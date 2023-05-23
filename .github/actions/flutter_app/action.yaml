@@ -60,9 +60,9 @@ runs:
     - name: Format
       working-directory: ${{ inputs.working_directory }}
       shell: ${{ inputs.shell }}
-      run: dart format --set-exit-if-changed lib test
+      run: dart format --set-exit-if-changed .
 
     - name: Analyze
       working-directory: ${{ inputs.working_directory }}
       shell: ${{ inputs.shell }}
-      run: flutter analyze lib test
+      run: flutter analyze .
