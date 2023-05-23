@@ -32,7 +32,7 @@ jobs:
             multiple_deployments:
               - ./.github/workflows/main.yaml
               - ./.github/actions/dart_package
-              - multiple_deployments/**            
+              - multiple_deployments/**
 
   build_flutter_apps:
     needs: changes
@@ -56,11 +56,10 @@ jobs:
         uses: ./.github/actions/flutter_app
         with:
           coverage_excludes: "**/*.g.dart"
-          working_directory: packages/${{ matrix.package }}
+          working_directory: ${{ matrix.package }}
 
   ci:
-    needs:
-      [semantic_pull_request, build_flutter_apps]
+    needs: [semantic_pull_request, build_flutter_apps]
     if: ${{ always() }}
 
     runs-on: ubuntu-latest
