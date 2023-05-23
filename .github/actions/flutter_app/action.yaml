@@ -1,0 +1,68 @@
+name: Flutter App Workflow
+description: A workflow for Flutter apps
+
+inputs:
+  concurrency:
+    required: false
+    default: "4"
+    description: The value of the concurrency flag (-j) used when running tests
+  coverage_excludes:
+    required: false
+    default: ""
+    description: Globs to exclude from coverage
+  flutter_channel:
+    required: false
+    default: "stable"
+    description: The Flutter channel version to use
+  flutter_version:
+    required: false
+    default: ""
+    description: The Flutter version to use
+  working_directory:
+    required: false
+    default: "."
+    description: The working directory for this workflow
+  min_coverage:
+    required: false
+    default: "100"
+    description: The minimum coverage percentage value
+  test_optimization:
+    required: false
+    default: "true"
+    description: Whether to optimize tests
+  test_recursion:
+    description: Whether to run tests recursively
+    required: false
+    default: "false"
+  shell:
+    description: The shell to use for the docs job
+    required: false
+    default: bash
+
+runs:
+  using: "composite"
+  steps:
+    - name: Setup Flutter
+      uses: subosito/flutter-action@v2
+      with:
+        flutter-version: ${{inputs.flutter_version}}
+        channel: ${{inputs.flutter_channel}}
+        cache: true
+
+    - name: Install Dependencies
+      working-directory: ${{ inputs.working_directory }}
+      shell: ${{ inputs.shell }}
+      run: |
+        flutter pub global activate very_good_cli
+        very_good --analytics false
+        very_good packages get --recursive
+
+    - name: Format
+      working-directory: ${{ inputs.working_directory }}
+      shell: ${{ inputs.shell }}
+      run: dart format --set-exit-if-changed lib test
+
+    - name: Analyze
+      working-directory: ${{ inputs.working_directory }}
+      shell: ${{ inputs.shell }}
+      run: flutter analyze lib test
