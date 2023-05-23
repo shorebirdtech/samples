@@ -1,0 +1,70 @@
+name: ci
+
+on:
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  semantic_pull_request:
+    name: ✅ Semantic Pull Request
+    uses: VeryGoodOpenSource/very_good_workflows/.github/workflows/semantic_pull_request.yml@v1
+
+  changes:
+    runs-on: ubuntu-latest
+
+    outputs:
+      needs_flutter_build: ${{ steps.needs_flutter_build.outputs.changes }}
+
+    name: 👀 Detect Changes
+
+    steps:
+      - name: Git Checkout
+        uses: actions/checkout@v3
+        with:
+          submodules: recursive
+
+      - uses: dorny/paths-filter@v2
+        name: Build Detection
+        id: needs_flutter_build
+        with:
+          filters: |
+            multiple_deployments:
+              - ./.github/workflows/main.yaml
+              - ./.github/actions/dart_package
+              - multiple_deployments/**
+
+  build_flutter_apps:
+    needs: changes
+    if: ${{ needs.changes.outputs.needs_flutter_build != '[]' }}
+
+    strategy:
+      matrix:
+        package: ${{ fromJSON(needs.changes.outputs.needs_flutter_build) }}
+
+    runs-on: ubuntu-latest
+
+    name: 🎯 Build ${{ matrix.package }}
+
+    steps:
+      - name: 📚 Git Checkout
+        uses: actions/checkout@v3
+        with:
+          submodules: recursive
+
+      - name: 🐦 Build ${{ matrix.package }}
+        uses: ./.github/actions/flutter_app
+        with:
+          coverage_excludes: "**/*.g.dart"
+          working_directory: ${{ matrix.package }}
+
+  ci:
+    needs: [semantic_pull_request, build_flutter_apps]
+    if: ${{ always() }}
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: ⛔️ exit(1) on failure
+        if: ${{ contains(join(needs.*.result, ','), 'failure') }}
+        run: exit 1
