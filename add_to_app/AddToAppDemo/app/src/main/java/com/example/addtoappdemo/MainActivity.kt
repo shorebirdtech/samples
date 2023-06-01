@@ -1,7 +1,6 @@
 package com.example.addtoappdemo
 
 import android.os.Bundle
-import com.google.android.material.snackbar.Snackbar
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.WindowCompat
 import androidx.navigation.findNavController
@@ -11,6 +10,7 @@ import androidx.navigation.ui.setupActionBarWithNavController
 import android.view.Menu
 import android.view.MenuItem
 import com.example.addtoappdemo.databinding.ActivityMainBinding
+import io.flutter.embedding.android.FlutterActivity
 
 class MainActivity : AppCompatActivity() {
 
@@ -30,10 +30,10 @@ class MainActivity : AppCompatActivity() {
         appBarConfiguration = AppBarConfiguration(navController.graph)
         setupActionBarWithNavController(navController, appBarConfiguration)
 
-        binding.fab.setOnClickListener { view ->
-            Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                .setAnchorView(R.id.fab)
-                .setAction("Action", null).show()
+        binding.fab.setOnClickListener {
+            startActivity(
+                FlutterActivity.createDefaultIntent(this)
+            )
         }
     }
 
