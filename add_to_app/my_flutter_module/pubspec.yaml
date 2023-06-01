@@ -85,3 +85,5 @@ flutter:
     androidX: true
     androidPackage: com.example.my_flutter_module
     iosBundleIdentifier: com.example.myFlutterModule
+  assets:
+    - shorebird.yaml
