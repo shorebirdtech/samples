@@ -1,0 +1,22 @@
+pluginManagement {
+    repositories {
+        google()
+        mavenCentral()
+        gradlePluginPortal()
+    }
+}
+dependencyResolutionManagement {
+    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+    repositories {
+        google()
+        mavenCentral()
+        maven {
+            url '../my_flutter_module/build/host/outputs/repo'
+        }
+        maven {
+            url 'https://download.shorebird.dev/download.flutter.io'
+        }
+    }
+}
+rootProject.name = "AddToAppDemo"
+include ':app'
