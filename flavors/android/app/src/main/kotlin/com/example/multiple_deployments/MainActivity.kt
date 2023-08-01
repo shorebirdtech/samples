@@ -1,4 +1,4 @@
-package com.example.multiple_deployments
+package com.example.flavors
 
 import io.flutter.embedding.android.FlutterActivity
 

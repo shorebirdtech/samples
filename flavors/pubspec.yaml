@@ -1,5 +1,5 @@
-name: multiple_deployments
-description: A Shorebird app which contains multiple deployment tracks.
+name: flavors
+description: A Shorebird app which contains multiple flavors.
 publish_to: "none"
 
 version: 1.0.0+1
