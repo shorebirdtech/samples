@@ -29,10 +29,10 @@ jobs:
         id: needs_flutter_build
         with:
           filters: |
-            multiple_deployments:
+            flavors:
               - ./.github/workflows/main.yaml
               - ./.github/actions/dart_package
-              - multiple_deployments/**
+              - flavors/**
 
   build_flutter_apps:
     needs: changes
