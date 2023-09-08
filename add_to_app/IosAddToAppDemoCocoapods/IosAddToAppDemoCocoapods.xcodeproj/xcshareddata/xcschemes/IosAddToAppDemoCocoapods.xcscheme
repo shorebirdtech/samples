@@ -14,10 +14,10 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "EDA0FE4A2A746CF200439555"
-               BuildableName = "IosAddToAppDemo.app"
-               BlueprintName = "IosAddToAppDemo"
-               ReferencedContainer = "container:IosAddToAppDemo.xcodeproj">
+               BlueprintIdentifier = "ED5874092AAB743800AAC217"
+               BuildableName = "IosAddToAppDemoCocoapods.app"
+               BlueprintName = "IosAddToAppDemoCocoapods"
+               ReferencedContainer = "container:IosAddToAppDemoCocoapods.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
       </BuildActionEntries>
@@ -43,10 +43,10 @@
          runnableDebuggingMode = "0">
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "EDA0FE4A2A746CF200439555"
-            BuildableName = "IosAddToAppDemo.app"
-            BlueprintName = "IosAddToAppDemo"
-            ReferencedContainer = "container:IosAddToAppDemo.xcodeproj">
+            BlueprintIdentifier = "ED5874092AAB743800AAC217"
+            BuildableName = "IosAddToAppDemoCocoapods.app"
+            BlueprintName = "IosAddToAppDemoCocoapods"
+            ReferencedContainer = "container:IosAddToAppDemoCocoapods.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </LaunchAction>
@@ -60,10 +60,10 @@
          runnableDebuggingMode = "0">
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "EDA0FE4A2A746CF200439555"
-            BuildableName = "IosAddToAppDemo.app"
-            BlueprintName = "IosAddToAppDemo"
-            ReferencedContainer = "container:IosAddToAppDemo.xcodeproj">
+            BlueprintIdentifier = "ED5874092AAB743800AAC217"
+            BuildableName = "IosAddToAppDemoCocoapods.app"
+            BlueprintName = "IosAddToAppDemoCocoapods"
+            ReferencedContainer = "container:IosAddToAppDemoCocoapods.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </ProfileAction>

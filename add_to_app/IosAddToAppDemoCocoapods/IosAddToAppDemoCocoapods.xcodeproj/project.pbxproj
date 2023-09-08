@@ -13,9 +13,13 @@
 		ED5874152AAB743800AAC217 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = ED5874132AAB743800AAC217 /* Main.storyboard */; };
 		ED5874172AAB743900AAC217 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = ED5874162AAB743900AAC217 /* Assets.xcassets */; };
 		ED58741A2AAB743900AAC217 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = ED5874182AAB743900AAC217 /* LaunchScreen.storyboard */; };
+		F4ACAF8CFE0AB385E7091123 /* Pods_IosAddToAppDemoCocoapods.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C007D2D0EA78F9C1A08FA410 /* Pods_IosAddToAppDemoCocoapods.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		0127B0611F6001CE033DF51E /* Pods-IosAddToAppDemoCocoapods.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-IosAddToAppDemoCocoapods.debug.xcconfig"; path = "Target Support Files/Pods-IosAddToAppDemoCocoapods/Pods-IosAddToAppDemoCocoapods.debug.xcconfig"; sourceTree = "<group>"; };
+		757EFD2C1E006FB9B68FC45C /* Pods-IosAddToAppDemoCocoapods.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-IosAddToAppDemoCocoapods.release.xcconfig"; path = "Target Support Files/Pods-IosAddToAppDemoCocoapods/Pods-IosAddToAppDemoCocoapods.release.xcconfig"; sourceTree = "<group>"; };
+		C007D2D0EA78F9C1A08FA410 /* Pods_IosAddToAppDemoCocoapods.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_IosAddToAppDemoCocoapods.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		ED58740A2AAB743800AAC217 /* IosAddToAppDemoCocoapods.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = IosAddToAppDemoCocoapods.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		ED58740D2AAB743800AAC217 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		ED58740F2AAB743800AAC217 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
@@ -31,17 +35,29 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				F4ACAF8CFE0AB385E7091123 /* Pods_IosAddToAppDemoCocoapods.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		967D47F560B291C0D5D75444 /* Pods */ = {
+			isa = PBXGroup;
+			children = (
+				0127B0611F6001CE033DF51E /* Pods-IosAddToAppDemoCocoapods.debug.xcconfig */,
+				757EFD2C1E006FB9B68FC45C /* Pods-IosAddToAppDemoCocoapods.release.xcconfig */,
+			);
+			path = Pods;
+			sourceTree = "<group>";
+		};
 		ED5874012AAB743800AAC217 = {
 			isa = PBXGroup;
 			children = (
 				ED58740C2AAB743800AAC217 /* IosAddToAppDemoCocoapods */,
 				ED58740B2AAB743800AAC217 /* Products */,
+				967D47F560B291C0D5D75444 /* Pods */,
+				F1DAF6F6B673B3C2B711E1C7 /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -67,6 +83,14 @@
 			path = IosAddToAppDemoCocoapods;
 			sourceTree = "<group>";
 		};
+		F1DAF6F6B673B3C2B711E1C7 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				C007D2D0EA78F9C1A08FA410 /* Pods_IosAddToAppDemoCocoapods.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -74,9 +98,12 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = ED58741E2AAB743900AAC217 /* Build configuration list for PBXNativeTarget "IosAddToAppDemoCocoapods" */;
 			buildPhases = (
+				D5554590C20CD29D2B729495 /* [CP] Check Pods Manifest.lock */,
+				C6AB999128A63562C644D77C /* [CP-User] Run Flutter Build my_flutter_module Script */,
 				ED5874062AAB743800AAC217 /* Sources */,
 				ED5874072AAB743800AAC217 /* Frameworks */,
 				ED5874082AAB743800AAC217 /* Resources */,
+				9805EFE806D27AD757B7655E /* [CP-User] Embed Flutter Build my_flutter_module Script */,
 			);
 			buildRules = (
 			);
@@ -132,6 +159,51 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		9805EFE806D27AD757B7655E /* [CP-User] Embed Flutter Build my_flutter_module Script */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			name = "[CP-User] Embed Flutter Build my_flutter_module Script";
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "set -e\nset -u\nsource \"${SRCROOT}/../my_flutter_module/.ios/Flutter/flutter_export_environment.sh\"\nexport VERBOSE_SCRIPT_LOGGING=1 && \"$FLUTTER_ROOT\"/packages/flutter_tools/bin/xcode_backend.sh embed_and_thin\n";
+		};
+		C6AB999128A63562C644D77C /* [CP-User] Run Flutter Build my_flutter_module Script */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			name = "[CP-User] Run Flutter Build my_flutter_module Script";
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "set -e\nset -u\nsource \"${SRCROOT}/../my_flutter_module/.ios/Flutter/flutter_export_environment.sh\"\nexport VERBOSE_SCRIPT_LOGGING=1 && \"$FLUTTER_ROOT\"/packages/flutter_tools/bin/xcode_backend.sh build";
+		};
+		D5554590C20CD29D2B729495 /* [CP] Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
+				"${PODS_ROOT}/Manifest.lock",
+			);
+			name = "[CP] Check Pods Manifest.lock";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+				"$(DERIVED_FILE_DIR)/Pods-IosAddToAppDemoCocoapods-checkManifestLockResult.txt",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
+			showEnvVarsInLog = 0;
+		};
+/* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		ED5874062AAB743800AAC217 /* Sources */ = {
@@ -282,11 +354,12 @@
 		};
 		ED58741F2AAB743900AAC217 /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 0127B0611F6001CE033DF51E /* Pods-IosAddToAppDemoCocoapods.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 7;
 				DEVELOPMENT_TEAM = 6V53YACS2W;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = IosAddToAppDemoCocoapods/Info.plist;
@@ -299,7 +372,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.0;
+				MARKETING_VERSION = 1.0.0;
 				PRODUCT_BUNDLE_IDENTIFIER = dev.shorebird.IosAddToAppDemoCocoapods;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
@@ -310,11 +383,12 @@
 		};
 		ED5874202AAB743900AAC217 /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 757EFD2C1E006FB9B68FC45C /* Pods-IosAddToAppDemoCocoapods.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 7;
 				DEVELOPMENT_TEAM = 6V53YACS2W;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = IosAddToAppDemoCocoapods/Info.plist;
@@ -327,7 +401,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.0;
+				MARKETING_VERSION = 1.0.0;
 				PRODUCT_BUNDLE_IDENTIFIER = dev.shorebird.IosAddToAppDemoCocoapods;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
