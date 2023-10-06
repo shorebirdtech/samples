@@ -5,8 +5,8 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.navigation.fragment.findNavController
 import com.example.addtoappdemo.databinding.FragmentFirstBinding
+import io.flutter.embedding.android.FlutterActivity
 
 /**
  * A simple [Fragment] subclass as the default destination in the navigation.
@@ -33,7 +33,9 @@ class FirstFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         binding.buttonFirst.setOnClickListener {
-            findNavController().navigate(R.id.action_FirstFragment_to_SecondFragment)
+            startActivity(
+                FlutterActivity.createDefaultIntent(requireActivity().applicationContext)
+            )
         }
     }
 
