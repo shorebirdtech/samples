@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flame/collisions.dart';
 import 'package:flame/components.dart';
 import 'package:super_dash_counter/game/game.dart';
 
@@ -10,7 +11,8 @@ class DashComponent extends PositionComponent
   }) : super(size: Vector2.all(16));
 
   static const walkSpeed = 40;
-  static const gravityFactor = 40;
+  static const gravityFactor = 120;
+  static const jumpForce = 68.0;
 
   late final Sprite _idleSprite;
   late final Sprite _jumpingSprite;
@@ -22,6 +24,12 @@ class DashComponent extends PositionComponent
   double _jump = 0;
 
   set jump(double value) {
+
+    if (value == jumpForce && _jump != 0) {
+      // Don't jump if already jumping.
+      return;
+    }
+
     if (_jump == 0 && value > 0) {
       _updateSprite(
         SpriteComponent(
@@ -118,6 +126,8 @@ class DashComponent extends PositionComponent
         size: size,
       ),
     );
+
+    add(RectangleHitbox());
   }
 
   @override

@@ -5,11 +5,11 @@ import 'package:flame/game.dart';
 import 'package:flutter/material.dart';
 import 'package:super_dash_counter/game/game.dart';
 
-class SuperDashCounterGame extends FlameGame {
+class SuperDashCounterGame extends FlameGame with HasCollisionDetection {
   final counter = ValueNotifier<int>(0);
 
   static final gameResolution = Vector2(48, 64);
-  static const groundLevel = 16.0;
+  static const groundLevel = 0.0;
 
   late final DashComponent _dash;
 
@@ -26,10 +26,33 @@ class SuperDashCounterGame extends FlameGame {
 
     _dash.position = Vector2(-8, groundLevel);
     world.add(_dash);
+
+    final groundSprite = await loadSprite('ground.png');
+    world.add(
+      SpriteComponent(
+        sprite: groundSprite,
+        position: Vector2(-gameResolution.x / 2, groundLevel + 16),
+        size: Vector2(gameResolution.x, 32),
+      ),
+    );
+
+    world.add(
+      BlockComponent(
+        addNumber: true,
+        position: Vector2(-24, groundLevel - 32),
+      ),
+    );
+
+    world.add(
+      BlockComponent(
+        addNumber: false,
+        position: Vector2(8, groundLevel - 32),
+      ),
+    );
   }
 
   void jump() {
-    _dash.jump = 20;
+    _dash.jump = DashComponent.jumpForce;
   }
 
   void startMoving(int direction) {
