@@ -12,7 +12,7 @@ class DashComponent extends PositionComponent
 
   static const walkSpeed = 40;
   static const gravityFactor = 120;
-  static const jumpForce = 68.0;
+  static const jumpForce = 52.0;
 
   late final Sprite _idleSprite;
   late final Sprite _jumpingSprite;
@@ -24,7 +24,6 @@ class DashComponent extends PositionComponent
   double _jump = 0;
 
   set jump(double value) {
-
     if (value == jumpForce && _jump != 0) {
       // Don't jump if already jumping.
       return;
@@ -95,7 +94,6 @@ class DashComponent extends PositionComponent
   int? get direction => _direction;
 
   void _updateSprite(PositionComponent newSprite) {
-
     if (_currentSprite != null) {
       newSprite.transform.setFrom(_currentSprite!.transform);
     }
