@@ -11,7 +11,7 @@ dependencyResolutionManagement {
         google()
         mavenCentral()
         maven {
-            url '../my_flutter_module/build/host/outputs/repo'
+            url '../my_flutter_module/release'
         }
         maven {
             url 'https://download.shorebird.dev/download.flutter.io'
