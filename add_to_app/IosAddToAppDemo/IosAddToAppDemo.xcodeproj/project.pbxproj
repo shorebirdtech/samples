@@ -3,14 +3,12 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 56;
+	objectVersion = 60;
 	objects = {
 
 /* Begin PBXBuildFile section */
-		ED109CA42A77F5AF0057C32C /* App.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = EDA0FE632A74754800439555 /* App.xcframework */; };
-		ED109CA52A77F5AF0057C32C /* App.xcframework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = EDA0FE632A74754800439555 /* App.xcframework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
-		ED109CA72A77F5B00057C32C /* Flutter.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = EDA0FE642A74754800439555 /* Flutter.xcframework */; };
-		ED109CA82A77F5B00057C32C /* Flutter.xcframework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = EDA0FE642A74754800439555 /* Flutter.xcframework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		ED085BEB2BD997F40045C592 /* App.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = ED085BEA2BD997F40045C592 /* App.xcframework */; };
+		ED085BED2BD997F70045C592 /* ShorebirdFlutter.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = ED085BEC2BD997F70045C592 /* ShorebirdFlutter.xcframework */; };
 		EDA0FE4F2A746CF200439555 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDA0FE4E2A746CF200439555 /* AppDelegate.swift */; };
 		EDA0FE512A746CF200439555 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDA0FE502A746CF200439555 /* SceneDelegate.swift */; };
 		EDA0FE532A746CF200439555 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDA0FE522A746CF200439555 /* ViewController.swift */; };
@@ -26,8 +24,6 @@
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
-				ED109CA82A77F5B00057C32C /* Flutter.xcframework in Embed Frameworks */,
-				ED109CA52A77F5AF0057C32C /* App.xcframework in Embed Frameworks */,
 			);
 			name = "Embed Frameworks";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -35,6 +31,8 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		ED085BEA2BD997F40045C592 /* App.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; name = App.xcframework; path = ../my_flutter_module/release/App.xcframework; sourceTree = "<group>"; };
+		ED085BEC2BD997F70045C592 /* ShorebirdFlutter.xcframework */ = {isa = PBXFileReference; expectedSignature = "AppleDeveloperProgram:6V53YACS2W:Code Town Inc"; lastKnownFileType = wrapper.xcframework; name = ShorebirdFlutter.xcframework; path = ../my_flutter_module/release/ShorebirdFlutter.xcframework; sourceTree = "<group>"; };
 		EDA0FE4B2A746CF200439555 /* IosAddToAppDemo.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = IosAddToAppDemo.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		EDA0FE4E2A746CF200439555 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		EDA0FE502A746CF200439555 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
@@ -43,8 +41,6 @@
 		EDA0FE572A746CF300439555 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		EDA0FE5A2A746CF300439555 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		EDA0FE5C2A746CF300439555 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		EDA0FE632A74754800439555 /* App.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; name = App.xcframework; path = ../my_flutter_module/build/ios/framework/Release/App.xcframework; sourceTree = "<group>"; };
-		EDA0FE642A74754800439555 /* Flutter.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; name = Flutter.xcframework; path = ../my_flutter_module/build/ios/framework/Release/Flutter.xcframework; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -52,8 +48,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				ED109CA72A77F5B00057C32C /* Flutter.xcframework in Frameworks */,
-				ED109CA42A77F5AF0057C32C /* App.xcframework in Frameworks */,
+				ED085BEB2BD997F40045C592 /* App.xcframework in Frameworks */,
+				ED085BED2BD997F70045C592 /* ShorebirdFlutter.xcframework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -94,8 +90,8 @@
 		EDA0FE622A74754800439555 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
-				EDA0FE632A74754800439555 /* App.xcframework */,
-				EDA0FE642A74754800439555 /* Flutter.xcframework */,
+				ED085BEC2BD997F70045C592 /* ShorebirdFlutter.xcframework */,
+				ED085BEA2BD997F40045C592 /* App.xcframework */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -322,7 +318,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 3;
+				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 6V53YACS2W;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = IosAddToAppDemo/Info.plist;
@@ -350,7 +346,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 3;
+				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 6V53YACS2W;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = IosAddToAppDemo/Info.plist;
