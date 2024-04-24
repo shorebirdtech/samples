@@ -7,8 +7,10 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		ED085BEB2BD997F40045C592 /* App.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = ED085BEA2BD997F40045C592 /* App.xcframework */; };
-		ED085BED2BD997F70045C592 /* ShorebirdFlutter.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = ED085BEC2BD997F70045C592 /* ShorebirdFlutter.xcframework */; };
+		ED085BEE2BD9988D0045C592 /* App.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = ED085BEA2BD997F40045C592 /* App.xcframework */; };
+		ED085BEF2BD9988D0045C592 /* App.xcframework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = ED085BEA2BD997F40045C592 /* App.xcframework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		ED085BF02BD9988E0045C592 /* ShorebirdFlutter.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = ED085BEC2BD997F70045C592 /* ShorebirdFlutter.xcframework */; };
+		ED085BF12BD9988E0045C592 /* ShorebirdFlutter.xcframework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = ED085BEC2BD997F70045C592 /* ShorebirdFlutter.xcframework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		EDA0FE4F2A746CF200439555 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDA0FE4E2A746CF200439555 /* AppDelegate.swift */; };
 		EDA0FE512A746CF200439555 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDA0FE502A746CF200439555 /* SceneDelegate.swift */; };
 		EDA0FE532A746CF200439555 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDA0FE522A746CF200439555 /* ViewController.swift */; };
@@ -24,6 +26,8 @@
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
+				ED085BEF2BD9988D0045C592 /* App.xcframework in Embed Frameworks */,
+				ED085BF12BD9988E0045C592 /* ShorebirdFlutter.xcframework in Embed Frameworks */,
 			);
 			name = "Embed Frameworks";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -48,8 +52,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				ED085BEB2BD997F40045C592 /* App.xcframework in Frameworks */,
-				ED085BED2BD997F70045C592 /* ShorebirdFlutter.xcframework in Frameworks */,
+				ED085BEE2BD9988D0045C592 /* App.xcframework in Frameworks */,
+				ED085BF02BD9988E0045C592 /* ShorebirdFlutter.xcframework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -232,7 +236,7 @@
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
-				FRAMEWORK_SEARCH_PATHS = "$(PROJECT_DIR)/../my_flutter_module/build/ios/framework/Release";
+				FRAMEWORK_SEARCH_PATHS = "$(PROJECT_DIR)/../my_flutter_module/release";
 				GCC_C_LANGUAGE_STANDARD = gnu11;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_NO_COMMON_BLOCKS = YES;
@@ -293,7 +297,7 @@
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
-				FRAMEWORK_SEARCH_PATHS = "$(PROJECT_DIR)/../my_flutter_module/build/ios/framework/Release";
+				FRAMEWORK_SEARCH_PATHS = "$(PROJECT_DIR)/../my_flutter_module/release";
 				GCC_C_LANGUAGE_STANDARD = gnu11;
 				GCC_NO_COMMON_BLOCKS = YES;
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
