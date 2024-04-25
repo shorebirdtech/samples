@@ -38,6 +38,7 @@ Icon?
 .tags*
 
 build/
+release/
 .android/
 .ios/
 .flutter-plugins
