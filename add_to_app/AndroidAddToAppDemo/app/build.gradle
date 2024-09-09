@@ -24,6 +24,9 @@ android {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
             signingConfig signingConfigs.debug
+
+            // Necessary to ensure the libapp.so produced by Shorebird matches the one that ends up
+            // in the APK.
             packagingOptions {
                 doNotStrip "*/arm64-v8a/*.so"
                 doNotStrip "*/armeabi-v7a/*.so"
