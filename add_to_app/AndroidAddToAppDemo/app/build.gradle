@@ -27,9 +27,7 @@ android {
 
             // Necessary to ensure the libapp.so produced by Shorebird matches the one that ends up
             // in the APK.
-            packagingOptions {
-                doNotStrip "**/libapp.so"
-            }
+            packaging.jniLibs.keepDebugSymbols.add("**/libapp.so")
         }
     }
     compileOptions {
