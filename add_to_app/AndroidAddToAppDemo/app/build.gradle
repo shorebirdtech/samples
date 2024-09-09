@@ -24,6 +24,12 @@ android {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
             signingConfig signingConfigs.debug
+            packagingOptions {
+                doNotStrip "*/arm64-v8a/*.so"
+                doNotStrip "*/armeabi-v7a/*.so"
+                doNotStrip "*/x86/*.so"
+                doNotStrip "*/x86_64/*.so"
+            }
         }
     }
     compileOptions {
