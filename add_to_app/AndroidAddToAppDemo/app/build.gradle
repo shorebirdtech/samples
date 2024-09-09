@@ -10,10 +10,8 @@ android {
     defaultConfig {
         applicationId "com.example.addtoappdemo"
         minSdk 24
-        // This needs to be 33 or lower-Shorebird currently does not support 34+
-        // See https://github.com/shorebirdtech/shorebird/issues/2369
-        targetSdk 33
-        versionCode 14
+        targetSdk 34
+        versionCode 2
         versionName "1.0.0"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
