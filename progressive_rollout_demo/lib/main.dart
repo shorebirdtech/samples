@@ -76,23 +76,17 @@ class _MyHomePageState extends State<MyHomePage> {
     return collection.docs.first.data()[releaseVersion] as int?;
   }
 
-  /// Gets the group number (1-100) from shared preferences. We assume elsewhere
-  /// that this has been set before this widget is used.
-  Future<int?> _fetchGroupNumber() async {
-    final prefs = await SharedPreferences.getInstance();
-    return prefs.getInt(groupKey);
-  }
-
   /// Determines the update track (beta or stable) based on the group number
   /// and rollout percentage. If a user's group number is less than or equal to
   /// the rollout percentage, they are assigned to the beta track. Otherwise,
   /// they are assigned to the stable track. If there is no rollout percentage
   /// for the current release version, all users are on the stable track.
   Future<UpdateTrack> _updateTrack() async {
-    final (groupNumber, rolloutPercentage) = await (
-      _fetchGroupNumber(),
-      _fetchRolloutPercentage(),
-    ).wait;
+    // If we haven't set a group number yet, assume we're in the stable trakc.
+    // This should never happen.
+    if (_groupNumber == null) return UpdateTrack.stable;
+
+    final rolloutPercentage = await _fetchRolloutPercentage();
 
     // If there is no rollout percentage, all users are on the stable track.
     if (rolloutPercentage == null) return UpdateTrack.stable;
@@ -102,7 +96,7 @@ class _MyHomePageState extends State<MyHomePage> {
     // - if the rollout percentage is 25%, users with group numbers 1-25 are on
     //   the beta track, and the other 75% are on the stable track.
     // - if the rollout percentage is 100%, all users are on the beta track.
-    return groupNumber! <= rolloutPercentage
+    return _groupNumber! <= rolloutPercentage
         ? UpdateTrack.beta
         : UpdateTrack.stable;
   }
