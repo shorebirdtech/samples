@@ -1,0 +1,4 @@
+app_id: fdd48b3f-0b05-41b0-ac22-464600f739ee
+
+# IMPORTANT: this needs to be false to make use of the beta track
+auto_update: false
