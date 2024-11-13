@@ -82,7 +82,7 @@ class _MyHomePageState extends State<MyHomePage> {
   /// they are assigned to the stable track. If there is no rollout percentage
   /// for the current release version, all users are on the stable track.
   Future<UpdateTrack> _updateTrack() async {
-    // If we haven't set a group number yet, assume we're in the stable trakc.
+    // If we haven't set a group number yet, assume we're in the stable track.
     // This should never happen.
     if (_groupNumber == null) return UpdateTrack.stable;
 
