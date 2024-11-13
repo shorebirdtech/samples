@@ -5,7 +5,7 @@ rollout using Shorebird's tracks feature.
 
 The guide for this can be found at [TODO](link here).
 
-## Getting Started
+## Running the app (Shorebird employees only)
 
 ### Download Firebase Config files
 
@@ -22,3 +22,9 @@ Download `GoogleService-Info.plist` for the iOS app at
 https://console.firebase.google.com/u/0/project/progressive-rollout-demo/settings/general/ios:dev.shorebird.progressive-rollout-demo
 
 This file should be placed at `ios/Runner/GoogleService-Info.plist`.
+
+### Updating Release Percentages
+
+The Cloud Firestore used by this app is at
+https://console.firebase.google.com/u/0/project/progressive-rollout-demo/firestore/databases/-default-/data/~2Frollouts~2Frollouts
+You can view and edit the rollouts collection there.
