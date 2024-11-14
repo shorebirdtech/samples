@@ -3,7 +3,8 @@
 This app demonstrates how to implement progressive (percentage-based) patch
 rollout using Shorebird's tracks feature.
 
-The guide for this can be found at [TODO](link here).
+The guide for this can be found on our [docs
+site](https://docs.shorebird.dev/guides/percentage-based-rollouts).
 
 ## Running the app (Shorebird employees only)
 
