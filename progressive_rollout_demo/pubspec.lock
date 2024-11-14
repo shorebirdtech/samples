@@ -339,10 +339,11 @@ packages:
   shorebird_code_push:
     dependency: "direct main"
     description:
-      path: "/Users/bryanoltman/shorebirdtech/engine/src/third_party/updater/shorebird_code_push"
-      relative: false
-    source: path
-    version: "2.0.0-dev.2"
+      name: shorebird_code_push
+      sha256: "1d5f9dacf94a6c790fac6fdfddc8a5ff533343459ff66d8d0780572987b2a97a"
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.0.0"
   sky_engine:
     dependency: transitive
     description: flutter

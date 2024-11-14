@@ -14,8 +14,7 @@ dependencies:
     sdk: flutter
   package_info_plus: ^8.1.1
   shared_preferences: ^2.3.3
-  shorebird_code_push:
-    path: /Users/bryanoltman/shorebirdtech/engine/src/third_party/updater/shorebird_code_push
+  shorebird_code_push: ^2.0.0
 
 dev_dependencies:
   flutter_test:
