@@ -11,27 +11,30 @@ const groupKey = 'groupNumber';
 const firestoreCollectionName = 'rollouts';
 const firebaseDocumentName = 'rollouts';
 
-/// Assigns a random group number (1-100) to the user if one has not already
-/// been assigned.
-Future<void> assignGroupNumberIfNeeded() async {
+/// Assigns a random group number (1-100) to the device if one has not already
+/// been assigned and returns it.
+Future<int> getGroupNumber() async {
   final prefs = await SharedPreferences.getInstance();
-  if (!prefs.containsKey(groupKey)) {
-    final groupNumber = Random().nextInt(100) + 1;
-    await prefs.setInt(groupKey, groupNumber);
-  }
+  final cachedGroupNumber = prefs.getInt(groupKey);
+  if (cachedGroupNumber != null) return cachedGroupNumber;
+  final groupNumber = Random().nextInt(100) + 1;
+  await prefs.setInt(groupKey, groupNumber);
+  return groupNumber;
 }
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   await Firebase.initializeApp();
-  await assignGroupNumberIfNeeded();
+  final groupNumber = await getGroupNumber();
 
-  runApp(const MyApp());
+  runApp(MyApp(groupNumber: groupNumber));
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  const MyApp({required this.groupNumber, super.key});
+
+  final int groupNumber;
 
   @override
   Widget build(BuildContext context) {
@@ -40,13 +43,15 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
-      home: const MyHomePage(),
+      home: MyHomePage(groupNumber: groupNumber),
     );
   }
 }
 
 class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key});
+  const MyHomePage({required this.groupNumber, super.key});
+
+  final int groupNumber;
 
   @override
   State<MyHomePage> createState() => _MyHomePageState();
@@ -54,8 +59,6 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   final _updater = ShorebirdUpdater();
-
-  int? _groupNumber;
 
   /// Returns the current release version (e.g., 1.0.0+1).
   Future<String> _releaseVersion() async {
@@ -82,10 +85,6 @@ class _MyHomePageState extends State<MyHomePage> {
   /// they are assigned to the stable track. If there is no rollout percentage
   /// for the current release version, all users are on the stable track.
   Future<UpdateTrack> _updateTrack() async {
-    // If we haven't set a group number yet, assume we're in the stable track.
-    // This should never happen.
-    if (_groupNumber == null) return UpdateTrack.stable;
-
     final rolloutPercentage = await _fetchRolloutPercentage();
 
     // If there is no rollout percentage, all users are on the stable track.
@@ -96,7 +95,7 @@ class _MyHomePageState extends State<MyHomePage> {
     // - if the rollout percentage is 25%, users with group numbers 1-25 are on
     //   the beta track, and the other 75% are on the stable track.
     // - if the rollout percentage is 100%, all users are on the beta track.
-    return _groupNumber! <= rolloutPercentage
+    return widget.groupNumber <= rolloutPercentage
         ? UpdateTrack.beta
         : UpdateTrack.stable;
   }
@@ -110,17 +109,6 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   @override
-  void initState() {
-    super.initState();
-
-    SharedPreferences.getInstance().then((prefs) {
-      setState(() {
-        _groupNumber = prefs.getInt(groupKey);
-      });
-    });
-  }
-
-  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
@@ -131,7 +119,7 @@ class _MyHomePageState extends State<MyHomePage> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            Text('Group number: ${_groupNumber ?? 'unknown'}'),
+            Text('Group number: ${widget.groupNumber}'),
           ],
         ),
       ),
