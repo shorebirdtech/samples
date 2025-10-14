@@ -35,9 +35,11 @@ android {
         create("internal") {
             dimension = "track"
             applicationIdSuffix = ".internal"
+            manifestPlaceholders["applicationLabel"] = "[Internal] Shorebird Example"
         }
         create("stable") {
             dimension = "track"
+            manifestPlaceholders["applicationLabel"] = "Shorebird Example"
         }
     }
 
