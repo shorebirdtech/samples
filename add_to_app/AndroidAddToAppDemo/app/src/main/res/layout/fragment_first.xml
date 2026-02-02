@@ -6,20 +6,102 @@
     android:layout_height="match_parent"
     tools:context=".FirstFragment">
 
-    <androidx.constraintlayout.widget.ConstraintLayout
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:padding="16dp">
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="16dp"
+        android:gravity="center_horizontal">
+
+        <TextView
+            android:id="@+id/text_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Multi-Engine Test"
+            android:textSize="24sp"
+            android:textStyle="bold"
+            android:layout_marginBottom="16dp" />
+
+        <TextView
+            android:id="@+id/text_status"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Active engines: 0"
+            android:textSize="14sp"
+            android:fontFamily="monospace"
+            android:background="#f0f0f0"
+            android:padding="12dp"
+            android:layout_marginBottom="24dp" />
 
         <Button
             android:id="@+id/button_first"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/launch_flutter"
-            app:layout_constraintLeft_toLeftOf="parent"
-            app:layout_constraintRight_toRightOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent" />
+            android:text="Launch Flutter (Default)"
+            android:layout_marginBottom="8dp" />
 
-    </androidx.constraintlayout.widget.ConstraintLayout>
+        <Button
+            android:id="@+id/button_spin_up"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Spin Up Engine"
+            android:layout_marginBottom="8dp" />
+
+        <Button
+            android:id="@+id/button_spin_down"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Spin Down Engine (Immediate)"
+            android:layout_marginBottom="8dp" />
+
+        <Button
+            android:id="@+id/button_spin_down_delayed"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Spin Up + Destroy After 2s"
+            android:layout_marginBottom="8dp" />
+
+        <Button
+            android:id="@+id/button_create_destroy"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Create + Destroy (No Dart)"
+            android:backgroundTint="#dc3545"
+            android:layout_marginBottom="8dp" />
+
+        <Button
+            android:id="@+id/button_engine_group"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Create EngineGroup (Warmup)"
+            android:backgroundTint="#ff5722"
+            android:layout_marginBottom="16dp" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="EngineGroup Warmup Test (LIKELY REPRO):\n1. Install app with Shorebird patch\n2. Click 'Create EngineGroup (Warmup)'\n3. Force-stop the app immediately\n4. Relaunch - patch should be marked bad!\n\nThis mimics apps that create FlutterEngineGroup for warmup but don't immediately run Dart."
+            android:textSize="12sp"
+            android:background="#ffccbc"
+            android:padding="12dp"
+            android:layout_marginBottom="16dp" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Ghost Engine Test:\n1. Clear app data (fresh install)\n2. Click 'Create + Destroy (No Dart)'\n3. Force-stop the app\n4. Relaunch - patch should be marked bad!\n\nThis tests the first-engine-destroyed scenario."
+            android:textSize="12sp"
+            android:background="#f8d7da"
+            android:padding="12dp"
+            android:layout_marginBottom="16dp" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Multi-Engine Test:\n1. Click 'Spin Up Engine' to create engine\n2. Let Flutter UI appear\n3. Click 'Spin Down Engine' to destroy mid-boot\n4. Force-stop the app\n5. Relaunch - check if patch is marked bad"
+            android:textSize="12sp"
+            android:background="#fff3cd"
+            android:padding="12dp" />
+
+    </LinearLayout>
 </androidx.core.widget.NestedScrollView>

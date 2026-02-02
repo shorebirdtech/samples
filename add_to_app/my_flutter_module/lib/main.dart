@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:shorebird_code_push/shorebird_code_push.dart';
 
 void main() => runApp(const MyApp());
 
@@ -19,9 +20,9 @@ class MyApp extends StatelessWidget {
         // "hot reload" (press "r" in the console where you ran "flutter run",
         // or press Run > Flutter Hot Reload in a Flutter IDE). Notice that the
         // counter didn't reset back to zero; the application is not restarted.
-        primarySwatch: Colors.green,
+        primarySwatch: Colors.blue,
       ),
-      home: const MyHomePage(title: 'Flutter Demo Home Page'),
+      home: const MyHomePage(title: 'Flutter newly patched Home Page'),
     );
   }
 }
@@ -45,7 +46,19 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
+  final _updater = ShorebirdUpdater();
   int _counter = 0;
+  int? _currentPatchNumber;
+
+  @override
+  void initState() {
+    super.initState();
+    _updater.readCurrentPatch().then((patch) {
+      setState(() {
+        _currentPatchNumber = patch?.number;
+      });
+    });
+  }
 
   void _incrementCounter() {
     setState(() {
@@ -54,7 +67,7 @@ class _MyHomePageState extends State<MyHomePage> {
       // so that the display can reflect the updated values. If we changed
       // _counter without calling setState(), then the build method would not be
       // called again, and so nothing would appear to happen.
-      _counter++;
+      _counter += 3;
     });
   }
 
@@ -92,8 +105,13 @@ class _MyHomePageState extends State<MyHomePage> {
           // horizontal).
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
+            Text(
+              'Current patch: ${_currentPatchNumber ?? 'none'}',
+              style: Theme.of(context).textTheme.titleMedium,
+            ),
+            const SizedBox(height: 16),
             const Text(
-              'You have pushed the button this many times:',
+              'Really fancy patched Flutter Module:',
             ),
             Text(
               '$_counter',
