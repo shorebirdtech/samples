@@ -25,7 +25,7 @@ class WalletScreen extends StatelessWidget {
                 padding: EdgeInsets.symmetric(horizontal: 24, vertical: 16),
                 sliver: SliverToBoxAdapter(
                   child: Text(
-                    'Recent Transactions',
+                    AppStrings.recentTransactions,
                     style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                   ),
                 ),

@@ -32,4 +32,6 @@ class ConfirmTransfer extends TransferEvent {
   List<Object?> get props => [amount, fee, isInternal];
 }
 
-class ResetTransfer extends TransferEvent {}
+class ResetTransfer extends TransferEvent {
+  const ResetTransfer();
+}

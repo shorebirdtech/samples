@@ -16,11 +16,12 @@ class TransferScreen extends StatefulWidget {
 
 class _TransferScreenState extends State<TransferScreen> {
   final TextEditingController _amountController = TextEditingController();
-  bool _isInternal = false;
+  final ValueNotifier<bool> _isInternal = ValueNotifier(false);
 
   @override
   void dispose() {
     _amountController.dispose();
+    _isInternal.dispose();
     super.dispose();
   }
 
@@ -29,7 +30,10 @@ class _TransferScreenState extends State<TransferScreen> {
     if (amount <= 0) return;
 
     context.read<TransferBloc>().add(
-      UpdateTransferValues(amount: amount, isInternal: _isInternal),
+      UpdateTransferValues(
+        amount: amount,
+        isInternal: _isInternal.value,
+      ),
     );
   }
 
@@ -49,7 +53,7 @@ class _TransferScreenState extends State<TransferScreen> {
                     amount: state.amount,
                     fee: state.fee,
                     total: state.total,
-                    isInternal: _isInternal,
+                    isInternal: _isInternal.value,
                   ),
                 ),
               ),
@@ -83,14 +87,17 @@ class _TransferScreenState extends State<TransferScreen> {
                   ),
                 ),
                 const SizedBox(height: 24),
-                SwitchListTile(
-                  title: const Text(AppStrings.internalTransfer),
-                  subtitle: const Text('Transfer to friends or family'),
-                  value: _isInternal,
-                  onChanged: (val) {
-                    setState(() {
-                      _isInternal = val;
-                    });
+                ValueListenableBuilder<bool>(
+                  valueListenable: _isInternal,
+                  builder: (context, isInternal, child) {
+                    return SwitchListTile(
+                      title: const Text(AppStrings.internalTransfer),
+                      subtitle: const Text(AppStrings.internalTransferSubtitle),
+                      value: isInternal,
+                      onChanged: (val) {
+                        _isInternal.value = val;
+                      },
+                    );
                   },
                 ),
                 const Spacer(),
