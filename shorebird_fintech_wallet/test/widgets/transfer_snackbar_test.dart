@@ -13,13 +13,14 @@ void main() {
     (WidgetTester tester) async {
       // Create a bloc that we can control or that will fail
       final bloc = TransferBloc(TransactionLogic(), WalletStore());
-      
+
       await tester.pumpWidget(
         MaterialApp(
           home: BlocProvider.value(
             value: bloc,
             child: const TransferPreviewScreen(
-              amount: 20000.0, // This will fail because initial balance is 10000
+              amount:
+                  20000.0, // This will fail because initial balance is 10000
               fee: 200.0,
               total: 20200.0,
               isInternal: false,
@@ -30,7 +31,7 @@ void main() {
 
       // Tap confirm to trigger failure
       await tester.tap(find.text(AppStrings.confirmTransfer));
-      
+
       // Wait for delayed bloc logic (1 sec)
       await tester.pump(const Duration(seconds: 1));
       await tester.pump(); // SnackBar needs a frame

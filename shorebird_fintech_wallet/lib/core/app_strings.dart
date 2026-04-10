@@ -12,7 +12,8 @@ class AppStrings {
   static const String transactionFailure = 'Transaction Failed';
   static const String loading = 'Processing...';
   static const String internalTransfer = 'Internal Transfer (Free)';
-  static const String internalTransferSubtitle = 'Transfer to friends or family';
+  static const String internalTransferSubtitle =
+      'Transfer to friends or family';
   static const String standardTransfer = 'Standard Transfer (1% Fee)';
   static const String confirmTransfer = 'Confirm Transfer';
   static const String insufficientBalance = 'Insufficient Balance';
