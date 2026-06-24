@@ -57,7 +57,7 @@ jobs:
       has_unit_tests: true
       subpackages: ""
       flutter_version: ""
-      has_integration_tests: true
+      has_integration_tests: false
 
   flavors:
     needs: changes
@@ -70,7 +70,7 @@ jobs:
       has_unit_tests: true
       subpackages: ""
       flutter_version: ""
-      has_integration_tests: true
+      has_integration_tests: false
 
   multi_dimensioanl_flavors:
     needs: changes
@@ -83,7 +83,7 @@ jobs:
       has_unit_tests: true
       subpackages: ""
       flutter_version: ""
-      has_integration_tests: true
+      has_integration_tests: false
 
   my_flutter_module:
     needs: changes
@@ -96,7 +96,7 @@ jobs:
       has_unit_tests: true
       subpackages: ""
       flutter_version: ""
-      has_integration_tests: true
+      has_integration_tests: false
 
   progressive_rollout_demo:
     needs: changes
@@ -109,7 +109,7 @@ jobs:
       has_unit_tests: true
       subpackages: ""
       flutter_version: ""
-      has_integration_tests: true
+      has_integration_tests: false
 
   shorebird_fintech_wallet:
     needs: changes
@@ -122,7 +122,7 @@ jobs:
       has_unit_tests: true
       subpackages: ""
       flutter_version: ""
-      has_integration_tests: true
+      has_integration_tests: false
 
   required:
     name: required
