@@ -8,7 +8,7 @@ void main() {
   testWidgets('app launches successfully', (WidgetTester tester) async {
     app.main();
     await tester.pumpAndSettle();
-    
+
     // We just verify that it doesn't crash on launch
     expect(find.text('0'), findsNothing); // Dummy check
   });
