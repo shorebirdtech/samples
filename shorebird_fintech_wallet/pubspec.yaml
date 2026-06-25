@@ -42,7 +42,7 @@ dependencies:
   dio: ^5.9.2
   equatable: ^2.0.8
   google_fonts: ^8.0.2
-  intl: ^0.20.2
+  intl: ^0.20.3
   json_annotation: ^4.11.0
 
 dev_dependencies:
