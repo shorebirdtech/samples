@@ -21,7 +21,7 @@ jobs:
       progressive_rollout_demo: ${{ steps.filter.outputs.progressive_rollout_demo }}
       shorebird_fintech_wallet: ${{ steps.filter.outputs.shorebird_fintech_wallet }}
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
         with:
           # Full history so dorny/paths-filter can diff on push events.
           fetch-depth: 0
