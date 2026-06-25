@@ -12,7 +12,7 @@ class TransferBloc extends Bloc<TransferEvent, TransferState> {
   final WalletStore _walletStore;
 
   TransferBloc(this._transactionLogic, this._walletStore)
-    : super(TransferInitial()) {
+      : super(TransferInitial()) {
     on<UpdateTransferValues>(_onUpdateValues);
     on<ConfirmTransfer>(_onConfirmTransfer);
     on<ResetTransfer>(_onReset);

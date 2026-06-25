@@ -67,7 +67,7 @@ jobs:
       package_name: flavors
       package_path: flavors
       has_bloc_lint: false
-      has_unit_tests: false
+      has_unit_tests: true
       subpackages: ""
       flutter_version: ""
       has_integration_tests: false
@@ -80,7 +80,7 @@ jobs:
       package_name: multi_dimensioanl_flavors
       package_path: multi_dimensional_flavors
       has_bloc_lint: false
-      has_unit_tests: false
+      has_unit_tests: true
       subpackages: ""
       flutter_version: ""
       has_integration_tests: false
@@ -106,7 +106,7 @@ jobs:
       package_name: progressive_rollout_demo
       package_path: progressive_rollout_demo
       has_bloc_lint: false
-      has_unit_tests: false
+      has_unit_tests: true
       subpackages: ""
       flutter_version: ""
       has_integration_tests: false

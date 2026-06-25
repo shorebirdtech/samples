@@ -30,8 +30,8 @@ class _TransferScreenState extends State<TransferScreen> {
     if (amount <= 0) return;
 
     context.read<TransferBloc>().add(
-      UpdateTransferValues(amount: amount, isInternal: _isInternal.value),
-    );
+          UpdateTransferValues(amount: amount, isInternal: _isInternal.value),
+        );
   }
 
   @override

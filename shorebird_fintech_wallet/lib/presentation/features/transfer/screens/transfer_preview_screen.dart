@@ -81,12 +81,12 @@ class TransferPreviewScreen extends StatelessWidget {
                   ElevatedButton(
                     onPressed: () {
                       context.read<TransferBloc>().add(
-                        ConfirmTransfer(
-                          amount: amount,
-                          fee: fee,
-                          isInternal: isInternal,
-                        ),
-                      );
+                            ConfirmTransfer(
+                              amount: amount,
+                              fee: fee,
+                              isInternal: isInternal,
+                            ),
+                          );
                     },
                     child: const Text(AppStrings.confirmTransfer),
                   ),
