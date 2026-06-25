@@ -24,7 +24,7 @@ jobs:
         with:
           submodules: recursive
 
-      - uses: dorny/paths-filter@v2
+      - uses: dorny/paths-filter@v4
         name: Build Detection
         id: needs_flutter_build
         with:
