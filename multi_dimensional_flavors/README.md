@@ -6,4 +6,4 @@ It demonstrates how to configure Shorebird for Android applications that use mul
 
 ## Running the App
 
-Please refer to the [official flavors guide](https://docs.shorebird.dev/guides/flavors) for general flavor concepts.
+Running this app is the same as running a standard Flutter application. You can use standard `flutter run` commands with the appropriate flavor flags.
