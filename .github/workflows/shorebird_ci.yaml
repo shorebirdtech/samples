@@ -14,7 +14,6 @@ jobs:
   changes:
     runs-on: ubuntu-latest
     outputs:
-      firebase_test: ${{ steps.filter.outputs.firebase_test }}
       flavors: ${{ steps.filter.outputs.flavors }}
       multi_dimensioanl_flavors: ${{ steps.filter.outputs.multi_dimensioanl_flavors }}
       my_flutter_module: ${{ steps.filter.outputs.my_flutter_module }}
@@ -33,8 +32,6 @@ jobs:
         id: filter
         with:
           filters: |
-            firebase_test:
-              - firebase_test/**
             flavors:
               - flavors/**
             multi_dimensioanl_flavors:
@@ -45,19 +42,6 @@ jobs:
               - progressive_rollout_demo/**
             shorebird_fintech_wallet:
               - shorebird_fintech_wallet/**
-
-  firebase_test:
-    needs: changes
-    if: needs.changes.outputs.firebase_test == 'true'
-    uses: ./.github/workflows/_shorebird_ci_flutter.yaml
-    with:
-      package_name: firebase_test
-      package_path: firebase_test
-      has_bloc_lint: false
-      has_unit_tests: true
-      subpackages: ""
-      flutter_version: ""
-      has_integration_tests: false
 
   flavors:
     needs: changes
@@ -129,7 +113,6 @@ jobs:
     if: ${{ always() }}
     needs:
       - changes
-      - firebase_test
       - flavors
       - multi_dimensioanl_flavors
       - my_flutter_module
