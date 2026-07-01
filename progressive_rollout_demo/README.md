@@ -1,4 +1,4 @@
-# progressive_rollout_demo
+# 📈 Progressive Rollout Demo
 
 This app demonstrates how to implement progressive (percentage-based) patch
 rollout using Shorebird's tracks feature.

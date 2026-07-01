@@ -1,8 +1,14 @@
-## add_to_app
+# 🧩 Add-to-App Sample
 
-The source code for the [Add-to-app Guide](https://docs.shorebird.dev/guides/hybrid-app).
+This directory contains the source code for the [Add-to-app Guide](https://docs.shorebird.dev/guides/hybrid-app).
 
-### Status
+It demonstrates how to seamlessly patch a Shorebird Flutter module that is embedded inside an existing native Android or iOS application.
 
-Android: ready
-iOS: ready
+## Status
+
+- **Android**: Ready
+- **iOS**: Ready
+
+## Running the App
+
+Please refer to the [Add-to-app Guide](https://docs.shorebird.dev/guides/hybrid-app) for detailed integration instructions.
