@@ -39,7 +39,7 @@ dependencies:
   bloc: ^9.2.0
   get_it: ^9.2.1
   injectable: ^3.0.0
-  dio: ^5.9.2
+  dio: ^5.10.0
   equatable: ^2.0.8
   google_fonts: ^8.0.2
   intl: ^0.20.3
