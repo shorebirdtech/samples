@@ -10,10 +10,6 @@ updates:
     schedule:
       interval: "weekly"
 
-  - package-ecosystem: "pub"
-    directory: "/firebase_test"
-    schedule:
-      interval: "weekly"
 
   - package-ecosystem: "pub"
     directory: "/flavors"
