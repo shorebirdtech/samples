@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:clear_skies/data/models/models.dart';
 import 'package:clear_skies/core/core.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class WeatherRepository {
   final http.Client httpClient;
@@ -13,8 +14,9 @@ class WeatherRepository {
     final geoUrl = Uri.parse(AppStrings.geoUrl(city));
     final geoRes = await httpClient.get(geoUrl);
 
-    if (geoRes.statusCode != 200)
+    if (geoRes.statusCode != 200) {
       throw Exception(AppStrings.errorLocationFetch);
+    }
 
     final geoJson = jsonDecode(geoRes.body);
     if (!geoJson.containsKey('results') || geoJson['results'].isEmpty) {
@@ -37,8 +39,9 @@ class WeatherRepository {
     final weatherUrl = Uri.parse(AppStrings.weatherUrl(lat, lon));
     final weatherRes = await httpClient.get(weatherUrl);
 
-    if (weatherRes.statusCode != 200)
+    if (weatherRes.statusCode != 200) {
       throw Exception(AppStrings.errorWeatherFetch);
+    }
 
     final weatherJson = jsonDecode(weatherRes.body);
     return Weather.fromJson(cityName, weatherJson);
@@ -78,5 +81,22 @@ class WeatherRepository {
     }
 
     return suggestions;
+  }
+
+  Future<List<String>> getFavorites() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final favoritesList = prefs.getStringList('favorite_cities');
+      return favoritesList?.toList() ?? [];
+    } catch (_) {
+      return [];
+    }
+  }
+
+  Future<void> saveFavorites(List<String> favorites) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setStringList('favorite_cities', favorites);
+    } catch (_) {}
   }
 }

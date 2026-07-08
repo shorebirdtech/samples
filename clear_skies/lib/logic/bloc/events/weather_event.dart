@@ -6,3 +6,5 @@ abstract class WeatherEvent extends Equatable {
   @override
   List<Object> get props => [];
 }
+
+class ResetWeather extends WeatherEvent {}

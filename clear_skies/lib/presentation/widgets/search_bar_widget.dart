@@ -49,34 +49,58 @@ class _SearchBarWidgetState extends State<SearchBarWidget> {
       },
       fieldViewBuilder:
           (context, textEditingController, focusNode, onFieldSubmitted) {
-            return Container(
-              decoration: BoxDecoration(
-                color: bgColor,
-                borderRadius: BorderRadius.circular(30),
-              ),
-              child: TextField(
-                controller: textEditingController,
-                focusNode: focusNode,
-                style: GoogleFonts.inter(color: textColor),
-                decoration: InputDecoration(
-                  hintText: AppStrings.searchHint,
-                  hintStyle: GoogleFonts.inter(color: hintColor),
-                  prefixIcon: Icon(Icons.search, color: iconColor),
-                  border: InputBorder.none,
-                  contentPadding: const EdgeInsets.symmetric(
-                    horizontal: 20,
-                    vertical: 15,
+            return Row(
+              children: [
+                BlocBuilder<WeatherBloc, WeatherState>(
+                  builder: (context, state) {
+                    if (state.status != WeatherStatus.initial) {
+                      return Padding(
+                        padding: const EdgeInsets.only(right: 8.0),
+                        child: IconButton(
+                          icon: Icon(Icons.arrow_back_ios_new_rounded, color: widget.isDay ? Colors.black87 : Colors.white),
+                          onPressed: () {
+                            textEditingController.clear();
+                            focusNode.unfocus();
+                            context.read<WeatherBloc>().add(ResetWeather());
+                          },
+                        ),
+                      );
+                    }
+                    return const SizedBox.shrink();
+                  },
+                ),
+                Expanded(
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: bgColor,
+                      borderRadius: BorderRadius.circular(30),
+                    ),
+                    child: TextField(
+                      controller: textEditingController,
+                      focusNode: focusNode,
+                      style: GoogleFonts.inter(color: textColor),
+                      decoration: InputDecoration(
+                        hintText: AppStrings.searchHint,
+                        hintStyle: GoogleFonts.inter(color: hintColor),
+                        prefixIcon: Icon(Icons.search, color: iconColor),
+                        border: InputBorder.none,
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 20,
+                          vertical: 15,
+                        ),
+                      ),
+                      onSubmitted: (value) {
+                        if (value.trim().isNotEmpty) {
+                          context.read<WeatherBloc>().add(
+                            WeatherRequested(value.trim()),
+                          );
+                          FocusManager.instance.primaryFocus?.unfocus();
+                        }
+                      },
+                    ),
                   ),
                 ),
-                onSubmitted: (value) {
-                  if (value.trim().isNotEmpty) {
-                    context.read<WeatherBloc>().add(
-                      WeatherRequested(value.trim()),
-                    );
-                    FocusManager.instance.primaryFocus?.unfocus();
-                  }
-                },
-              ),
+              ],
             );
           },
       optionsViewBuilder: (context, onSelected, options) {

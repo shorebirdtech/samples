@@ -5,21 +5,25 @@ import 'package:clear_skies/logic/bloc/bloc.dart';
 class WeatherBloc extends Bloc<WeatherEvent, WeatherState> {
   final WeatherRepository weatherRepository;
 
-  WeatherBloc({required this.weatherRepository}) : super(WeatherInitial()) {
+  WeatherBloc({required this.weatherRepository}) : super(const WeatherState()) {
     on<WeatherRequested>(_onWeatherRequested);
     on<WeatherLocationRequested>(_onWeatherLocationRequested);
+    on<ResetWeather>((event, emit) => emit(const WeatherState()));
   }
 
   Future<void> _onWeatherRequested(
     WeatherRequested event,
     Emitter<WeatherState> emit,
   ) async {
-    emit(WeatherLoading());
+    emit(state.copyWith(status: WeatherStatus.loading));
     try {
       final weather = await weatherRepository.getWeather(event.cityName);
-      emit(WeatherLoaded(weather));
+      emit(state.copyWith(status: WeatherStatus.loaded, weather: weather));
     } catch (e) {
-      emit(WeatherError(e.toString().replaceAll('Exception: ', '')));
+      emit(state.copyWith(
+        status: WeatherStatus.error,
+        errorMessage: e.toString().replaceAll('Exception: ', ''),
+      ));
     }
   }
 
@@ -27,16 +31,19 @@ class WeatherBloc extends Bloc<WeatherEvent, WeatherState> {
     WeatherLocationRequested event,
     Emitter<WeatherState> emit,
   ) async {
-    emit(WeatherLoading());
+    emit(state.copyWith(status: WeatherStatus.loading));
     try {
       final weather = await weatherRepository.getWeatherByCoordinates(
         event.latitude,
         event.longitude,
         event.cityName,
       );
-      emit(WeatherLoaded(weather));
+      emit(state.copyWith(status: WeatherStatus.loaded, weather: weather));
     } catch (e) {
-      emit(WeatherError(e.toString().replaceAll('Exception: ', '')));
+      emit(state.copyWith(
+        status: WeatherStatus.error,
+        errorMessage: e.toString().replaceAll('Exception: ', ''),
+      ));
     }
   }
 }

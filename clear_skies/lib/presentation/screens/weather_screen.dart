@@ -37,9 +37,9 @@ class _WeatherScreenState extends State<WeatherScreen>
       body: BlocBuilder<WeatherBloc, WeatherState>(
         builder: (context, state) {
           bool isDay = true;
-          if (state is WeatherLoaded) {
-            isDay = state.weather.isDay;
-          } else if (state is WeatherError) {
+          if (state.status == WeatherStatus.loaded && state.weather != null) {
+            isDay = state.weather!.isDay;
+          } else if (state.status == WeatherStatus.error) {
             isDay = false; // Just to show dark theme on error
           }
           final bgColor = isDay
@@ -72,7 +72,7 @@ class _WeatherScreenState extends State<WeatherScreen>
                     padding: const EdgeInsets.all(16.0),
                     child: SearchBarWidget(isDay: isDay),
                   ),
-                  Expanded(child: Center(child: _buildContent(state, isDay))),
+                  Expanded(child: _buildContent(state, isDay)),
                 ],
               ),
             ),
@@ -85,52 +85,155 @@ class _WeatherScreenState extends State<WeatherScreen>
   Widget _buildContent(WeatherState state, bool isDay) {
     final textColor = isDay ? AppColors.textDay : AppColors.textNight;
 
-    if (state is WeatherInitial) {
-      return Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(
-            Icons.travel_explore_rounded,
-            size: 80,
-            color: textColor.withValues(alpha: 0.5),
-          ),
-          const SizedBox(height: 16),
-          Text(
-            AppStrings.initialSearchPrompt,
-            style: GoogleFonts.outfit(
-              fontSize: 24,
-              color: textColor.withValues(alpha: 0.8),
-              fontWeight: FontWeight.w300,
+    if (state.status == WeatherStatus.initial) {
+      return BlocBuilder<FavoritesBloc, FavoritesState>(
+        builder: (context, favState) {
+          if (favState.status == FavoritesStatus.loading) {
+            return const Center(child: CircularProgressIndicator(color: Colors.white70));
+          } else if (favState.status == FavoritesStatus.loaded && favState.favorites.isNotEmpty) {
+            return ListView.separated(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              shrinkWrap: true,
+              physics: const AlwaysScrollableScrollPhysics(),
+              itemCount: favState.favorites.length,
+              separatorBuilder: (context, index) => const SizedBox(height: 12),
+              itemBuilder: (context, index) {
+                final favWeather = favState.favorites[index];
+                return GestureDetector(
+                  onTap: () {
+                    context.read<WeatherBloc>().add(
+                      WeatherRequested(favWeather.cityName),
+                    );
+                  },
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 24,
+                      vertical: 20,
+                    ),
+                    decoration: BoxDecoration(
+                      color: textColor.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(24),
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                favWeather.cityName,
+                                style: GoogleFonts.outfit(
+                                  fontSize: 22,
+                                  fontWeight: FontWeight.w600,
+                                  color: textColor,
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                WeatherHelper.getWeatherDescription(
+                                  favWeather.weatherCode,
+                                ),
+                                style: GoogleFonts.inter(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w300,
+                                  color: textColor.withValues(alpha: 0.7),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        Row(
+                          children: [
+                            Text(
+                              '${favWeather.temperature.round()}°',
+                              style: GoogleFonts.inter(
+                                fontSize: 32,
+                                fontWeight: FontWeight.w300,
+                                color: textColor,
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            Text(
+                              WeatherHelper.getWeatherIcon(
+                                favWeather.weatherCode,
+                              ),
+                              style: const TextStyle(fontSize: 40),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              },
+            );
+          }
+          return Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(
+                  Icons.travel_explore_rounded,
+                  size: 80,
+                  color: textColor.withValues(alpha: 0.5),
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  AppStrings.initialSearchPrompt,
+                  style: GoogleFonts.outfit(
+                    fontSize: 24,
+                    color: textColor.withValues(alpha: 0.8),
+                    fontWeight: FontWeight.w300,
+                  ),
+                ),
+              ],
             ),
-          ),
-        ],
+          );
+        },
       );
-    } else if (state is WeatherLoading) {
-      return CreativeLoadingWidget(textColor: textColor);
-    } else if (state is WeatherLoaded) {
-      return WeatherDisplay(weather: state.weather);
-    } else if (state is WeatherError) {
-      return Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 32.0),
+    } else if (state.status == WeatherStatus.loading) {
+      return Center(child: CreativeLoadingWidget(textColor: textColor));
+    } else if (state.status == WeatherStatus.loaded && state.weather != null) {
+      return SingleChildScrollView(
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(
-              Icons.error_outline_rounded,
-              size: 60,
-              color: Colors.redAccent,
-            ),
+            WeatherDisplay(weather: state.weather!),
             const SizedBox(height: 16),
-            Text(
-              state.message,
-              style: GoogleFonts.outfit(
-                fontSize: 20,
-                color: Colors.redAccent,
-                fontWeight: FontWeight.w400,
-              ),
-              textAlign: TextAlign.center,
+            ForecastListWidget(
+              forecast: state.weather!.forecast,
+              textColor: textColor,
             ),
+            const SizedBox(height: 32),
           ],
+        ),
+      );
+    } else if (state.status == WeatherStatus.error) {
+      return Center(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 32.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Icon(
+                Icons.error_outline_rounded,
+                size: 60,
+                color: Colors.redAccent,
+              ),
+              const SizedBox(height: 16),
+              Text(
+                state.errorMessage ?? 'An error occurred',
+                style: GoogleFonts.outfit(
+                  fontSize: 20,
+                  color: Colors.redAccent,
+                  fontWeight: FontWeight.w400,
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ],
+          ),
         ),
       );
     }

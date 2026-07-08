@@ -23,4 +23,22 @@ class CitySuggestion extends Equatable {
 
   @override
   List<Object?> get props => [name, admin1, country, latitude, longitude];
+
+  Map<String, dynamic> toJson() => {
+        'name': name,
+        'admin1': admin1,
+        'country': country,
+        'latitude': latitude,
+        'longitude': longitude,
+      };
+
+  factory CitySuggestion.fromJson(Map<String, dynamic> json) {
+    return CitySuggestion(
+      name: json['name'] as String,
+      admin1: json['admin1'] as String?,
+      country: json['country'] as String?,
+      latitude: (json['latitude'] as num).toDouble(),
+      longitude: (json['longitude'] as num).toDouble(),
+    );
+  }
 }
