@@ -4,6 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:clear_skies/core/core.dart';
 import 'package:clear_skies/features/features.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:geocoding/geocoding.dart';
 
 class WeatherScreen extends StatefulWidget {
   const WeatherScreen({super.key});
@@ -56,12 +57,33 @@ class _WeatherScreenState extends State<WeatherScreen>
           accuracy: LocationAccuracy.low,
         ),
       );
+      String resolvedCityName = "Current Location";
+      try {
+        final placemarks = await Geocoding().placemarkFromCoordinates(
+          position.latitude,
+          position.longitude,
+        );
+        if (placemarks.isNotEmpty) {
+          final p = placemarks.first;
+          final possibleName =
+              p.locality ??
+              p.subAdministrativeArea ??
+              p.administrativeArea ??
+              "";
+          if (possibleName.isNotEmpty) {
+            resolvedCityName = possibleName;
+          }
+        }
+      } catch (_) {
+        // Fallback to "Current Location" if reverse geocoding fails
+      }
+
       if (mounted) {
         context.read<WeatherBloc>().add(
           WeatherLocationRequested(
             latitude: position.latitude,
             longitude: position.longitude,
-            cityName: "Current Location",
+            cityName: resolvedCityName,
           ),
         );
       }
