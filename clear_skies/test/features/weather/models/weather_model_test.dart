@@ -18,7 +18,7 @@ void main() {
           'weather_code': [1, 2],
           'temperature_2m_max': [22.0, 21.0],
           'temperature_2m_min': [15.0, 14.0],
-        }
+        },
       };
 
       final weather = Weather.fromJson('London', json);
@@ -35,7 +35,7 @@ void main() {
       expect(weather.forecast[0].maxTemp, 22.0);
       expect(weather.forecast[0].minTemp, 15.0);
       expect(weather.forecast[0].weatherCode, 1);
-      
+
       expect(weather.props, [
         'London',
         20.5,
@@ -44,7 +44,7 @@ void main() {
         45,
         19.0,
         5.5,
-        weather.forecast
+        weather.forecast,
       ]);
     });
 
@@ -63,7 +63,7 @@ void main() {
           'weather_code': [],
           'temperature_2m_max': [],
           'temperature_2m_min': [],
-        }
+        },
       };
 
       final weather = Weather.fromJson('Paris', json);

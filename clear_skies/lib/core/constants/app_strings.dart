@@ -1,7 +1,9 @@
 class AppStrings {
   static const String appName = 'Clear Skies';
   static const String searchHint = 'Search city...';
-  static const String initialSearchPrompt = 'Search for a city';
+
+  static const String welcomeTitle = 'Welcome to Clear Skies';
+  static const String welcomeSubtitle = 'Discover the world\'s weather';
 
   static const String errorLocationFetch = 'Failed to fetch location data';
   static const String errorCityNotFound = 'City not found';

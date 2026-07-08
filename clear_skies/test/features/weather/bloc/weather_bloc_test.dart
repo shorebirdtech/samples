@@ -38,8 +38,9 @@ void main() {
     blocTest<WeatherBloc, WeatherState>(
       'emits [loading, loaded] when WeatherRequested succeeds',
       build: () {
-        when(() => mockWeatherRepository.getWeather('London'))
-            .thenAnswer((_) async => mockWeather);
+        when(
+          () => mockWeatherRepository.getWeather('London'),
+        ).thenAnswer((_) async => mockWeather);
         return weatherBloc;
       },
       act: (bloc) => bloc.add(const WeatherRequested('London')),
@@ -55,29 +56,40 @@ void main() {
     blocTest<WeatherBloc, WeatherState>(
       'emits [loading, error] when WeatherRequested fails',
       build: () {
-        when(() => mockWeatherRepository.getWeather('UnknownCity'))
-            .thenThrow(Exception(AppStrings.errorCityNotFound));
+        when(
+          () => mockWeatherRepository.getWeather('UnknownCity'),
+        ).thenThrow(Exception(AppStrings.errorCityNotFound));
         return weatherBloc;
       },
       act: (bloc) => bloc.add(const WeatherRequested('UnknownCity')),
       expect: () => [
         const WeatherState(status: WeatherStatus.loading),
-        WeatherState(status: WeatherStatus.error, errorMessage: AppStrings.errorCityNotFound),
+        WeatherState(
+          status: WeatherStatus.error,
+          errorMessage: AppStrings.errorCityNotFound,
+        ),
       ],
     );
 
     blocTest<WeatherBloc, WeatherState>(
       'emits [loading, loaded] when WeatherLocationRequested succeeds',
       build: () {
-        when(() => mockWeatherRepository.getWeatherByCoordinates(51.5, -0.12, 'London'))
-            .thenAnswer((_) async => mockWeather);
+        when(
+          () => mockWeatherRepository.getWeatherByCoordinates(
+            51.5,
+            -0.12,
+            'London',
+          ),
+        ).thenAnswer((_) async => mockWeather);
         return weatherBloc;
       },
-      act: (bloc) => bloc.add(const WeatherLocationRequested(
-        latitude: 51.5,
-        longitude: -0.12,
-        cityName: 'London',
-      )),
+      act: (bloc) => bloc.add(
+        const WeatherLocationRequested(
+          latitude: 51.5,
+          longitude: -0.12,
+          cityName: 'London',
+        ),
+      ),
       expect: () => [
         const WeatherState(status: WeatherStatus.loading),
         WeatherState(status: WeatherStatus.loaded, weather: mockWeather),
@@ -87,29 +99,38 @@ void main() {
     blocTest<WeatherBloc, WeatherState>(
       'emits [loading, error] when WeatherLocationRequested fails',
       build: () {
-        when(() => mockWeatherRepository.getWeatherByCoordinates(51.5, -0.12, 'London'))
-            .thenThrow(Exception('Location error'));
+        when(
+          () => mockWeatherRepository.getWeatherByCoordinates(
+            51.5,
+            -0.12,
+            'London',
+          ),
+        ).thenThrow(Exception('Location error'));
         return weatherBloc;
       },
-      act: (bloc) => bloc.add(const WeatherLocationRequested(
-        latitude: 51.5,
-        longitude: -0.12,
-        cityName: 'London',
-      )),
+      act: (bloc) => bloc.add(
+        const WeatherLocationRequested(
+          latitude: 51.5,
+          longitude: -0.12,
+          cityName: 'London',
+        ),
+      ),
       expect: () => [
         const WeatherState(status: WeatherStatus.loading),
-        const WeatherState(status: WeatherStatus.error, errorMessage: 'Location error'),
+        const WeatherState(
+          status: WeatherStatus.error,
+          errorMessage: 'Location error',
+        ),
       ],
     );
-    
+
     blocTest<WeatherBloc, WeatherState>(
       'emits [initial] when ResetWeather is added',
       build: () => weatherBloc,
-      seed: () => WeatherState(status: WeatherStatus.loaded, weather: mockWeather),
+      seed: () =>
+          WeatherState(status: WeatherStatus.loaded, weather: mockWeather),
       act: (bloc) => bloc.add(ResetWeather()),
-      expect: () => [
-        const WeatherState(status: WeatherStatus.initial),
-      ],
+      expect: () => [const WeatherState(status: WeatherStatus.initial)],
     );
   });
 }

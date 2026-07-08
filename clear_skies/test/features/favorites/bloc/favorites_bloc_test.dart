@@ -4,6 +4,7 @@ import 'package:mocktail/mocktail.dart';
 import 'package:clear_skies/features/features.dart';
 
 class MockWeatherRepository extends Mock implements WeatherRepository {}
+
 class MockFavoritesRepository extends Mock implements FavoritesRepository {}
 
 void main() {
@@ -44,16 +45,21 @@ void main() {
     blocTest<FavoritesBloc, FavoritesState>(
       'emits [loading, loaded] when LoadFavorites succeeds',
       build: () {
-        when(() => mockFavoritesRepository.getFavorites())
-            .thenAnswer((_) async => ['London']);
-        when(() => mockWeatherRepository.getWeather('London'))
-            .thenAnswer((_) async => mockWeather);
+        when(
+          () => mockFavoritesRepository.getFavorites(),
+        ).thenAnswer((_) async => ['London']);
+        when(
+          () => mockWeatherRepository.getWeather('London'),
+        ).thenAnswer((_) async => mockWeather);
         return favoritesBloc;
       },
       act: (bloc) => bloc.add(LoadFavorites()),
       expect: () => [
         const FavoritesState(status: FavoritesStatus.loading),
-        FavoritesState(status: FavoritesStatus.loaded, favorites: [mockWeather]),
+        FavoritesState(
+          status: FavoritesStatus.loaded,
+          favorites: [mockWeather],
+        ),
       ],
       verify: (_) {
         verify(() => mockFavoritesRepository.getFavorites()).called(1);
@@ -64,20 +70,22 @@ void main() {
     blocTest<FavoritesBloc, FavoritesState>(
       'emits [loading, error] when LoadFavorites fails getting data from network',
       build: () {
-        when(() => mockFavoritesRepository.getFavorites())
-            .thenAnswer((_) async => ['London']);
-        when(() => mockWeatherRepository.getWeather('London'))
-            .thenThrow(Exception('Network Error'));
+        when(
+          () => mockFavoritesRepository.getFavorites(),
+        ).thenAnswer((_) async => ['London']);
+        when(
+          () => mockWeatherRepository.getWeather('London'),
+        ).thenThrow(Exception('Network Error'));
         return favoritesBloc;
       },
       act: (bloc) => bloc.add(LoadFavorites()),
       expect: () => [
         const FavoritesState(status: FavoritesStatus.loading),
-        // Wait! The logic in FavoritesBloc catches error and skips it if one fails! 
-        // Let's check what it actually emits if one fails: It emits the ones that succeeded, 
-        // or an empty list if all failed. It shouldn't emit an error unless getFavorites itself throws, 
+        // Wait! The logic in FavoritesBloc catches error and skips it if one fails!
+        // Let's check what it actually emits if one fails: It emits the ones that succeeded,
+        // or an empty list if all failed. It shouldn't emit an error unless getFavorites itself throws,
         // OR wait, let me look at FavoritesBloc catch block.
-        // Let's assume it catches the whole block or individual. 
+        // Let's assume it catches the whole block or individual.
         // We'll verify actual behavior: it wraps the whole thing in a try-catch in FavoritesBloc.
         const FavoritesState(status: FavoritesStatus.loaded, favorites: []),
       ],
@@ -86,32 +94,45 @@ void main() {
     blocTest<FavoritesBloc, FavoritesState>(
       'emits updated list when AddFavorite is called',
       build: () {
-        when(() => mockFavoritesRepository.getFavorites())
-            .thenAnswer((_) async => []);
-        when(() => mockFavoritesRepository.saveFavorites(any()))
-            .thenAnswer((_) async {});
+        when(
+          () => mockFavoritesRepository.getFavorites(),
+        ).thenAnswer((_) async => []);
+        when(
+          () => mockFavoritesRepository.saveFavorites(any()),
+        ).thenAnswer((_) async {});
         return favoritesBloc;
       },
-      seed: () => const FavoritesState(status: FavoritesStatus.loaded, favorites: []),
+      seed: () =>
+          const FavoritesState(status: FavoritesStatus.loaded, favorites: []),
       act: (bloc) => bloc.add(AddFavorite(mockWeather)),
       expect: () => [
-        FavoritesState(status: FavoritesStatus.loaded, favorites: [mockWeather]),
+        FavoritesState(
+          status: FavoritesStatus.loaded,
+          favorites: [mockWeather],
+        ),
       ],
       verify: (_) {
-        verify(() => mockFavoritesRepository.saveFavorites(['London'])).called(1);
+        verify(
+          () => mockFavoritesRepository.saveFavorites(['London']),
+        ).called(1);
       },
     );
 
     blocTest<FavoritesBloc, FavoritesState>(
       'emits updated list when RemoveFavorite is called',
       build: () {
-        when(() => mockFavoritesRepository.getFavorites())
-            .thenAnswer((_) async => ['London']);
-        when(() => mockFavoritesRepository.saveFavorites(any()))
-            .thenAnswer((_) async {});
+        when(
+          () => mockFavoritesRepository.getFavorites(),
+        ).thenAnswer((_) async => ['London']);
+        when(
+          () => mockFavoritesRepository.saveFavorites(any()),
+        ).thenAnswer((_) async {});
         return favoritesBloc;
       },
-      seed: () => FavoritesState(status: FavoritesStatus.loaded, favorites: [mockWeather]),
+      seed: () => FavoritesState(
+        status: FavoritesStatus.loaded,
+        favorites: [mockWeather],
+      ),
       act: (bloc) => bloc.add(const RemoveFavorite('London')),
       expect: () => [
         const FavoritesState(status: FavoritesStatus.loaded, favorites: []),

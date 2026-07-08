@@ -30,8 +30,8 @@ void main() {
       test('returns Weather on successful fetch', () async {
         final mockGeoResponse = {
           'results': [
-            {'latitude': 51.50853, 'longitude': -0.12574, 'name': 'London'}
-          ]
+            {'latitude': 51.50853, 'longitude': -0.12574, 'name': 'London'},
+          ],
         };
 
         final mockWeatherResponse = {
@@ -48,14 +48,24 @@ void main() {
             'weather_code': [1, 2],
             'temperature_2m_max': [16.0, 17.0],
             'temperature_2m_min': [10.0, 11.0],
-          }
+          },
         };
 
-        when(() => mockHttpClient.get(Uri.parse(geoUrlStr)))
-            .thenAnswer((_) async => http.Response(jsonEncode(mockGeoResponse), 200));
+        when(() => mockHttpClient.get(Uri.parse(geoUrlStr))).thenAnswer(
+          (_) async => http.Response(jsonEncode(mockGeoResponse), 200),
+        );
 
-        when(() => mockHttpClient.get(any(that: predicate<Uri>((uri) => uri.toString().contains('/v1/forecast')))))
-            .thenAnswer((_) async => http.Response(jsonEncode(mockWeatherResponse), 200));
+        when(
+          () => mockHttpClient.get(
+            any(
+              that: predicate<Uri>(
+                (uri) => uri.toString().contains('/v1/forecast'),
+              ),
+            ),
+          ),
+        ).thenAnswer(
+          (_) async => http.Response(jsonEncode(mockWeatherResponse), 200),
+        );
 
         final result = await weatherRepository.getWeather(city);
 
@@ -67,13 +77,14 @@ void main() {
         expect(result.feelsLike, 14.5);
         expect(result.windSpeed, 10.0);
         expect(result.forecast.length, 2);
-        
+
         verify(() => mockHttpClient.get(Uri.parse(geoUrlStr))).called(1);
       });
 
       test('throws Exception when geo fetch fails (non-200)', () async {
-        when(() => mockHttpClient.get(Uri.parse(geoUrlStr)))
-            .thenAnswer((_) async => http.Response('Error', 404));
+        when(
+          () => mockHttpClient.get(Uri.parse(geoUrlStr)),
+        ).thenAnswer((_) async => http.Response('Error', 404));
 
         expect(
           () => weatherRepository.getWeather(city),
@@ -84,8 +95,9 @@ void main() {
       test('throws Exception when city is not found in results', () async {
         final mockGeoResponse = {'results': []};
 
-        when(() => mockHttpClient.get(Uri.parse(geoUrlStr)))
-            .thenAnswer((_) async => http.Response(jsonEncode(mockGeoResponse), 200));
+        when(() => mockHttpClient.get(Uri.parse(geoUrlStr))).thenAnswer(
+          (_) async => http.Response(jsonEncode(mockGeoResponse), 200),
+        );
 
         expect(
           () => weatherRepository.getWeather(city),
@@ -96,15 +108,23 @@ void main() {
       test('throws Exception when weather fetch fails (non-200)', () async {
         final mockGeoResponse = {
           'results': [
-            {'latitude': 51.50853, 'longitude': -0.12574, 'name': 'London'}
-          ]
+            {'latitude': 51.50853, 'longitude': -0.12574, 'name': 'London'},
+          ],
         };
 
-        when(() => mockHttpClient.get(Uri.parse(geoUrlStr)))
-            .thenAnswer((_) async => http.Response(jsonEncode(mockGeoResponse), 200));
+        when(() => mockHttpClient.get(Uri.parse(geoUrlStr))).thenAnswer(
+          (_) async => http.Response(jsonEncode(mockGeoResponse), 200),
+        );
 
-        when(() => mockHttpClient.get(any(that: predicate<Uri>((uri) => uri.toString().contains('/v1/forecast')))))
-            .thenAnswer((_) async => http.Response('Error', 500));
+        when(
+          () => mockHttpClient.get(
+            any(
+              that: predicate<Uri>(
+                (uri) => uri.toString().contains('/v1/forecast'),
+              ),
+            ),
+          ),
+        ).thenAnswer((_) async => http.Response('Error', 500));
 
         expect(
           () => weatherRepository.getWeather(city),
@@ -137,12 +157,15 @@ void main() {
               'country': 'Canada',
               'latitude': 42.98339,
               'longitude': -81.23304,
-            }
-          ]
+            },
+          ],
         };
 
-        when(() => mockHttpClient.get(Uri.parse(AppStrings.geoSearchUrl(query))))
-            .thenAnswer((_) async => http.Response(jsonEncode(mockSearchResponse), 200));
+        when(
+          () => mockHttpClient.get(Uri.parse(AppStrings.geoSearchUrl(query))),
+        ).thenAnswer(
+          (_) async => http.Response(jsonEncode(mockSearchResponse), 200),
+        );
 
         final results = await weatherRepository.searchCities(query);
 
@@ -170,12 +193,15 @@ void main() {
               'country': 'United Kingdom',
               'latitude': 51.51,
               'longitude': -0.13,
-            }
-          ]
+            },
+          ],
         };
 
-        when(() => mockHttpClient.get(Uri.parse(AppStrings.geoSearchUrl(query))))
-            .thenAnswer((_) async => http.Response(jsonEncode(mockSearchResponse), 200));
+        when(
+          () => mockHttpClient.get(Uri.parse(AppStrings.geoSearchUrl(query))),
+        ).thenAnswer(
+          (_) async => http.Response(jsonEncode(mockSearchResponse), 200),
+        );
 
         final results = await weatherRepository.searchCities(query);
 
@@ -185,19 +211,23 @@ void main() {
 
       test('returns empty list when results key is missing or empty', () async {
         final query = 'InvalidCity';
-        
-        when(() => mockHttpClient.get(Uri.parse(AppStrings.geoSearchUrl(query))))
-            .thenAnswer((_) async => http.Response(jsonEncode({'results': []}), 200));
+
+        when(
+          () => mockHttpClient.get(Uri.parse(AppStrings.geoSearchUrl(query))),
+        ).thenAnswer(
+          (_) async => http.Response(jsonEncode({'results': []}), 200),
+        );
 
         final results = await weatherRepository.searchCities(query);
         expect(results, isEmpty);
       });
-      
+
       test('returns empty list when geo fetch fails (non-200)', () async {
         final query = 'Lon';
-        
-        when(() => mockHttpClient.get(Uri.parse(AppStrings.geoSearchUrl(query))))
-            .thenAnswer((_) async => http.Response('Error', 500));
+
+        when(
+          () => mockHttpClient.get(Uri.parse(AppStrings.geoSearchUrl(query))),
+        ).thenAnswer((_) async => http.Response('Error', 500));
 
         final results = await weatherRepository.searchCities(query);
         expect(results, isEmpty);

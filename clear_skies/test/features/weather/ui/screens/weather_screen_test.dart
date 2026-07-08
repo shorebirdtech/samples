@@ -6,8 +6,12 @@ import 'package:bloc_test/bloc_test.dart';
 import 'package:clear_skies/features/features.dart';
 import 'package:clear_skies/core/core.dart';
 
-class MockWeatherBloc extends MockBloc<WeatherEvent, WeatherState> implements WeatherBloc {}
-class MockFavoritesBloc extends MockBloc<FavoritesEvent, FavoritesState> implements FavoritesBloc {}
+class MockWeatherBloc extends MockBloc<WeatherEvent, WeatherState>
+    implements WeatherBloc {}
+
+class MockFavoritesBloc extends MockBloc<FavoritesEvent, FavoritesState>
+    implements FavoritesBloc {}
+
 class MockWeatherRepository extends Mock implements WeatherRepository {}
 
 void main() {
@@ -39,47 +43,56 @@ void main() {
     Widget createWidgetUnderTest() {
       return MultiRepositoryProvider(
         providers: [
-          RepositoryProvider<WeatherRepository>.value(value: mockWeatherRepository),
+          RepositoryProvider<WeatherRepository>.value(
+            value: mockWeatherRepository,
+          ),
         ],
         child: MultiBlocProvider(
           providers: [
             BlocProvider<WeatherBloc>.value(value: mockWeatherBloc),
             BlocProvider<FavoritesBloc>.value(value: mockFavoritesBloc),
           ],
-          child: const MaterialApp(
-            home: WeatherScreen(),
-          ),
+          child: const MaterialApp(home: WeatherScreen()),
         ),
       );
     }
 
-    testWidgets('renders favorites when initial and favorites exist', (WidgetTester tester) async {
-      when(() => mockFavoritesBloc.state).thenReturn(FavoritesState(
-        status: FavoritesStatus.loaded,
-        favorites: [mockWeather],
-      ));
+    testWidgets('renders favorites when initial and favorites exist', (
+      WidgetTester tester,
+    ) async {
+      when(() => mockFavoritesBloc.state).thenReturn(
+        FavoritesState(
+          status: FavoritesStatus.loaded,
+          favorites: [mockWeather],
+        ),
+      );
 
       await tester.pumpWidget(createWidgetUnderTest());
 
       expect(find.byType(SearchBarWidget), findsOneWidget);
-      
+
       // Should display favorites list
       expect(find.text('London'), findsOneWidget);
     });
 
-    testWidgets('renders CreativeLoadingWidget when weather is loading', (WidgetTester tester) async {
-      when(() => mockWeatherBloc.state).thenReturn(const WeatherState(status: WeatherStatus.loading));
+    testWidgets('renders CreativeLoadingWidget when weather is loading', (
+      WidgetTester tester,
+    ) async {
+      when(
+        () => mockWeatherBloc.state,
+      ).thenReturn(const WeatherState(status: WeatherStatus.loading));
 
       await tester.pumpWidget(createWidgetUnderTest());
 
       expect(find.byType(CreativeLoadingWidget), findsOneWidget);
     });
 
-    testWidgets('renders WeatherDisplay when weather is loaded', (WidgetTester tester) async {
-      when(() => mockWeatherBloc.state).thenReturn(WeatherState(
-        status: WeatherStatus.loaded,
-        weather: mockWeather,
-      ));
+    testWidgets('renders WeatherDisplay when weather is loaded', (
+      WidgetTester tester,
+    ) async {
+      when(() => mockWeatherBloc.state).thenReturn(
+        WeatherState(status: WeatherStatus.loaded, weather: mockWeather),
+      );
 
       await tester.pumpWidget(createWidgetUnderTest());
 
@@ -87,12 +100,17 @@ void main() {
       expect(find.byType(SearchBarWidget), findsOneWidget);
     });
 
-    testWidgets('shows error widget when weather emits error', (WidgetTester tester) async {
+    testWidgets('shows error widget when weather emits error', (
+      WidgetTester tester,
+    ) async {
       whenListen(
         mockWeatherBloc,
         Stream.fromIterable([
           const WeatherState(status: WeatherStatus.loading),
-          const WeatherState(status: WeatherStatus.error, errorMessage: 'Network Error'),
+          const WeatherState(
+            status: WeatherStatus.error,
+            errorMessage: 'Network Error',
+          ),
         ]),
         initialState: const WeatherState(status: WeatherStatus.initial),
       );
@@ -104,26 +122,36 @@ void main() {
       expect(find.text('Network Error'), findsOneWidget);
     });
 
-    testWidgets('tapping a favorite city triggers WeatherRequested', (WidgetTester tester) async {
-      when(() => mockFavoritesBloc.state).thenReturn(FavoritesState(
-        status: FavoritesStatus.loaded,
-        favorites: [mockWeather],
-      ));
+    testWidgets('tapping a favorite city triggers WeatherRequested', (
+      WidgetTester tester,
+    ) async {
+      when(() => mockFavoritesBloc.state).thenReturn(
+        FavoritesState(
+          status: FavoritesStatus.loaded,
+          favorites: [mockWeather],
+        ),
+      );
 
       await tester.pumpWidget(createWidgetUnderTest());
-      
+
       // Tap on the favorite list tile
       await tester.tap(find.text('London'));
       await tester.pump();
 
-      verify(() => mockWeatherBloc.add(const WeatherRequested('London'))).called(1);
+      verify(
+        () => mockWeatherBloc.add(const WeatherRequested('London')),
+      ).called(1);
     });
 
-    testWidgets('shows loading for favorites if favorites are loading', (WidgetTester tester) async {
-      when(() => mockFavoritesBloc.state).thenReturn(const FavoritesState(status: FavoritesStatus.loading));
-      
+    testWidgets('shows loading for favorites if favorites are loading', (
+      WidgetTester tester,
+    ) async {
+      when(
+        () => mockFavoritesBloc.state,
+      ).thenReturn(const FavoritesState(status: FavoritesStatus.loading));
+
       await tester.pumpWidget(createWidgetUnderTest());
-      
+
       expect(find.byType(CircularProgressIndicator), findsOneWidget);
     });
   });

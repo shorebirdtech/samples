@@ -4,10 +4,22 @@ import 'package:clear_skies/features/features.dart';
 
 void main() {
   group('ForecastListWidget', () {
-    testWidgets('renders correct number of forecast items', (WidgetTester tester) async {
+    testWidgets('renders correct number of forecast items', (
+      WidgetTester tester,
+    ) async {
       final forecastList = [
-        DailyForecast(date: DateTime.parse('2023-10-25'), maxTemp: 22.0, minTemp: 15.0, weatherCode: 1),
-        DailyForecast(date: DateTime.parse('2023-10-26'), maxTemp: 20.0, minTemp: 14.0, weatherCode: 2),
+        DailyForecast(
+          date: DateTime.parse('2023-10-25'),
+          maxTemp: 22.0,
+          minTemp: 15.0,
+          weatherCode: 1,
+        ),
+        DailyForecast(
+          date: DateTime.parse('2023-10-26'),
+          maxTemp: 20.0,
+          minTemp: 14.0,
+          weatherCode: 2,
+        ),
       ];
 
       await tester.pumpWidget(
@@ -28,14 +40,13 @@ void main() {
       expect(find.text('14°'), findsOneWidget);
     });
 
-    testWidgets('renders empty gracefully if no forecast', (WidgetTester tester) async {
+    testWidgets('renders empty gracefully if no forecast', (
+      WidgetTester tester,
+    ) async {
       await tester.pumpWidget(
         const MaterialApp(
           home: Scaffold(
-            body: ForecastListWidget(
-              forecast: [],
-              textColor: Colors.black,
-            ),
+            body: ForecastListWidget(forecast: [], textColor: Colors.black),
           ),
         ),
       );

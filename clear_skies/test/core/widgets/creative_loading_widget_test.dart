@@ -4,21 +4,19 @@ import 'package:clear_skies/core/core.dart';
 
 void main() {
   group('CreativeLoadingWidget', () {
-    testWidgets('renders correctly and disposes without error', (WidgetTester tester) async {
+    testWidgets('renders correctly and disposes without error', (
+      WidgetTester tester,
+    ) async {
       await tester.pumpWidget(
         const MaterialApp(
-          home: Scaffold(
-            body: CreativeLoadingWidget(
-              textColor: Colors.blue,
-            ),
-          ),
+          home: Scaffold(body: CreativeLoadingWidget(textColor: Colors.blue)),
         ),
       );
 
       expect(find.byType(CreativeLoadingWidget), findsOneWidget);
       expect(find.text('☁️'), findsOneWidget);
       expect(find.text(AppStrings.loadingMessage), findsOneWidget);
-      
+
       // Let animation run
       await tester.pump(const Duration(seconds: 1));
     });

@@ -41,12 +41,9 @@ class _WeatherScreenState extends State<WeatherScreen>
           } else if (state.status == WeatherStatus.error) {
             isDay = false; // Just to show dark theme on error
           }
-          final bgColor = isDay
-              ? AppColors.backgroundDay
-              : AppColors.backgroundNight;
-          final altColor = isDay
-              ? const Color(0xFFB2EBF2)
-              : const Color(0xFF0D1B2A); // Slightly different shade
+          final currentGradient = isDay
+              ? AppColors.dayGradient
+              : AppColors.nightGradient;
 
           return AnimatedBuilder(
             animation: _bgController,
@@ -57,8 +54,8 @@ class _WeatherScreenState extends State<WeatherScreen>
                   gradient: LinearGradient(
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
-                    stops: [0.0, _bgController.value * 0.5 + 0.5],
-                    colors: [bgColor, altColor],
+                    stops: [0.0, _bgController.value * 0.2 + 0.4, 1.0],
+                    colors: currentGradient,
                   ),
                 ),
                 child: child,
@@ -173,27 +170,7 @@ class _WeatherScreenState extends State<WeatherScreen>
               },
             );
           }
-          return Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(
-                  Icons.travel_explore_rounded,
-                  size: 80,
-                  color: textColor.withValues(alpha: 0.5),
-                ),
-                const SizedBox(height: 16),
-                Text(
-                  AppStrings.initialSearchPrompt,
-                  style: GoogleFonts.outfit(
-                    fontSize: 24,
-                    color: textColor.withValues(alpha: 0.8),
-                    fontWeight: FontWeight.w300,
-                  ),
-                ),
-              ],
-            ),
-          );
+          return WelcomeHeroWidget(textColor: textColor);
         },
       );
     } else if (state.status == WeatherStatus.loading) {

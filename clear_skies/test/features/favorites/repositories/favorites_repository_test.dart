@@ -7,7 +7,9 @@ void main() {
     late FavoritesRepository favoritesRepository;
 
     setUp(() {
-      SharedPreferences.setMockInitialValues({'favorite_cities': ['London', 'Paris']});
+      SharedPreferences.setMockInitialValues({
+        'favorite_cities': ['London', 'Paris'],
+      });
       favoritesRepository = FavoritesRepository();
     });
 
@@ -24,10 +26,10 @@ void main() {
 
     test('saveFavorites persists the list of cities', () async {
       await favoritesRepository.saveFavorites(['New York']);
-      
+
       final prefs = await SharedPreferences.getInstance();
       final savedCities = prefs.getStringList('favorite_cities');
-      
+
       expect(savedCities, ['New York']);
     });
   });

@@ -21,8 +21,12 @@ class ClearSkiesApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiRepositoryProvider(
       providers: [
-        RepositoryProvider(create: (context) => weatherRepository ?? WeatherRepository()),
-        RepositoryProvider(create: (context) => favoritesRepository ?? FavoritesRepository()),
+        RepositoryProvider(
+          create: (context) => weatherRepository ?? WeatherRepository(),
+        ),
+        RepositoryProvider(
+          create: (context) => favoritesRepository ?? FavoritesRepository(),
+        ),
       ],
       child: MultiBlocProvider(
         providers: [
