@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:clear_skies/core/core.dart';
 import 'package:clear_skies/features/features.dart';
+import 'package:geolocator/geolocator.dart';
 
 class WeatherScreen extends StatefulWidget {
   const WeatherScreen({super.key});
@@ -22,6 +23,51 @@ class _WeatherScreenState extends State<WeatherScreen>
       vsync: this,
       duration: const Duration(seconds: 10),
     )..repeat(reverse: true);
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _requestLocationAndFetchWeather();
+    });
+  }
+
+  Future<void> _requestLocationAndFetchWeather() async {
+    bool serviceEnabled;
+    LocationPermission permission;
+
+    serviceEnabled = await Geolocator.isLocationServiceEnabled();
+    if (!serviceEnabled) {
+      return;
+    }
+
+    permission = await Geolocator.checkPermission();
+    if (permission == LocationPermission.denied) {
+      permission = await Geolocator.requestPermission();
+      if (permission == LocationPermission.denied) {
+        return;
+      }
+    }
+
+    if (permission == LocationPermission.deniedForever) {
+      return;
+    }
+
+    try {
+      final position = await Geolocator.getCurrentPosition(
+        locationSettings: const LocationSettings(
+          accuracy: LocationAccuracy.low,
+        ),
+      );
+      if (mounted) {
+        context.read<WeatherBloc>().add(
+          WeatherLocationRequested(
+            latitude: position.latitude,
+            longitude: position.longitude,
+            cityName: "Current Location",
+          ),
+        );
+      }
+    } catch (e) {
+      // Ignored
+    }
   }
 
   @override
@@ -170,7 +216,12 @@ class _WeatherScreenState extends State<WeatherScreen>
               },
             );
           }
-          return WelcomeHeroWidget(textColor: textColor);
+          return WelcomeHeroWidget(
+            textColor: textColor,
+            onCityTapped: (city) {
+              context.read<WeatherBloc>().add(WeatherRequested(city));
+            },
+          );
         },
       );
     } else if (state.status == WeatherStatus.loading) {

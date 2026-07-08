@@ -1,12 +1,17 @@
-import 'dart:math' as math;
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:clear_skies/core/core.dart';
 
 class WelcomeHeroWidget extends StatefulWidget {
   final Color textColor;
+  final void Function(String)? onCityTapped;
 
-  const WelcomeHeroWidget({super.key, required this.textColor});
+  const WelcomeHeroWidget({
+    super.key, 
+    required this.textColor,
+    this.onCityTapped,
+  });
 
   @override
   State<WelcomeHeroWidget> createState() => _WelcomeHeroWidgetState();
@@ -15,14 +20,25 @@ class WelcomeHeroWidget extends StatefulWidget {
 class _WelcomeHeroWidgetState extends State<WelcomeHeroWidget>
     with SingleTickerProviderStateMixin {
   late AnimationController _controller;
+  late Animation<double> _scaleAnimation;
+  late Animation<double> _opacityAnimation;
 
   @override
   void initState() {
     super.initState();
     _controller = AnimationController(
       vsync: this,
-      duration: const Duration(seconds: 4),
-    )..repeat(reverse: true);
+      duration: const Duration(milliseconds: 1500),
+    );
+    _scaleAnimation = Tween<double>(
+      begin: 0.9,
+      end: 1.0,
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOutCubic));
+    _opacityAnimation = Tween<double>(
+      begin: 0.0,
+      end: 1.0,
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeIn));
+    _controller.forward();
   }
 
   @override
@@ -33,75 +49,101 @@ class _WelcomeHeroWidgetState extends State<WelcomeHeroWidget>
 
   @override
   Widget build(BuildContext context) {
-    // Add slight shadow for better contrast against vibrant gradients
-    final shadowColor = widget.textColor == AppColors.textDay
-        ? Colors.black12
-        : Colors.black45;
-
     return Center(
       child: SingleChildScrollView(
         padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 24.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            // Animated Floating Elements
-            AnimatedBuilder(
-              animation: _controller,
-              builder: (context, child) {
-                final offset = math.sin(_controller.value * math.pi) * 15;
-                return Transform.translate(
-                  offset: Offset(0, offset),
-                  child: child,
-                );
-              },
-              child: Stack(
-                clipBehavior: Clip.none,
-                alignment: Alignment.center,
-                children: [
-                  Icon(
-                    Icons.cloud_rounded,
-                    size: 160,
-                    color: Colors.white.withValues(alpha: 0.9),
-                    shadows: [Shadow(color: shadowColor, blurRadius: 20)],
+        child: FadeTransition(
+          opacity: _opacityAnimation,
+          child: ScaleTransition(
+            scale: _scaleAnimation,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                // Elegant Typography
+                Text(
+                  AppStrings.welcomeTitle,
+                  style: GoogleFonts.outfit(
+                    fontSize: 36,
+                    fontWeight: FontWeight.w600,
+                    letterSpacing: -0.5,
+                    color: widget.textColor,
                   ),
-                  Positioned(
-                    top: -10,
-                    right: 20,
-                    child: Icon(
-                      Icons.wb_sunny_rounded,
-                      size: 90,
-                      color: Colors.amber.shade400,
-                      shadows: [Shadow(color: shadowColor, blurRadius: 15)],
-                    ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 12),
+                Text(
+                  AppStrings.welcomeSubtitle,
+                  style: GoogleFonts.inter(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w400,
+                    letterSpacing: 0.2,
+                    color: widget.textColor.withValues(alpha: 0.8),
                   ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 64),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 48),
 
-            // Typography without card background
-            Text(
-              AppStrings.welcomeTitle,
+                // Popular Destinations
+                Text(
+                  'Popular Destinations',
+                  style: GoogleFonts.inter(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w500,
+                    letterSpacing: 1.5,
+                    color: widget.textColor.withValues(alpha: 0.5),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                Wrap(
+                  spacing: 12,
+                  runSpacing: 12,
+                  alignment: WrapAlignment.center,
+                  children: [
+                    'Tokyo',
+                    'London',
+                    'New York',
+                    'Paris',
+                    'Dubai',
+                  ].map((city) => _buildCityChip(city)).toList(),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildCityChip(String city) {
+    return GestureDetector(
+      onTap: () {
+        if (widget.onCityTapped != null) {
+          widget.onCityTapped!(city);
+        }
+      },
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(20),
+        child: BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+            decoration: BoxDecoration(
+              color: widget.textColor.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(
+                color: widget.textColor.withValues(alpha: 0.2),
+                width: 1,
+              ),
+            ),
+            child: Text(
+              city,
               style: GoogleFonts.outfit(
-                fontSize: 32,
-                fontWeight: FontWeight.bold,
+                fontSize: 16,
+                fontWeight: FontWeight.w500,
                 color: widget.textColor,
-                shadows: [Shadow(color: shadowColor, blurRadius: 10)],
               ),
-              textAlign: TextAlign.center,
             ),
-            const SizedBox(height: 16),
-            Text(
-              AppStrings.welcomeSubtitle,
-              style: GoogleFonts.inter(
-                fontSize: 18,
-                fontWeight: FontWeight.w400,
-                color: widget.textColor.withValues(alpha: 0.9),
-                shadows: [Shadow(color: shadowColor, blurRadius: 5)],
-              ),
-              textAlign: TextAlign.center,
-            ),
-          ],
+          ),
         ),
       ),
     );
