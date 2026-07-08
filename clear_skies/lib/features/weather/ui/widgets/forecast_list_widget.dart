@@ -30,9 +30,9 @@ class ForecastListWidget extends StatelessWidget {
               : _getWeekday(day.date.weekday);
 
           return Container(
-            width: 80,
+            width: 100,
             margin: const EdgeInsets.symmetric(horizontal: 8),
-            padding: const EdgeInsets.all(12),
+            padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
               color: textColor.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(20),

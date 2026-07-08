@@ -8,14 +8,21 @@ void main() {
 }
 
 class ClearSkiesApp extends StatelessWidget {
-  const ClearSkiesApp({super.key});
+  final WeatherRepository? weatherRepository;
+  final FavoritesRepository? favoritesRepository;
+
+  const ClearSkiesApp({
+    super.key,
+    this.weatherRepository,
+    this.favoritesRepository,
+  });
 
   @override
   Widget build(BuildContext context) {
     return MultiRepositoryProvider(
       providers: [
-        RepositoryProvider(create: (context) => WeatherRepository()),
-        RepositoryProvider(create: (context) => FavoritesRepository()),
+        RepositoryProvider(create: (context) => weatherRepository ?? WeatherRepository()),
+        RepositoryProvider(create: (context) => favoritesRepository ?? FavoritesRepository()),
       ],
       child: MultiBlocProvider(
         providers: [
