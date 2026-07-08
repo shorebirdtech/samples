@@ -10,3 +10,4 @@ A collection of Shorebird samples and demos.
 | [Progressive Rollout Demo](progressive_rollout_demo) | Shows how to build a progressive patch rollout system with Shorebird tracks. |
 | [Firebase Test](firebase_test) | A sample app demonstrating Firebase integration with Shorebird. |
 | [Shorebird Fintech Wallet](shorebird_fintech_wallet) | A sample fintech wallet app built with Shorebird. |
+| [Clear Skies](clear_skies) | A beautifully designed, premium weather application with dynamic glassmorphic UI. |
