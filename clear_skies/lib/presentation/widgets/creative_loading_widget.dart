@@ -10,7 +10,8 @@ class CreativeLoadingWidget extends StatefulWidget {
   State<CreativeLoadingWidget> createState() => _CreativeLoadingWidgetState();
 }
 
-class _CreativeLoadingWidgetState extends State<CreativeLoadingWidget> with SingleTickerProviderStateMixin {
+class _CreativeLoadingWidgetState extends State<CreativeLoadingWidget>
+    with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<double> _animation;
 
@@ -21,11 +22,11 @@ class _CreativeLoadingWidgetState extends State<CreativeLoadingWidget> with Sing
       vsync: this,
       duration: const Duration(milliseconds: 800),
     )..repeat(reverse: true);
-    
-    _animation = Tween<double>(begin: -10, end: 10).animate(CurvedAnimation(
-      parent: _controller,
-      curve: Curves.easeInOut,
-    ));
+
+    _animation = Tween<double>(
+      begin: -10,
+      end: 10,
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeInOut));
   }
 
   @override
@@ -47,10 +48,7 @@ class _CreativeLoadingWidgetState extends State<CreativeLoadingWidget> with Sing
               child: child,
             );
           },
-          child: const Text(
-            '☁️',
-            style: TextStyle(fontSize: 60),
-          ),
+          child: const Text('☁️', style: TextStyle(fontSize: 60)),
         ),
         const SizedBox(height: 24),
         Text(

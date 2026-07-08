@@ -10,7 +10,10 @@ class WeatherBloc extends Bloc<WeatherEvent, WeatherState> {
     on<WeatherLocationRequested>(_onWeatherLocationRequested);
   }
 
-  Future<void> _onWeatherRequested(WeatherRequested event, Emitter<WeatherState> emit) async {
+  Future<void> _onWeatherRequested(
+    WeatherRequested event,
+    Emitter<WeatherState> emit,
+  ) async {
     emit(WeatherLoading());
     try {
       final weather = await weatherRepository.getWeather(event.cityName);
@@ -20,12 +23,15 @@ class WeatherBloc extends Bloc<WeatherEvent, WeatherState> {
     }
   }
 
-  Future<void> _onWeatherLocationRequested(WeatherLocationRequested event, Emitter<WeatherState> emit) async {
+  Future<void> _onWeatherLocationRequested(
+    WeatherLocationRequested event,
+    Emitter<WeatherState> emit,
+  ) async {
     emit(WeatherLoading());
     try {
       final weather = await weatherRepository.getWeatherByCoordinates(
-        event.latitude, 
-        event.longitude, 
+        event.latitude,
+        event.longitude,
         event.cityName,
       );
       emit(WeatherLoaded(weather));

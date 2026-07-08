@@ -17,6 +17,21 @@ class AppStrings {
   static const String weatherShowers = 'Showers';
   static const String weatherThunderstorm = 'Thunderstorm';
 
+  static const String suggestionClear =
+      'Perfect weather! Grab your sunglasses.';
+  static const String suggestionCloudy =
+      'A bit gloomy, but a great day for a walk.';
+  static const String suggestionRain =
+      'Don\'t forget your umbrella! It\'s raining.';
+  static const String suggestionSnow = 'Bundle up! It\'s snowing outside.';
+  static const String suggestionThunderstorm =
+      'Stay indoors! Thunderstorms ahead.';
+  static const String suggestionHot =
+      'It\'s hot! Stay hydrated and wear sunscreen.';
+  static const String suggestionCold = 'It\'s freezing! Wear a heavy coat.';
+  static const String suggestionFoggy = 'Drive safely! Visibility is low.';
+  static const String suggestionDefault = 'Have a great day ahead!';
+
   static const String smokeTestName = 'App smoke test';
   static const String loadingMessage = 'Looking up at the sky...';
 

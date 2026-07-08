@@ -17,9 +17,8 @@ class ClearSkiesApp extends StatelessWidget {
     return RepositoryProvider(
       create: (context) => WeatherRepository(),
       child: BlocProvider(
-        create: (context) => WeatherBloc(
-          weatherRepository: context.read<WeatherRepository>(),
-        ),
+        create: (context) =>
+            WeatherBloc(weatherRepository: context.read<WeatherRepository>()),
         child: MaterialApp(
           title: AppStrings.appName,
           debugShowCheckedModeBanner: false,

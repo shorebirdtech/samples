@@ -6,14 +6,16 @@ import 'package:clear_skies/core/core.dart';
 class WeatherRepository {
   final http.Client httpClient;
 
-  WeatherRepository({http.Client? httpClient}) : httpClient = httpClient ?? http.Client();
+  WeatherRepository({http.Client? httpClient})
+    : httpClient = httpClient ?? http.Client();
 
   Future<Weather> getWeather(String city) async {
     final geoUrl = Uri.parse(AppStrings.geoUrl(city));
     final geoRes = await httpClient.get(geoUrl);
-    
-    if (geoRes.statusCode != 200) throw Exception(AppStrings.errorLocationFetch);
-    
+
+    if (geoRes.statusCode != 200)
+      throw Exception(AppStrings.errorLocationFetch);
+
     final geoJson = jsonDecode(geoRes.body);
     if (!geoJson.containsKey('results') || geoJson['results'].isEmpty) {
       throw Exception(AppStrings.errorCityNotFound);
@@ -27,24 +29,29 @@ class WeatherRepository {
     return getWeatherByCoordinates(lat, lon, name);
   }
 
-  Future<Weather> getWeatherByCoordinates(double lat, double lon, String cityName) async {
+  Future<Weather> getWeatherByCoordinates(
+    double lat,
+    double lon,
+    String cityName,
+  ) async {
     final weatherUrl = Uri.parse(AppStrings.weatherUrl(lat, lon));
     final weatherRes = await httpClient.get(weatherUrl);
 
-    if (weatherRes.statusCode != 200) throw Exception(AppStrings.errorWeatherFetch);
-    
+    if (weatherRes.statusCode != 200)
+      throw Exception(AppStrings.errorWeatherFetch);
+
     final weatherJson = jsonDecode(weatherRes.body);
     return Weather.fromJson(cityName, weatherJson);
   }
 
   Future<List<CitySuggestion>> searchCities(String query) async {
     if (query.trim().isEmpty) return [];
-    
+
     final geoUrl = Uri.parse(AppStrings.geoSearchUrl(query.trim()));
     final geoRes = await httpClient.get(geoUrl);
-    
+
     if (geoRes.statusCode != 200) return [];
-    
+
     final geoJson = jsonDecode(geoRes.body);
     if (!geoJson.containsKey('results') || geoJson['results'].isEmpty) {
       return [];
@@ -69,7 +76,7 @@ class WeatherRepository {
         suggestions.add(suggestion);
       }
     }
-    
+
     return suggestions;
   }
 }

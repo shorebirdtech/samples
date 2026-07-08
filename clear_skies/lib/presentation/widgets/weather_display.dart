@@ -77,6 +77,41 @@ class WeatherDisplay extends StatelessWidget {
                       color: textColor.withValues(alpha: 0.8),
                     ),
                   ),
+                  const SizedBox(height: 32),
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 12,
+                    ),
+                    decoration: BoxDecoration(
+                      color: textColor.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          Icons.lightbulb_outline_rounded,
+                          color: textColor,
+                          size: 20,
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            WeatherHelper.getWeatherSuggestion(
+                              weather.weatherCode,
+                              weather.temperature,
+                            ),
+                            style: GoogleFonts.inter(
+                              color: textColor,
+                              fontSize: 14,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
                 ],
               ),
             ),

@@ -15,7 +15,11 @@ class CitySuggestion extends Equatable {
     required this.longitude,
   });
 
-  String get displayName => [name, admin1, country].where((e) => e != null && e.toString().isNotEmpty).join(', ');
+  String get displayName => [
+    name,
+    admin1,
+    country,
+  ].where((e) => e != null && e.toString().isNotEmpty).join(', ');
 
   @override
   List<Object?> get props => [name, admin1, country, latitude, longitude];
