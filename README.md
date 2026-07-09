@@ -15,7 +15,6 @@ Below is a list of the available samples. Each directory contains a specific use
 | [**Add-to-App**](./add_to_app) | Shows how to seamlessly patch a Shorebird Flutter module embedded inside a native Android or iOS application. |
 | [**Progressive Rollout Demo**](./progressive_rollout_demo) | Illustrates how to mitigate risk by performing percentage-based patch rollouts using Shorebird tracks. |
 | [**Shorebird Fintech Wallet**](./shorebird_fintech_wallet) | An enterprise-grade example of a logic-level hotfix using a decoupled Reactive Store + BLoC architecture. |
-| [**Firebase Test**](./firebase_test) | A sample app demonstrating Firebase integration with Shorebird. |
 | [**Clear Skies**](./clear_skies) | A beautifully designed, premium weather application with dynamic glassmorphic UI. |
 
 ## 🛠 Getting Started
