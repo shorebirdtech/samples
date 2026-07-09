@@ -1,9 +1,11 @@
 class AppStrings {
-  static const String appName = 'Clear Skies';
+  // TODO(Demo): Fix this typo during live patch!
+  static const String appName = 'Unclear Skies';
   static const String searchHint = 'Search city...';
 
-  static const String welcomeTitle = 'Welcome to Clear Skies';
-  static const String welcomeSubtitle = 'Discover the world\'s weather';
+  // TODO(Demo): Fix these strings during live patch!
+  static const String welcomeTitle = 'Welcome to Unclear Skies';
+  static const String welcomeSubtitle = 'Discover the world\'s worst weather';
 
   static const String errorLocationFetch = 'Failed to fetch location data';
   static const String errorCityNotFound = 'City not found';

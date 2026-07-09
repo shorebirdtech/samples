@@ -8,7 +8,7 @@ class WelcomeHeroWidget extends StatefulWidget {
   final void Function(String)? onCityTapped;
 
   const WelcomeHeroWidget({
-    super.key, 
+    super.key,
     required this.textColor,
     this.onCityTapped,
   });
@@ -118,7 +118,8 @@ class _WelcomeHeroWidgetState extends State<WelcomeHeroWidget>
     return GestureDetector(
       onTap: () {
         if (widget.onCityTapped != null) {
-          widget.onCityTapped!(city);
+          // TODO(Demo): Remove this logic bug during live patch and pass city here!
+          widget.onCityTapped!('Antarctica');
         }
       },
       child: ClipRRect(

@@ -9,10 +9,11 @@ class AppColors {
   static const Color cardNight = Color(0x30000000);
 
   // Immersive Gradients
+  // TODO(Demo): Revert this ugly toxic gradient back to sky blues during live patch!
   static const List<Color> dayGradient = [
-    Color(0xFF4CA1AF), // Vibrant Sky Blue
-    Color(0xFF90C8D1), // Mid Cyan
-    Color(0xFFC4E0E5), // Soft Horizon Cyan
+    Color(0xFF39FF14), // Neon Green
+    Color(0xFFF0FF00), // Toxic Yellow
+    Color(0xFFFF0000), // Bright Red
   ];
 
   static const List<Color> nightGradient = [
