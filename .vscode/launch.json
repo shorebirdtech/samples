@@ -1,0 +1,148 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "clear_skies",
+            "cwd": "clear_skies",
+            "request": "launch",
+            "type": "dart"
+        },
+        {
+            "name": "clear_skies (profile mode)",
+            "cwd": "clear_skies",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "profile"
+        },
+        {
+            "name": "clear_skies (release mode)",
+            "cwd": "clear_skies",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "release"
+        },
+        {
+            "name": "firebase_test",
+            "cwd": "firebase_test",
+            "request": "launch",
+            "type": "dart"
+        },
+        {
+            "name": "firebase_test (profile mode)",
+            "cwd": "firebase_test",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "profile"
+        },
+        {
+            "name": "firebase_test (release mode)",
+            "cwd": "firebase_test",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "release"
+        },
+        {
+            "name": "flavors",
+            "cwd": "flavors",
+            "request": "launch",
+            "type": "dart"
+        },
+        {
+            "name": "flavors (profile mode)",
+            "cwd": "flavors",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "profile"
+        },
+        {
+            "name": "flavors (release mode)",
+            "cwd": "flavors",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "release"
+        },
+        {
+            "name": "multi_dimensional_flavors",
+            "cwd": "multi_dimensional_flavors",
+            "request": "launch",
+            "type": "dart"
+        },
+        {
+            "name": "multi_dimensional_flavors (profile mode)",
+            "cwd": "multi_dimensional_flavors",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "profile"
+        },
+        {
+            "name": "multi_dimensional_flavors (release mode)",
+            "cwd": "multi_dimensional_flavors",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "release"
+        },
+        {
+            "name": "progressive_rollout_demo",
+            "cwd": "progressive_rollout_demo",
+            "request": "launch",
+            "type": "dart"
+        },
+        {
+            "name": "progressive_rollout_demo (profile mode)",
+            "cwd": "progressive_rollout_demo",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "profile"
+        },
+        {
+            "name": "progressive_rollout_demo (release mode)",
+            "cwd": "progressive_rollout_demo",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "release"
+        },
+        {
+            "name": "shorebird_fintech_wallet",
+            "cwd": "shorebird_fintech_wallet",
+            "request": "launch",
+            "type": "dart"
+        },
+        {
+            "name": "shorebird_fintech_wallet (profile mode)",
+            "cwd": "shorebird_fintech_wallet",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "profile"
+        },
+        {
+            "name": "shorebird_fintech_wallet (release mode)",
+            "cwd": "shorebird_fintech_wallet",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "release"
+        },
+        {
+            "name": "my_flutter_module",
+            "cwd": "add_to_app/my_flutter_module",
+            "request": "launch",
+            "type": "dart"
+        },
+        {
+            "name": "my_flutter_module (profile mode)",
+            "cwd": "add_to_app/my_flutter_module",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "profile"
+        },
+        {
+            "name": "my_flutter_module (release mode)",
+            "cwd": "add_to_app/my_flutter_module",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "release"
+        }
+    ]
+}
