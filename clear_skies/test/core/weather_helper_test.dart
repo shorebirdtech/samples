@@ -15,8 +15,8 @@ void main() {
       });
 
       test('returns fog icon for 45, 48', () {
-        expect(WeatherHelper.getWeatherIcon(45), '🌫️');
-        expect(WeatherHelper.getWeatherIcon(48), '🌫️');
+        expect(WeatherHelper.getWeatherIcon(45), '🌁');
+        expect(WeatherHelper.getWeatherIcon(48), '🌁');
       });
 
       test('returns rain icon for 51, 53, 55, 61, 63, 65', () {
