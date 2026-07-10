@@ -39,34 +39,16 @@ This guide provides step-by-step instructions for the team on stage to execute t
 Open your IDE (VS Code / Android Studio) and use **Global Search** for the keyword:
 👉 `TODO(Demo)`
 
-This will instantly take you to the three bugs. Revert them back to their correct state:
+This will instantly take you to the three bugs. To fix them, simply uncomment the `CORRECT VERSION` block and comment out or delete the `BUG VERSION` block:
 
 - **Bug 1: `lib/core/constants/app_strings.dart`**
-  ```diff
-  - static const String appName = 'Unclear Skies';
-  + static const String appName = 'Clear Skies';
-  
-  - static const String welcomeTitle = 'Welcome to Unclear Skies';
-  - static const String welcomeSubtitle = 'Discover the world\'s worst weather';
-  + static const String welcomeTitle = 'Welcome to Clear Skies';
-  + static const String welcomeSubtitle = 'Discover the world\'s weather';
-  ```
+  Uncomment the correct strings for `appName`, `welcomeTitle`, and `welcomeSubtitle` and comment out the buggy ones.
 
 - **Bug 2: `lib/core/constants/app_colors.dart`**
-  ```diff
-  - Color(0xFF39FF14), // Neon Green
-  - Color(0xFFF0FF00), // Toxic Yellow
-  - Color(0xFFFF0000), // Bright Red
-  + Color(0xFF4CA1AF), // Vibrant Sky Blue
-  + Color(0xFF90C8D1), // Mid Cyan
-  + Color(0xFFC4E0E5), // Soft Horizon Cyan
-  ```
+  Uncomment the beautiful sky blue `dayGradient` and comment out the toxic green/red gradient.
 
 - **Bug 3: `lib/features/weather/ui/widgets/welcome_hero_widget.dart`**
-  ```diff
-  - widget.onCityTapped!('Antarctica');
-  + widget.onCityTapped!(city);
-  ```
+  Uncomment the correct `widget.onCityTapped!(city)` and comment out the one hardcoded to `'Antarctica'`.
 
 ### 3. Push the Patch via Shorebird
 In your terminal, run the patch command to send the fix over the air:
@@ -82,5 +64,5 @@ shorebird patch android
 3. **Boom!** The toxic green is gone, the title is "Clear Skies", and Tokyo brings up Tokyo's weather. No app store update required!
 
 > [!TIP]
-> **Need to run the demo multiple times?** 
-> If you need to practice or do the demo again for a different audience, you can easily downgrade the app on the device by uninstalling it and re-running the `adb install` command with the original buggy APK (Step 1.2), then reverting your local code changes back to the buggy state.
+> **Resetting for the Next Booth Demo Loop 🔁** 
+> Since this will be demoed continuously at the booth throughout the day, resetting is simple. Just uninstall the app on the device (or clear its data) and re-install the original buggy APK (Step 1.2) to wipe out the downloaded Shorebird patch. Then, revert your local IDE code changes back to the `BUG VERSION` state, and you're ready for the next person!

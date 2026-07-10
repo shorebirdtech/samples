@@ -119,6 +119,11 @@ class _WelcomeHeroWidgetState extends State<WelcomeHeroWidget>
       onTap: () {
         if (widget.onCityTapped != null) {
           // TODO(Demo): Remove this logic bug during live patch and pass city here!
+
+          // -- CORRECT VERSION --
+          // widget.onCityTapped!(city);
+
+          // -- BUG VERSION --
           widget.onCityTapped!('Antarctica');
         }
       },
