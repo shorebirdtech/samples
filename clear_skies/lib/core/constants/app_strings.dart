@@ -1,9 +1,17 @@
 class AppStrings {
   // TODO(Demo): Fix this typo during live patch!
+  // -- CORRECT VERSION --
+  // static const String appName = 'Clear Skies';
+  // -- BUG VERSION --
   static const String appName = 'Unclear Skies';
+
   static const String searchHint = 'Search city...';
 
   // TODO(Demo): Fix these strings during live patch!
+  // -- CORRECT VERSION --
+  // static const String welcomeTitle = 'Welcome to Clear Skies';
+  // static const String welcomeSubtitle = 'Discover the world\'s weather';
+  // -- BUG VERSION --
   static const String welcomeTitle = 'Welcome to Unclear Skies';
   static const String welcomeSubtitle = 'Discover the world\'s worst weather';
 
