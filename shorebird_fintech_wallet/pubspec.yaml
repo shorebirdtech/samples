@@ -41,7 +41,7 @@ dependencies:
   injectable: ^3.0.0
   dio: ^5.10.0
   equatable: ^2.1.0
-  google_fonts: ^8.0.2
+  google_fonts: ^8.2.0
   intl: ^0.20.3
   json_annotation: ^4.11.0
 
