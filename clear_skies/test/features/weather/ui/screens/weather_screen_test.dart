@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:mocktail/mocktail.dart';
@@ -78,9 +78,8 @@ void main() {
     testWidgets('renders CreativeLoadingWidget when weather is loading', (
       WidgetTester tester,
     ) async {
-      when(
-        () => mockWeatherBloc.state,
-      ).thenReturn(const WeatherState(status: WeatherStatus.loading));
+      when(() => mockWeatherBloc.state)
+          .thenReturn(const WeatherState(status: WeatherStatus.loading));
 
       await tester.pumpWidget(createWidgetUnderTest());
 
@@ -138,17 +137,15 @@ void main() {
       await tester.tap(find.text('London'));
       await tester.pump();
 
-      verify(
-        () => mockWeatherBloc.add(const WeatherRequested('London')),
-      ).called(1);
+      verify(() => mockWeatherBloc.add(const WeatherRequested('London')))
+          .called(1);
     });
 
     testWidgets('shows loading for favorites if favorites are loading', (
       WidgetTester tester,
     ) async {
-      when(
-        () => mockFavoritesBloc.state,
-      ).thenReturn(const FavoritesState(status: FavoritesStatus.loading));
+      when(() => mockFavoritesBloc.state)
+          .thenReturn(const FavoritesState(status: FavoritesStatus.loading));
 
       await tester.pumpWidget(createWidgetUnderTest());
 

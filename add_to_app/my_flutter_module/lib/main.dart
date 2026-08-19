@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:shorebird_code_push/shorebird_code_push.dart';
 
 void main() => runApp(const MyApp());
@@ -110,9 +110,7 @@ class _MyHomePageState extends State<MyHomePage> {
               style: Theme.of(context).textTheme.titleMedium,
             ),
             const SizedBox(height: 16),
-            const Text(
-              'Really fancy patched Flutter Module:',
-            ),
+            const Text('Really fancy patched Flutter Module:'),
             Text(
               '$_counter',
               style: Theme.of(context).textTheme.headlineMedium,

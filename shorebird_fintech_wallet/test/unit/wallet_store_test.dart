@@ -18,21 +18,18 @@ void main() {
       expect(store.transactions.length, 2);
     });
 
-    test(
-      'updating balance and transactions adds a new record and decreases balance',
-      () {
-        final initialBalance = store.balance;
-        const amount = 100.0;
-        const fee = 5.0;
+    test('updating balance and transactions adds a new record and decreases balance', () {
+      final initialBalance = store.balance;
+      const amount = 100.0;
+      const fee = 5.0;
 
-        store.updateBalanceAndTransactions(amount, fee, true);
+      store.updateBalanceAndTransactions(amount, fee, true);
 
-        expect(store.balance, initialBalance - (amount + fee));
-        expect(store.transactions.length, 3);
-        expect(store.transactions.first.amount, amount);
-        expect(store.transactions.first.fee, fee);
-      },
-    );
+      expect(store.balance, initialBalance - (amount + fee));
+      expect(store.transactions.length, 3);
+      expect(store.transactions.first.amount, amount);
+      expect(store.transactions.first.fee, fee);
+    });
 
     test('notifies listeners when balance is updated', () {
       int count = 0;

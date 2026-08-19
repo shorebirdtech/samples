@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:shorebird_fintech_wallet/core/app_theme.dart';
 import 'package:shorebird_fintech_wallet/core/di/injection.dart';
 import 'package:shorebird_fintech_wallet/store/wallet_store/wallet_store.dart';

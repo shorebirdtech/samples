@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+
 import 'daily_forecast.dart';
 
 class Weather extends Equatable {

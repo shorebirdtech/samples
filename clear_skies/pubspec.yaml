@@ -19,7 +19,7 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 version: 0.0.1+1
 
 environment:
-  sdk: ^3.12.2
+  sdk: ^3.13.0
 
 # Dependencies specify other packages that your package needs in order to work.
 # To automatically upgrade your package dependencies to the latest versions
@@ -40,6 +40,7 @@ dependencies:
   geolocator: ^14.0.3
   geocoding: ^5.0.0
 
+  material_ui: any
 dev_dependencies:
   flutter_test:
     sdk: flutter

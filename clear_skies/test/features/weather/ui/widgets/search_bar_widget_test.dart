@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:mocktail/mocktail.dart';
@@ -39,9 +39,8 @@ void main() {
     testWidgets('renders TextField and no back button initially', (
       WidgetTester tester,
     ) async {
-      when(
-        () => mockWeatherBloc.state,
-      ).thenReturn(const WeatherState(status: WeatherStatus.initial));
+      when(() => mockWeatherBloc.state)
+          .thenReturn(const WeatherState(status: WeatherStatus.initial));
 
       await tester.pumpWidget(createWidgetUnderTest());
 
@@ -52,9 +51,8 @@ void main() {
     testWidgets('renders back button when status is loaded', (
       WidgetTester tester,
     ) async {
-      when(
-        () => mockWeatherBloc.state,
-      ).thenReturn(const WeatherState(status: WeatherStatus.loaded));
+      when(() => mockWeatherBloc.state)
+          .thenReturn(const WeatherState(status: WeatherStatus.loaded));
 
       await tester.pumpWidget(createWidgetUnderTest());
 
@@ -64,26 +62,23 @@ void main() {
     testWidgets('submitting text adds WeatherRequested event', (
       WidgetTester tester,
     ) async {
-      when(
-        () => mockWeatherBloc.state,
-      ).thenReturn(const WeatherState(status: WeatherStatus.initial));
+      when(() => mockWeatherBloc.state)
+          .thenReturn(const WeatherState(status: WeatherStatus.initial));
 
       await tester.pumpWidget(createWidgetUnderTest());
 
       await tester.enterText(find.byType(TextField), 'London');
       await tester.testTextInput.receiveAction(TextInputAction.done);
 
-      verify(
-        () => mockWeatherBloc.add(const WeatherRequested('London')),
-      ).called(1);
+      verify(() => mockWeatherBloc.add(const WeatherRequested('London')))
+          .called(1);
     });
 
     testWidgets(
       'typing shows autocomplete suggestions and tapping one adds WeatherLocationRequested event',
       (WidgetTester tester) async {
-        when(
-          () => mockWeatherBloc.state,
-        ).thenReturn(const WeatherState(status: WeatherStatus.initial));
+        when(() => mockWeatherBloc.state)
+            .thenReturn(const WeatherState(status: WeatherStatus.initial));
 
         final suggestion = CitySuggestion(
           name: 'Paris',
@@ -93,9 +88,8 @@ void main() {
           longitude: 2.35,
         );
 
-        when(
-          () => mockWeatherRepository.searchCities('Par'),
-        ).thenAnswer((_) async => [suggestion]);
+        when(() => mockWeatherRepository.searchCities('Par'))
+            .thenAnswer((_) async => [suggestion]);
 
         await tester.pumpWidget(createWidgetUnderTest());
 
@@ -123,9 +117,8 @@ void main() {
     testWidgets(
       'clicking back button clears text and adds ResetWeather event',
       (WidgetTester tester) async {
-        when(
-          () => mockWeatherBloc.state,
-        ).thenReturn(const WeatherState(status: WeatherStatus.loaded));
+        when(() => mockWeatherBloc.state)
+            .thenReturn(const WeatherState(status: WeatherStatus.loaded));
 
         await tester.pumpWidget(createWidgetUnderTest());
 
