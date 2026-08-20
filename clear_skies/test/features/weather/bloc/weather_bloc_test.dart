@@ -38,9 +38,8 @@ void main() {
     blocTest<WeatherBloc, WeatherState>(
       'emits [loading, loaded] when WeatherRequested succeeds',
       build: () {
-        when(
-          () => mockWeatherRepository.getWeather('London'),
-        ).thenAnswer((_) async => mockWeather);
+        when(() => mockWeatherRepository.getWeather('London'))
+            .thenAnswer((_) async => mockWeather);
         return weatherBloc;
       },
       act: (bloc) => bloc.add(const WeatherRequested('London')),
@@ -56,9 +55,8 @@ void main() {
     blocTest<WeatherBloc, WeatherState>(
       'emits [loading, error] when WeatherRequested fails',
       build: () {
-        when(
-          () => mockWeatherRepository.getWeather('UnknownCity'),
-        ).thenThrow(Exception(AppStrings.errorCityNotFound));
+        when(() => mockWeatherRepository.getWeather('UnknownCity'))
+            .thenThrow(Exception(AppStrings.errorCityNotFound));
         return weatherBloc;
       },
       act: (bloc) => bloc.add(const WeatherRequested('UnknownCity')),

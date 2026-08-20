@@ -1,5 +1,5 @@
-import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:material_ui/material_ui.dart';
 
 class AppTheme {
   static const Color primaryColor = Color(0xFF1E88E5);
@@ -27,9 +27,22 @@ class AppTheme {
         onSurface: textColor,
         onError: Colors.white,
       ),
-      textTheme: GoogleFonts.outfitTextTheme().apply(
-        bodyColor: textColor,
-        displayColor: textColor,
+      textTheme: TextTheme(
+        displayLarge: GoogleFonts.outfit(color: textColor),
+        displayMedium: GoogleFonts.outfit(color: textColor),
+        displaySmall: GoogleFonts.outfit(color: textColor),
+        headlineLarge: GoogleFonts.outfit(color: textColor),
+        headlineMedium: GoogleFonts.outfit(color: textColor),
+        headlineSmall: GoogleFonts.outfit(color: textColor),
+        titleLarge: GoogleFonts.outfit(color: textColor),
+        titleMedium: GoogleFonts.outfit(color: textColor),
+        titleSmall: GoogleFonts.outfit(color: textColor),
+        bodyLarge: GoogleFonts.outfit(color: textColor),
+        bodyMedium: GoogleFonts.outfit(color: textColor),
+        bodySmall: GoogleFonts.outfit(color: textColor),
+        labelLarge: GoogleFonts.outfit(color: textColor),
+        labelMedium: GoogleFonts.outfit(color: textColor),
+        labelSmall: GoogleFonts.outfit(color: textColor),
       ),
       appBarTheme: AppBarTheme(
         backgroundColor: Colors.transparent,

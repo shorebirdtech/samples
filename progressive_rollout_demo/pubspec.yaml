@@ -5,8 +5,8 @@ publish_to: "none"
 version: 1.0.0+1
 
 environment:
-  sdk: ">=3.5.0 <4.0.0"
-  flutter: ">=3.44.0 <4.0.0"
+  sdk: ">=3.13.0 <4.0.0"
+  flutter: ">=3.47.0 <4.0.0"
 
 dependencies:
   cloud_firestore: ^6.8.0
@@ -17,6 +17,7 @@ dependencies:
   shared_preferences: ^2.3.3
   shorebird_code_push: ^2.0.7
 
+  material_ui: any
 dev_dependencies:
   flutter_test:
     sdk: flutter

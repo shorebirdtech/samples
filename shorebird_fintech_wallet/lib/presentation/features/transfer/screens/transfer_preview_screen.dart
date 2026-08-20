@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shorebird_fintech_wallet/core/app_strings.dart';
 import 'package:shorebird_fintech_wallet/core/app_theme.dart';
@@ -81,12 +81,12 @@ class TransferPreviewScreen extends StatelessWidget {
                   ElevatedButton(
                     onPressed: () {
                       context.read<TransferBloc>().add(
-                            ConfirmTransfer(
-                              amount: amount,
-                              fee: fee,
-                              isInternal: isInternal,
-                            ),
-                          );
+                        ConfirmTransfer(
+                          amount: amount,
+                          fee: fee,
+                          isInternal: isInternal,
+                        ),
+                      );
                     },
                     child: const Text(AppStrings.confirmTransfer),
                   ),

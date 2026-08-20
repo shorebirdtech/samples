@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 class AppColors {
   static const Color backgroundDay = Color(0xFFE0F7FA);

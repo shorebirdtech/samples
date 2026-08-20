@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:mocktail/mocktail.dart';
@@ -53,10 +53,7 @@ void main() {
       expect(find.text('London'), findsOneWidget);
 
       // Find temperature (15.0 rounded -> 15°)
-      expect(
-        find.text('15°'),
-        findsWidgets,
-      ); // Can be found multiple times depending on UI structure, but we at least expect it
+      expect(find.text('15°'), findsWidgets); // Can be found multiple times depending on UI structure, but we at least expect it
 
       // Find humidity
       expect(find.text('50%'), findsOneWidget);
@@ -96,9 +93,8 @@ void main() {
         await tester.pumpWidget(createWidgetUnderTest());
         await tester.tap(find.byIcon(Icons.favorite_rounded));
 
-        verify(
-          () => mockFavoritesBloc.add(const RemoveFavorite('London')),
-        ).called(1);
+        verify(() => mockFavoritesBloc.add(const RemoveFavorite('London')))
+            .called(1);
       },
     );
 

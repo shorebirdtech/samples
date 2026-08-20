@@ -1,0 +1,20 @@
+# Flutter / Dart build artifacts
+build/
+.dart_tool/
+.packages
+.pub-cache/
+.pub/
+.flutter-plugins
+.flutter-plugins-dependencies
+
+# IDE and OS
+.DS_Store
+.idea/
+.vscode/
+*.swp
+*.swo
+*.xcuserdata
+**/swiftpm/
+**/xcshareddata/swiftpm/
+configuration/
+DerivedData/

@@ -73,30 +73,24 @@ void main() {
       expect(bloc.state, isA<TransferInitial>());
     });
 
-    test(
-      'UpdateTransferValues with zero amount emits TransferInitial from Preview',
-      () async {
-        bloc.add(const UpdateTransferValues(amount: 100.0, isInternal: true));
-        await expectLater(bloc.stream, emits(isA<TransferPreview>()));
+    test('UpdateTransferValues with zero amount emits TransferInitial from Preview', () async {
+      bloc.add(const UpdateTransferValues(amount: 100.0, isInternal: true));
+      await expectLater(bloc.stream, emits(isA<TransferPreview>()));
 
-        final future = expectLater(bloc.stream, emits(isA<TransferInitial>()));
-        bloc.add(const UpdateTransferValues(amount: 0.0, isInternal: true));
-        await future;
-        expect(bloc.state, isA<TransferInitial>());
-      },
-    );
+      final future = expectLater(bloc.stream, emits(isA<TransferInitial>()));
+      bloc.add(const UpdateTransferValues(amount: 0.0, isInternal: true));
+      await future;
+      expect(bloc.state, isA<TransferInitial>());
+    });
 
-    test(
-      'UpdateTransferValues with negative amount emits TransferInitial from Preview',
-      () async {
-        bloc.add(const UpdateTransferValues(amount: 100.0, isInternal: true));
-        await expectLater(bloc.stream, emits(isA<TransferPreview>()));
+    test('UpdateTransferValues with negative amount emits TransferInitial from Preview', () async {
+      bloc.add(const UpdateTransferValues(amount: 100.0, isInternal: true));
+      await expectLater(bloc.stream, emits(isA<TransferPreview>()));
 
-        final future = expectLater(bloc.stream, emits(isA<TransferInitial>()));
-        bloc.add(const UpdateTransferValues(amount: -50.0, isInternal: true));
-        await future;
-        expect(bloc.state, isA<TransferInitial>());
-      },
-    );
+      final future = expectLater(bloc.stream, emits(isA<TransferInitial>()));
+      bloc.add(const UpdateTransferValues(amount: -50.0, isInternal: true));
+      await future;
+      expect(bloc.state, isA<TransferInitial>());
+    });
   });
 }

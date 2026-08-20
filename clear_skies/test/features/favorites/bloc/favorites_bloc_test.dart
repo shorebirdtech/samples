@@ -45,12 +45,10 @@ void main() {
     blocTest<FavoritesBloc, FavoritesState>(
       'emits [loading, loaded] when LoadFavorites succeeds',
       build: () {
-        when(
-          () => mockFavoritesRepository.getFavorites(),
-        ).thenAnswer((_) async => ['London']);
-        when(
-          () => mockWeatherRepository.getWeather('London'),
-        ).thenAnswer((_) async => mockWeather);
+        when(() => mockFavoritesRepository.getFavorites())
+            .thenAnswer((_) async => ['London']);
+        when(() => mockWeatherRepository.getWeather('London'))
+            .thenAnswer((_) async => mockWeather);
         return favoritesBloc;
       },
       act: (bloc) => bloc.add(LoadFavorites()),
@@ -70,12 +68,10 @@ void main() {
     blocTest<FavoritesBloc, FavoritesState>(
       'emits [loading, error] when LoadFavorites fails getting data from network',
       build: () {
-        when(
-          () => mockFavoritesRepository.getFavorites(),
-        ).thenAnswer((_) async => ['London']);
-        when(
-          () => mockWeatherRepository.getWeather('London'),
-        ).thenThrow(Exception('Network Error'));
+        when(() => mockFavoritesRepository.getFavorites())
+            .thenAnswer((_) async => ['London']);
+        when(() => mockWeatherRepository.getWeather('London'))
+            .thenThrow(Exception('Network Error'));
         return favoritesBloc;
       },
       act: (bloc) => bloc.add(LoadFavorites()),
@@ -94,12 +90,10 @@ void main() {
     blocTest<FavoritesBloc, FavoritesState>(
       'emits updated list when AddFavorite is called',
       build: () {
-        when(
-          () => mockFavoritesRepository.getFavorites(),
-        ).thenAnswer((_) async => []);
-        when(
-          () => mockFavoritesRepository.saveFavorites(any()),
-        ).thenAnswer((_) async {});
+        when(() => mockFavoritesRepository.getFavorites())
+            .thenAnswer((_) async => []);
+        when(() => mockFavoritesRepository.saveFavorites(any()))
+            .thenAnswer((_) async {});
         return favoritesBloc;
       },
       seed: () =>
@@ -112,21 +106,18 @@ void main() {
         ),
       ],
       verify: (_) {
-        verify(
-          () => mockFavoritesRepository.saveFavorites(['London']),
-        ).called(1);
+        verify(() => mockFavoritesRepository.saveFavorites(['London']))
+            .called(1);
       },
     );
 
     blocTest<FavoritesBloc, FavoritesState>(
       'emits updated list when RemoveFavorite is called',
       build: () {
-        when(
-          () => mockFavoritesRepository.getFavorites(),
-        ).thenAnswer((_) async => ['London']);
-        when(
-          () => mockFavoritesRepository.saveFavorites(any()),
-        ).thenAnswer((_) async {});
+        when(() => mockFavoritesRepository.getFavorites())
+            .thenAnswer((_) async => ['London']);
+        when(() => mockFavoritesRepository.saveFavorites(any()))
+            .thenAnswer((_) async {});
         return favoritesBloc;
       },
       seed: () => FavoritesState(

@@ -1,4 +1,5 @@
 import 'dart:convert';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
 import 'package:mocktail/mocktail.dart';
@@ -82,9 +83,8 @@ void main() {
       });
 
       test('throws Exception when geo fetch fails (non-200)', () async {
-        when(
-          () => mockHttpClient.get(Uri.parse(geoUrlStr)),
-        ).thenAnswer((_) async => http.Response('Error', 404));
+        when(() => mockHttpClient.get(Uri.parse(geoUrlStr)))
+            .thenAnswer((_) async => http.Response('Error', 404));
 
         expect(
           () => weatherRepository.getWeather(city),

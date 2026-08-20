@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shorebird_fintech_wallet/core/app_strings.dart';
 import 'package:shorebird_fintech_wallet/core/di/injection.dart';
@@ -30,8 +30,8 @@ class _TransferScreenState extends State<TransferScreen> {
     if (amount <= 0) return;
 
     context.read<TransferBloc>().add(
-          UpdateTransferValues(amount: amount, isInternal: _isInternal.value),
-        );
+      UpdateTransferValues(amount: amount, isInternal: _isInternal.value),
+    );
   }
 
   @override
