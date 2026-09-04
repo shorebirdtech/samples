@@ -1,0 +1,29 @@
+name: shorebird_runner
+description: "Patch Rush — A Shorebird booth arcade game. Dodge bugs, collect patches, keep flying!"
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.5.0
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  # Game engine — web-compatible, Flutter-native
+  flame: ^1.38.2
+
+  # High score persistence (localStorage on web)
+  shared_preferences: ^2.3.2
+  web_socket_channel: ^3.0.3
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^4.0.0
+
+flutter:
+  uses-material-design: true
+
+  assets:
+    - assets/images/

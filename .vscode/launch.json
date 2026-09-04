@@ -143,6 +143,29 @@
             "request": "launch",
             "type": "dart",
             "flutterMode": "release"
+        },
+        {
+            "name": "🎮 Patch Rush (shorebird_runner)",
+            "cwd": "shorebird_runner",
+            "request": "launch",
+            "type": "dart",
+            "deviceId": "chrome"
+        },
+        {
+            "name": "🎮 Patch Rush (profile mode)",
+            "cwd": "shorebird_runner",
+            "request": "launch",
+            "type": "dart",
+            "deviceId": "chrome",
+            "flutterMode": "profile"
+        },
+        {
+            "name": "🎮 Patch Rush (release mode)",
+            "cwd": "shorebird_runner",
+            "request": "launch",
+            "type": "dart",
+            "deviceId": "chrome",
+            "flutterMode": "release"
         }
     ]
 }

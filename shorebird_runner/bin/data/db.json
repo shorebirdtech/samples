@@ -1,0 +1,87 @@
+{
+  "hall_of_fame": [
+    {
+      "name": "SkyWalker",
+      "score": 92,
+      "patches": 5,
+      "timestamp": "2026-09-04T17:36:22.917961"
+    },
+    {
+      "name": "NeoRunner",
+      "score": 33,
+      "patches": 1,
+      "timestamp": "2026-09-04T17:32:27.929537"
+    },
+    {
+      "name": "NeoRunner1",
+      "score": 24,
+      "patches": 1,
+      "timestamp": "2026-09-04T17:32:27.929701"
+    },
+    {
+      "name": "SkyWalker",
+      "score": 2,
+      "patches": 0,
+      "timestamp": "2026-09-04T17:35:19.869309"
+    }
+  ],
+  "matches": [
+    {
+      "roomCode": "RUSH",
+      "timestamp": "2026-09-04T17:36:22.918072",
+      "winner": "SkyWalker",
+      "rankings": [
+        {
+          "rank": 1,
+          "id": "p_1788523481177_314",
+          "name": "SkyWalker",
+          "skin": "goldPhoenix",
+          "score": 92,
+          "patches": 5,
+          "level": 1
+        }
+      ]
+    },
+    {
+      "roomCode": "RUSH",
+      "timestamp": "2026-09-04T17:35:19.869418",
+      "winner": "SkyWalker",
+      "rankings": [
+        {
+          "rank": 1,
+          "id": "p_1788523481177_314",
+          "name": "SkyWalker",
+          "skin": "goldPhoenix",
+          "score": 2,
+          "patches": 0,
+          "level": 1
+        }
+      ]
+    },
+    {
+      "roomCode": "NEON",
+      "timestamp": "2026-09-04T17:32:27.929963",
+      "winner": "NeoRunner",
+      "rankings": [
+        {
+          "rank": 1,
+          "id": "p_1788523313454_696",
+          "name": "NeoRunner",
+          "skin": "violetRaven",
+          "score": 33,
+          "patches": 1,
+          "level": 1
+        },
+        {
+          "rank": 2,
+          "id": "p_1788523333195_975",
+          "name": "NeoRunner1",
+          "skin": "violetRaven",
+          "score": 24,
+          "patches": 1,
+          "level": 1
+        }
+      ]
+    }
+  ]
+}

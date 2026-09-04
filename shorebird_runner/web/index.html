@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <base href="$FLUTTER_BASE_HREF">
+  <meta charset="UTF-8">
+  <meta content="IE=Edge" http-equiv="X-UA-Compatible">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+  <meta name="description" content="Patch Rush — Dodge bugs, collect patches, keep flying! A Shorebird arcade game.">
+  <meta name="theme-color" content="#0A0E1A">
+
+  <!-- iOS meta tags & icons -->
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Patch Rush">
+  <link rel="apple-touch-icon" href="icons/Icon-192.png">
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/png" href="favicon.png" />
+
+  <title>Patch Rush — by Shorebird</title>
+  <link rel="manifest" href="manifest.json">
+
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      width: 100%;
+      height: 100%;
+      background: #0A0E1A;
+      overflow: hidden;
+    }
+
+    /* Custom loading screen */
+    #loading {
+      position: fixed;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: #0A0E1A;
+      z-index: 9999;
+      gap: 24px;
+    }
+
+    #loading-title {
+      font-family: system-ui, sans-serif;
+      font-size: 28px;
+      font-weight: 900;
+      letter-spacing: 6px;
+      background: linear-gradient(90deg, #00D4FF, #8B5CF6);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    #loading-bar-bg {
+      width: 240px;
+      height: 4px;
+      background: #1A2040;
+      border-radius: 2px;
+      overflow: hidden;
+    }
+
+    #loading-bar {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, #00D4FF, #8B5CF6);
+      border-radius: 2px;
+      transition: width 0.3s ease;
+    }
+
+    #loading-sub {
+      font-family: system-ui, sans-serif;
+      font-size: 12px;
+      letter-spacing: 3px;
+      color: #4A5568;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="loading">
+    <div id="loading-title">PATCH RUSH</div>
+    <div id="loading-bar-bg">
+      <div id="loading-bar"></div>
+    </div>
+    <div id="loading-sub">by Shorebird · Loading...</div>
+  </div>
+
+  <script>
+    // Animate loading bar up to 90% while Flutter initialises
+    let progress = 0;
+    const bar = document.getElementById('loading-bar');
+    const interval = setInterval(() => {
+      progress = Math.min(progress + Math.random() * 15, 90);
+      bar.style.width = progress + '%';
+    }, 200);
+
+    // flutter-first-frame is the real Flutter web event fired after the
+    // engine renders its first frame — this is what actually dismisses the
+    // loading screen.
+    window.addEventListener('flutter-first-frame', function () {
+      clearInterval(interval);
+      bar.style.width = '100%';
+      setTimeout(() => {
+        const loading = document.getElementById('loading');
+        loading.style.opacity = '0';
+        loading.style.transition = 'opacity 0.5s ease';
+        setTimeout(() => loading.remove(), 500);
+      }, 300);
+    });
+    // Web Audio arcade sound synthesizer
+    (function () {
+      let audioCtx = null;
+      function getAudioContext() {
+        if (!audioCtx) {
+          const AudioContext = window.AudioContext || window.webkitAudioContext;
+          if (AudioContext) audioCtx = new AudioContext();
+        }
+        if (audioCtx && audioCtx.state === 'suspended') {
+          audioCtx.resume();
+        }
+        return audioCtx;
+      }
+
+      window.playArcadeSound = function (type) {
+        try {
+          const ctx = getAudioContext();
+          if (!ctx) return;
+          const now = ctx.currentTime;
+
+          if (type === 'switch') {
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(320, now);
+            osc.frequency.exponentialRampToValueAtTime(620, now + 0.07);
+            gain.gain.setValueAtTime(0.12, now);
+            gain.gain.linearRampToValueAtTime(0.001, now + 0.07);
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+            osc.start(now);
+            osc.stop(now + 0.07);
+          } else if (type === 'patch') {
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.type = 'triangle';
+            osc.frequency.setValueAtTime(987, now); // B5
+            osc.frequency.setValueAtTime(1318, now + 0.07); // E6
+            gain.gain.setValueAtTime(0.18, now);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + 0.22);
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+            osc.start(now);
+            osc.stop(now + 0.22);
+          } else if (type === 'combo') {
+            [523.25, 659.25, 783.99, 1046.5].forEach((freq, i) => {
+              const osc = ctx.createOscillator();
+              const gain = ctx.createGain();
+              osc.type = 'square';
+              osc.frequency.setValueAtTime(freq, now + i * 0.05);
+              gain.gain.setValueAtTime(0.08, now + i * 0.05);
+              gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.05 + 0.15);
+              osc.connect(gain);
+              gain.connect(ctx.destination);
+              osc.start(now + i * 0.05);
+              osc.stop(now + i * 0.05 + 0.15);
+            });
+          } else if (type === 'levelup') {
+            [392.00, 523.25, 659.25, 783.99, 1046.50, 1318.51].forEach((freq, i) => {
+              const osc = ctx.createOscillator();
+              const gain = ctx.createGain();
+              osc.type = 'triangle';
+              osc.frequency.setValueAtTime(freq, now + i * 0.08);
+              gain.gain.setValueAtTime(0.2, now + i * 0.08);
+              gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.08 + 0.3);
+              osc.connect(gain);
+              gain.connect(ctx.destination);
+              osc.start(now + i * 0.08);
+              osc.stop(now + i * 0.08 + 0.3);
+            });
+          } else if (type === 'jump') {
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.type = 'square';
+            osc.frequency.setValueAtTime(175, now);
+            osc.frequency.exponentialRampToValueAtTime(420, now + 0.14);
+            gain.gain.setValueAtTime(0.12, now);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + 0.14);
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+            osc.start(now);
+            osc.stop(now + 0.14);
+          } else if (type === 'miss') {
+            [110, 116].forEach(freq => {
+              const osc = ctx.createOscillator();
+              const gain = ctx.createGain();
+              osc.type = 'sawtooth';
+              osc.frequency.setValueAtTime(freq, now);
+              gain.gain.setValueAtTime(0.18, now);
+              gain.gain.exponentialRampToValueAtTime(0.001, now + 0.25);
+              osc.connect(gain);
+              gain.connect(ctx.destination);
+              osc.start(now);
+              osc.stop(now + 0.25);
+            });
+          } else if (type === 'stomp') {
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.type = 'triangle';
+            osc.frequency.setValueAtTime(380, now);
+            osc.frequency.exponentialRampToValueAtTime(120, now + 0.08);
+            gain.gain.setValueAtTime(0.2, now);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + 0.08);
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+            osc.start(now);
+            osc.stop(now + 0.08);
+          } else if (type === 'crash') {
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.type = 'sawtooth';
+            osc.frequency.setValueAtTime(150, now);
+            osc.frequency.exponentialRampToValueAtTime(30, now + 0.35);
+            gain.gain.setValueAtTime(0.35, now);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + 0.35);
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+            osc.start(now);
+            osc.stop(now + 0.35);
+          }
+        } catch (e) {
+          // ignore audio errors
+        }
+      };
+    })();
+  </script>
+
+  <script src="flutter_bootstrap.js" async></script>
+</body>
+
+</html>
