@@ -66,18 +66,22 @@ class LaneWorld extends Component {
           _curHorizonColor.withValues(alpha: 0.55),
           const Color(0xFF071829),
         ],
-      ).createShader(const Rect.fromLTWH(0, cy - 80, GameConfig.designWidth, 80));
+      ).createShader(
+          const Rect.fromLTWH(0, cy - 80, GameConfig.designWidth, 80));
 
     final hillPath = Path()
       ..moveTo(0, cy)
-      ..quadraticBezierTo(GameConfig.designWidth * 0.25, cy - 65, GameConfig.designWidth * 0.5, cy - 25)
-      ..quadraticBezierTo(GameConfig.designWidth * 0.75, cy - 75, GameConfig.designWidth, cy)
+      ..quadraticBezierTo(GameConfig.designWidth * 0.25, cy - 65,
+          GameConfig.designWidth * 0.5, cy - 25)
+      ..quadraticBezierTo(
+          GameConfig.designWidth * 0.75, cy - 75, GameConfig.designWidth, cy)
       ..close();
     canvas.drawPath(hillPath, hillPaint);
 
     // Mario Puffy Cloud
     _drawCloud(canvas, const Offset(GameConfig.vanishingX - 160, cy - 70), 0.7);
-    _drawCloud(canvas, const Offset(GameConfig.vanishingX + 170, cy - 85), 0.85);
+    _drawCloud(
+        canvas, const Offset(GameConfig.vanishingX + 170, cy - 85), 0.85);
 
     // Glowing horizon neon line
     final horizonGlow = Paint()
@@ -107,8 +111,10 @@ class LaneWorld extends Component {
       ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 2);
 
     canvas.drawCircle(pos, 22 * scale, cloudPaint);
-    canvas.drawCircle(Offset(pos.dx - 15 * scale, pos.dy + 6 * scale), 16 * scale, cloudPaint);
-    canvas.drawCircle(Offset(pos.dx + 18 * scale, pos.dy + 4 * scale), 18 * scale, cloudPaint);
+    canvas.drawCircle(Offset(pos.dx - 15 * scale, pos.dy + 6 * scale),
+        16 * scale, cloudPaint);
+    canvas.drawCircle(Offset(pos.dx + 18 * scale, pos.dy + 4 * scale),
+        18 * scale, cloudPaint);
   }
 
   void _drawRoadSegments(Canvas canvas) {
@@ -136,7 +142,9 @@ class LaneWorld extends Component {
 
       final isEven = (i % 2 == 0);
       final segmentAlpha = (0.4 + tNear * 0.55).clamp(0.0, 1.0);
-      final baseColor = isEven ? _curRoadColor : Color.lerp(_curRoadColor, const Color(0xFF020710), 0.5)!;
+      final baseColor = isEven
+          ? _curRoadColor
+          : Color.lerp(_curRoadColor, const Color(0xFF020710), 0.5)!;
 
       final tilePaint = Paint()
         ..color = baseColor.withValues(alpha: segmentAlpha)
@@ -144,7 +152,8 @@ class LaneWorld extends Component {
       canvas.drawPath(path, tilePaint);
 
       final seamPaint = Paint()
-        ..color = _curAccentColor.withValues(alpha: (tNear * 0.35).clamp(0.0, 0.4))
+        ..color =
+            _curAccentColor.withValues(alpha: (tNear * 0.35).clamp(0.0, 0.4))
         ..strokeWidth = (1.0 + tNear * 1.5);
       canvas.drawLine(pNearL, pNearR, seamPaint);
     }
@@ -221,7 +230,8 @@ class LaneWorld extends Component {
     double alpha, {
     required bool isLeft,
   }) {
-    final top = Offset(base.dx + (isLeft ? -width * 0.8 : width * 0.8), base.dy - height);
+    final top = Offset(
+        base.dx + (isLeft ? -width * 0.8 : width * 0.8), base.dy - height);
 
     final postPaint = Paint()
       ..shader = LinearGradient(
@@ -241,7 +251,8 @@ class LaneWorld extends Component {
       ..maskFilter = MaskFilter.blur(BlurStyle.normal, width * 1.5);
     canvas.drawCircle(top, width * 0.9, beaconGlow);
 
-    final beaconCore = Paint()..color = const Color(0xFFFFFFFF).withValues(alpha: alpha);
+    final beaconCore = Paint()
+      ..color = const Color(0xFFFFFFFF).withValues(alpha: alpha);
     canvas.drawCircle(top, width * 0.45, beaconCore);
   }
 
@@ -249,7 +260,8 @@ class LaneWorld extends Component {
     final leftX = _farLeft.dx + (_nearLeft.dx - _farLeft.dx) * t;
     final rightX = _farRight.dx + (_nearRight.dx - _farRight.dx) * t;
     final x = leftX + (rightX - leftX) * xFrac;
-    final y = GameConfig.horizonY + (GameConfig.nearY - GameConfig.horizonY) * t;
+    final y =
+        GameConfig.horizonY + (GameConfig.nearY - GameConfig.horizonY) * t;
     return Offset(x, y);
   }
 }

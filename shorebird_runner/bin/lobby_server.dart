@@ -23,8 +23,10 @@ void main(List<String> args) async {
   await for (final HttpRequest request in server) {
     // Enable CORS
     request.response.headers.set('Access-Control-Allow-Origin', '*');
-    request.response.headers.set('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
-    request.response.headers.set('Access-Control-Allow-Headers', 'Content-Type');
+    request.response.headers
+        .set('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+    request.response.headers
+        .set('Access-Control-Allow-Headers', 'Content-Type');
 
     if (request.method == 'OPTIONS') {
       request.response.statusCode = HttpStatus.ok;
@@ -41,7 +43,8 @@ void main(List<String> args) async {
       if (path == '/api/health') {
         request.response
           ..headers.contentType = ContentType.json
-          ..write(jsonEncode({'status': 'ok', 'time': DateTime.now().toIso8601String()}));
+          ..write(jsonEncode(
+              {'status': 'ok', 'time': DateTime.now().toIso8601String()}));
         await request.response.close();
       } else if (path == '/api/leaderboard') {
         final hallOfFame = db.getHallOfFame();
@@ -101,12 +104,13 @@ enum RoomState { waiting, countdown, racing, finished }
 class Room {
   final String code;
   final String hostId;
+  final WebSocket hostSocket;
   RoomState state = RoomState.waiting;
   final Map<String, PlayerInfo> players = {};
   DateTime createdAt = DateTime.now();
   Timer? countdownTimer;
 
-  Room({required this.code, required this.hostId});
+  Room({required this.code, required this.hostId, required this.hostSocket});
 
   Map<String, dynamic> toJson() => {
         'code': code,
@@ -117,9 +121,13 @@ class Room {
 
   void broadcast(Map<String, dynamic> message) {
     final payload = jsonEncode(message);
-    for (final player in players.values) {
+    final recipients = <WebSocket>{
+      hostSocket,
+      for (final player in players.values) player.socket,
+    };
+    for (final s in recipients) {
       try {
-        player.socket.add(payload);
+        s.add(payload);
       } catch (e) {
         // Socket closed or error
       }
@@ -143,7 +151,8 @@ class LobbyManager {
           final message = jsonDecode(data as String) as Map<String, dynamic>;
           _processMessage(socket, message);
         } catch (e) {
-          socket.add(jsonEncode({'type': 'error', 'message': 'Invalid JSON: $e'}));
+          socket.add(
+              jsonEncode({'type': 'error', 'message': 'Invalid JSON: $e'}));
         }
       },
       onDone: () => _handleDisconnect(socket),
@@ -159,13 +168,19 @@ class LobbyManager {
 
     if (code != null && rooms.containsKey(code)) {
       final room = rooms[code]!;
-      room.players.remove(pid);
-      if (room.players.isEmpty) {
+      if (pid != null) {
+        room.players.remove(pid);
+      }
+
+      if (room.hostSocket == socket) {
+        room.countdownTimer?.cancel();
+        rooms.remove(code);
+        print('🧹 Room $code destroyed (host disconnected)');
+      } else if (room.players.isEmpty && room.state == RoomState.racing) {
         room.countdownTimer?.cancel();
         rooms.remove(code);
         print('🧹 Room $code destroyed (all players left)');
       } else {
-        // Check if remaining players finished race
         _checkRaceCompletion(room);
         room.broadcast({
           'type': 'room_updated',
@@ -195,41 +210,62 @@ class LobbyManager {
         _handleDisconnect(socket);
         break;
       default:
-        socket.add(jsonEncode({'type': 'error', 'message': 'Unknown action: $type'}));
+        socket.add(
+            jsonEncode({'type': 'error', 'message': 'Unknown action: $type'}));
     }
   }
 
   void _createRoom(WebSocket socket, Map<String, dynamic> message) {
-    final playerName = (message['playerName'] as String? ?? 'Pilot').trim();
+    final isParticipant = message['isParticipant'] as bool? ?? false;
+    final playerName = (message['playerName'] as String? ?? 'Host').trim();
     final skin = (message['skin'] as String? ?? 'blueBird').trim();
-    final playerId = 'p_${DateTime.now().millisecondsSinceEpoch}_${_rng.nextInt(999)}';
+    final hostId =
+        'h_${DateTime.now().millisecondsSinceEpoch}_${_rng.nextInt(999)}';
 
     // Generate readable 4-letter room code
-    const words = ['BIRD', 'RUSH', 'WING', 'DART', 'CODE', 'FAST', 'NEON', 'FLUT', 'MEGA', 'TURB', 'HERO', 'APEX'];
+    const words = [
+      'BIRD',
+      'RUSH',
+      'WING',
+      'DART',
+      'CODE',
+      'FAST',
+      'NEON',
+      'FLUT',
+      'MEGA',
+      'TURB',
+      'HERO',
+      'APEX'
+    ];
     String code = words[_rng.nextInt(words.length)];
     if (rooms.containsKey(code)) {
       code = '$code${_rng.nextInt(9)}';
     }
 
-    final room = Room(code: code, hostId: playerId);
-    final player = PlayerInfo(
-      id: playerId,
-      name: playerName.isEmpty ? 'Host Pilot' : playerName,
-      skin: skin,
-      socket: socket,
-    );
-    room.players[playerId] = player;
-    rooms[code] = room;
+    final room = Room(code: code, hostId: hostId, hostSocket: socket);
 
-    socketToPlayerId[socket] = playerId;
+    if (isParticipant) {
+      final player = PlayerInfo(
+        id: hostId,
+        name: playerName.isEmpty ? 'Host Pilot' : playerName,
+        skin: skin,
+        socket: socket,
+      );
+      room.players[hostId] = player;
+    }
+
+    rooms[code] = room;
+    socketToPlayerId[socket] = hostId;
     socketToRoomCode[socket] = code;
 
-    print('🏠 Room created: $code by ${player.name} ($playerId)');
+    print(
+        '🏠 Room created: $code by host ($hostId), isParticipant: $isParticipant, racers: ${room.players.length}');
 
     socket.add(jsonEncode({
       'type': 'room_created',
       'roomCode': code,
-      'playerId': playerId,
+      'playerId': hostId,
+      'isParticipant': isParticipant,
       'room': room.toJson(),
     }));
   }
@@ -256,7 +292,11 @@ class LobbyManager {
       return;
     }
 
-    final playerId = 'p_${DateTime.now().millisecondsSinceEpoch}_${_rng.nextInt(999)}';
+    final existingPid = socketToPlayerId[socket];
+    final playerId = (existingPid != null && existingPid.startsWith('h_'))
+        ? existingPid
+        : 'p_${DateTime.now().millisecondsSinceEpoch}_${_rng.nextInt(999)}';
+
     final player = PlayerInfo(
       id: playerId,
       name: playerName.isEmpty ? 'Challenger' : playerName,
@@ -268,7 +308,8 @@ class LobbyManager {
     socketToPlayerId[socket] = playerId;
     socketToRoomCode[socket] = code;
 
-    print('👋 Player ${player.name} joined room $code');
+    print(
+        '👋 Player ${player.name} ($playerId) joined room $code (Total racers: ${room.players.length})');
 
     socket.add(jsonEncode({
       'type': 'join_success',
@@ -290,7 +331,17 @@ class LobbyManager {
 
     final room = rooms[code]!;
     if (room.hostId != pid) {
-      socket.add(jsonEncode({'type': 'error', 'message': 'Only the host can start the match'}));
+      socket.add(jsonEncode(
+          {'type': 'error', 'message': 'Only the host can start the match'}));
+      return;
+    }
+
+    if (room.players.isEmpty) {
+      socket.add(jsonEncode({
+        'type': 'error',
+        'message':
+            'Cannot start race: Waiting for participants to join with room code "$code"!'
+      }));
       return;
     }
 
@@ -425,7 +476,8 @@ class DatabaseService {
 
   Future<void> _save() async {
     try {
-      await dbFile.writeAsString(const JsonEncoder.withIndent('  ').convert(_data));
+      await dbFile
+          .writeAsString(const JsonEncoder.withIndent('  ').convert(_data));
     } catch (e) {
       print('Error saving database: $e');
     }

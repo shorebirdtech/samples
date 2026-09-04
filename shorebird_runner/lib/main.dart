@@ -44,6 +44,15 @@ class _GameShellState extends State<GameShell> {
   ShorebirdRunnerGame? _soloGame;
   List<RacerStanding> _lastPodiumRankings = [];
 
+  @override
+  void initState() {
+    super.initState();
+    // Auto-enter multiplayer lobby if opened via an invite link with ?room=CODE
+    if (Uri.base.queryParameters.containsKey('room')) {
+      _mode = AppMode.lobby;
+    }
+  }
+
   void _startSolo() {
     final game = ShorebirdRunnerGame(
       controlScheme: ControlScheme.both,

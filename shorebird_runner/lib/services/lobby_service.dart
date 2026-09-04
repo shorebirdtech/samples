@@ -110,6 +110,9 @@ class LobbyService extends ChangeNotifier {
   bool get isHost =>
       _myPlayerId != null && _hostId != null && _myPlayerId == _hostId;
 
+  bool get isParticipant => _players.any((p) => p.id == _myPlayerId);
+  bool get isSpectator => isHost && !isParticipant;
+
   List<LobbyPlayer> _players = [];
   List<LobbyPlayer> get players => _players;
 
@@ -128,12 +131,55 @@ class LobbyService extends ChangeNotifier {
   String? _errorMessage;
   String? get errorMessage => _errorMessage;
 
+  String? _customServerUrl;
+  String? get customServerUrl => _customServerUrl;
+
+  set customServerUrl(String? value) {
+    _customServerUrl = value;
+    notifyListeners();
+  }
+
   String get defaultServerUrl {
+    if (_customServerUrl != null && _customServerUrl!.trim().isNotEmpty) {
+      return _customServerUrl!.trim();
+    }
+
+    const envUrl = String.fromEnvironment('LOBBY_SERVER_URL');
+    if (envUrl.isNotEmpty) return envUrl;
+
     if (kIsWeb) {
+      final queryServer = Uri.base.queryParameters['server'];
+      if (queryServer != null && queryServer.trim().isNotEmpty) {
+        return queryServer.trim();
+      }
+
       final host = Uri.base.host.isEmpty ? 'localhost' : Uri.base.host;
+      if (Uri.base.scheme == 'https') {
+        if (host == 'localhost' || host == '127.0.0.1') {
+          return 'ws://localhost:8088';
+        }
+        return 'wss://$host:8088';
+      }
       return 'ws://$host:8088';
     }
     return 'ws://localhost:8088';
+  }
+
+  void disconnect() {
+    _sub?.cancel();
+    _sub = null;
+    _channel?.sink.close();
+    _channel = null;
+    _isConnected = false;
+    notifyListeners();
+  }
+
+  Future<bool> reconnect([String? newUrl]) async {
+    disconnect();
+    if (newUrl != null) {
+      _customServerUrl = newUrl;
+    }
+    return ensureConnected();
   }
 
   Future<bool> ensureConnected([String? url]) async {
@@ -170,9 +216,13 @@ class LobbyService extends ChangeNotifier {
     }
   }
 
-  void createRoom(String playerName, PlayerSkin skin) async {
-    _myPlayerName = playerName.trim().isEmpty ? 'Pilot 1' : playerName.trim();
-    _mySkin = skin;
+  void createRoom(
+      {bool isParticipant = false,
+      String? playerName,
+      PlayerSkin? skin}) async {
+    _myPlayerName =
+        playerName?.trim().isNotEmpty == true ? playerName!.trim() : 'Host';
+    if (skin != null) _mySkin = skin;
     _finalRankings = null;
     _isRacing = false;
     _countdown = 0;
@@ -182,6 +232,20 @@ class LobbyService extends ChangeNotifier {
 
     _send({
       'type': 'create_room',
+      'isParticipant': isParticipant,
+      'playerName': _myPlayerName,
+      'skin': _mySkin.name,
+    });
+  }
+
+  void joinAsParticipant(String playerName, PlayerSkin skin) {
+    if (_currentRoomCode == null) return;
+    _myPlayerName =
+        playerName.trim().isNotEmpty ? playerName.trim() : 'Host Pilot';
+    _mySkin = skin;
+    _send({
+      'type': 'join_room',
+      'roomCode': _currentRoomCode!,
       'playerName': _myPlayerName,
       'skin': _mySkin.name,
     });

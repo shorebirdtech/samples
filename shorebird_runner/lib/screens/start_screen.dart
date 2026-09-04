@@ -1,5 +1,6 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
+import 'package:shorebird_runner/widgets/game_rules_dialog.dart';
 
 /// Animated start screen with parallax stars, animated title,
 /// and a glowing "TAP TO PLAY" prompt.
@@ -123,11 +124,12 @@ class _StartScreenState extends State<StartScreen>
                   ),
                   const SizedBox(height: 8),
                   const Text(
-                    'Fly as Shorebird (🐤). Dodge stores & bugs. Deploy patches.',
+                    'Run as a Developer! Collect 🐤 patches • Dodge store review delays & 🐛 bugs.',
+                    textAlign: TextAlign.center,
                     style: TextStyle(
                       color: Color(0xFF8892B0),
-                      fontSize: 16,
-                      letterSpacing: 2,
+                      fontSize: 15,
+                      letterSpacing: 1.5,
                     ),
                   ),
 
@@ -139,8 +141,10 @@ class _StartScreenState extends State<StartScreen>
                   const SizedBox(height: 32),
 
                   // Mode selection buttons
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
+                  Wrap(
+                    alignment: WrapAlignment.center,
+                    spacing: 16,
+                    runSpacing: 12,
                     children: [
                       AnimatedBuilder(
                         animation: _pulseCtrl,
@@ -150,16 +154,24 @@ class _StartScreenState extends State<StartScreen>
                             title: '▶  SOLO RUN',
                             subtitle: '1 PLAYER CAMPAIGN',
                             color: const Color(0xFF00D4FF),
-                            onTap: widget.onStartSolo,
+                            onTap: () {
+                              showGameRulesDialog(context,
+                                  onStart: widget.onStartSolo);
+                            },
                           ),
                         ),
                       ),
-                      const SizedBox(width: 20),
                       _PlayButton(
                         title: '🌐  MULTIPLAYER LOBBY',
                         subtitle: 'ENTER CODE • COMPETE TOGETHER',
                         color: const Color(0xFFFFB347),
                         onTap: widget.onOpenLobby,
+                      ),
+                      _PlayButton(
+                        title: '📜  RULES & HOW TO PLAY',
+                        subtitle: 'MISSION BRIEFING • CONTROLS',
+                        color: const Color(0xFF00FF88),
+                        onTap: () => showGameRulesDialog(context),
                       ),
                     ],
                   ),
@@ -194,92 +206,60 @@ class _BirdLogo extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: 120,
-      height: 120,
+      width: 130,
+      height: 130,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
         gradient: const RadialGradient(
-          colors: [Color(0xFF1A3A5C), Color(0xFF0A0E1A)],
+          colors: [Color(0xFF1E293B), Color(0xFF0A0E1A)],
+        ),
+        border: Border.all(
+          color: const Color(0xFF00D4FF).withValues(alpha: 0.6),
+          width: 2.5,
         ),
         boxShadow: [
           BoxShadow(
             color: const Color(0xFF00D4FF).withValues(alpha: 0.4),
-            blurRadius: 40,
-            spreadRadius: 5,
+            blurRadius: 36,
+            spreadRadius: 4,
           ),
         ],
       ),
-      child: CustomPaint(painter: _BirdPainter()),
+      child: Stack(
+        alignment: Alignment.center,
+        children: [
+          // Developer Avatar
+          const Text(
+            '👨‍💻',
+            style: TextStyle(fontSize: 58),
+          ),
+          // Shorebird Badge
+          Positioned(
+            right: 6,
+            bottom: 6,
+            child: Container(
+              padding: const EdgeInsets.all(5),
+              decoration: BoxDecoration(
+                color: const Color(0xFF0A192F),
+                shape: BoxShape.circle,
+                border: Border.all(
+                  color: const Color(0xFF00FF88),
+                  width: 1.8,
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: const Color(0xFF00FF88).withValues(alpha: 0.4),
+                    blurRadius: 10,
+                  ),
+                ],
+              ),
+              child: const Text('🐤', style: TextStyle(fontSize: 18)),
+            ),
+          ),
+        ],
+      ),
     );
   }
-}
-
-class _BirdPainter extends CustomPainter {
-  @override
-  void paint(Canvas canvas, Size size) {
-    final cx = size.width / 2;
-    final cy = size.height / 2;
-    final r = size.width * 0.3;
-
-    // Glow
-    canvas.drawCircle(
-      Offset(cx, cy),
-      r * 1.3,
-      Paint()
-        ..color = const Color(0xFF00D4FF).withValues(alpha: 0.15)
-        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 20),
-    );
-
-    // Body
-    final bodyPath = Path();
-    bodyPath.moveTo(cx, cy - r * 1.4);
-    bodyPath.cubicTo(
-        cx + r, cy - r * 0.4, cx + r * 0.7, cy + r, cx, cy + r * 1.1);
-    bodyPath.cubicTo(
-        cx - r * 0.7, cy + r, cx - r, cy - r * 0.4, cx, cy - r * 1.4);
-
-    canvas.drawPath(
-      bodyPath,
-      Paint()
-        ..shader = const RadialGradient(
-          colors: [Color(0xFF00D4FF), Color(0xFF8B5CF6)],
-          center: Alignment(0, -0.3),
-        ).createShader(
-            Rect.fromCircle(center: Offset(cx, cy), radius: r * 1.5)),
-    );
-
-    // Eye
-    canvas.drawCircle(
-      Offset(cx + r * 0.28, cy - r * 0.2),
-      r * 0.25,
-      Paint()..color = Colors.white,
-    );
-    canvas.drawCircle(
-      Offset(cx + r * 0.28, cy - r * 0.2),
-      r * 0.13,
-      Paint()..color = const Color(0xFF0A0E1A),
-    );
-
-    // Wings
-    final wingPaint = Paint()
-      ..color = const Color(0xFF8B5CF6).withValues(alpha: 0.7)
-      ..style = PaintingStyle.fill;
-
-    final leftWing = Path()
-      ..moveTo(cx - r * 0.3, cy)
-      ..cubicTo(cx - r * 1.6, cy - r * 0.6, cx - r * 1.8, cy + 0, cx - r * 0.5,
-          cy + r * 0.4);
-    canvas.drawPath(leftWing, wingPaint);
-
-    final rightWing = Path()
-      ..moveTo(cx + r * 0.3, cy)
-      ..cubicTo(cx + r * 1.6, cy - r * 0.6, cx + r * 1.8, cy + 0, cx + r * 0.5,
-          cy + r * 0.4);
-    canvas.drawPath(rightWing, wingPaint);
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
 
 class _PlayButton extends StatelessWidget {
@@ -383,7 +363,8 @@ class _ControlsHint extends StatelessWidget {
               ),
               Text(
                 'Missing a patch gives -15 pts penalty & resets combo!',
-                style: TextStyle(color: Color(0xFFCBD5E1), fontSize: 11, letterSpacing: 0.5),
+                style: TextStyle(
+                    color: Color(0xFFCBD5E1), fontSize: 11, letterSpacing: 0.5),
               ),
             ],
           ),
@@ -520,7 +501,8 @@ class _StagesRoadmap extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             children: [
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                 decoration: BoxDecoration(
                   color: p.$4.withValues(alpha: 0.12),
                   borderRadius: BorderRadius.circular(8),

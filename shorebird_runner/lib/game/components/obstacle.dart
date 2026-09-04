@@ -6,9 +6,9 @@ import 'package:shorebird_runner/game/components/player.dart';
 import 'package:shorebird_runner/game/utils/game_config.dart';
 
 enum ObstacleType {
-  appStore,  // Apple App Store logo barrier
+  appStore, // Apple App Store logo barrier
   playStore, // Google Play Store 4-color polygon emblem
-  wormBug,   // Animated 🐛 crawling worm / caterpillar bug
+  wormBug, // Animated 🐛 crawling worm / caterpillar bug
 }
 
 /// 3D obstacle representing App Store & Play Store review delays, and runtime bugs.
@@ -72,7 +72,10 @@ class Obstacle extends Component {
       ..color = const Color(0xFF001133).withValues(alpha: 0.6 * scale)
       ..maskFilter = MaskFilter.blur(BlurStyle.normal, 8 * scale);
     canvas.drawOval(
-      Rect.fromCenter(center: Offset(pos.dx, pos.dy + 8 * scale), width: size * 1.1, height: 14 * scale),
+      Rect.fromCenter(
+          center: Offset(pos.dx, pos.dy + 8 * scale),
+          width: size * 1.1,
+          height: 14 * scale),
       shadowPaint,
     );
 
@@ -82,7 +85,8 @@ class Obstacle extends Component {
 
     final boxW = size * 0.96;
     final boxH = size * 0.96;
-    final boxRect = Rect.fromCenter(center: Offset.zero, width: boxW, height: boxH);
+    final boxRect =
+        Rect.fromCenter(center: Offset.zero, width: boxW, height: boxH);
     final cornerRadius = Radius.circular(boxW * 0.23);
     final rrect = RRect.fromRectAndRadius(boxRect, cornerRadius);
 
@@ -108,7 +112,10 @@ class Obstacle extends Component {
     canvas.drawRRect(rrect, bgPaint);
 
     // Subtle Glass Top Sheen
-    final sheenRect = Rect.fromCenter(center: Offset(0, -boxH * 0.22), width: boxW * 0.92, height: boxH * 0.42);
+    final sheenRect = Rect.fromCenter(
+        center: Offset(0, -boxH * 0.22),
+        width: boxW * 0.92,
+        height: boxH * 0.42);
     final sheenPaint = Paint()
       ..shader = LinearGradient(
         begin: Alignment.topCenter,
@@ -119,7 +126,9 @@ class Obstacle extends Component {
         ],
       ).createShader(sheenRect)
       ..style = PaintingStyle.fill;
-    canvas.drawRRect(RRect.fromRectAndRadius(sheenRect, Radius.circular(boxW * 0.18)), sheenPaint);
+    canvas.drawRRect(
+        RRect.fromRectAndRadius(sheenRect, Radius.circular(boxW * 0.18)),
+        sheenPaint);
 
     // Outer Crisp Border
     final borderPaint = Paint()
@@ -143,15 +152,19 @@ class Obstacle extends Component {
     final crossY = boxH * 0.06;
 
     // Left diagonal bar
-    canvas.drawLine(Offset(-boxW * 0.03, topPeakY), Offset(legLeftX, bottomY), aPaint);
+    canvas.drawLine(
+        Offset(-boxW * 0.03, topPeakY), Offset(legLeftX, bottomY), aPaint);
     // Right diagonal bar
-    canvas.drawLine(Offset(boxW * 0.03, topPeakY), Offset(legRightX, bottomY), aPaint);
+    canvas.drawLine(
+        Offset(boxW * 0.03, topPeakY), Offset(legRightX, bottomY), aPaint);
     // Horizontal cross bar
-    canvas.drawLine(Offset(-boxW * 0.28, crossY), Offset(boxW * 0.28, crossY), aPaint);
+    canvas.drawLine(
+        Offset(-boxW * 0.28, crossY), Offset(boxW * 0.28, crossY), aPaint);
 
     // Inner detail joints
     final jointPaint = Paint()..color = const Color(0xFF0071E3);
-    canvas.drawCircle(Offset(-boxW * 0.14, crossY), aStrokeW * 0.22, jointPaint);
+    canvas.drawCircle(
+        Offset(-boxW * 0.14, crossY), aStrokeW * 0.22, jointPaint);
     canvas.drawCircle(Offset(boxW * 0.14, crossY), aStrokeW * 0.22, jointPaint);
 
     canvas.restore();
@@ -167,7 +180,10 @@ class Obstacle extends Component {
       ..color = const Color(0xFF000000).withValues(alpha: 0.55 * scale)
       ..maskFilter = MaskFilter.blur(BlurStyle.normal, 8 * scale);
     canvas.drawOval(
-      Rect.fromCenter(center: Offset(pos.dx, pos.dy + 8 * scale), width: size * 1.1, height: 14 * scale),
+      Rect.fromCenter(
+          center: Offset(pos.dx, pos.dy + 8 * scale),
+          width: size * 1.1,
+          height: 14 * scale),
       shadowPaint,
     );
 
@@ -299,12 +315,16 @@ class Obstacle extends Component {
       // Crawling arch waveform
       final segmentWobble = sin(crawlSpeed - i * 0.75) * 6 * scale;
       final segX = pos.dx + segmentOffset * 0.5;
-      final segY = pos.dy - size * 0.28 - crawlBob + segmentWobble * (1.0 - t * 0.3);
+      final segY =
+          pos.dy - size * 0.28 - crawlBob + segmentWobble * (1.0 - t * 0.3);
 
       final isHead = (i == 0);
-      final radius = isHead ? segmentRadius * 1.25 : segmentRadius * (0.85 + (1.0 - t) * 0.25);
+      final radius = isHead
+          ? segmentRadius * 1.25
+          : segmentRadius * (0.85 + (1.0 - t) * 0.25);
 
-      final segRect = Rect.fromCircle(center: Offset(segX, segY), radius: radius);
+      final segRect =
+          Rect.fromCircle(center: Offset(segX, segY), radius: radius);
 
       // Gradient body coloring (bright toxic neon green / lime)
       final bodyPaint = Paint()
@@ -321,13 +341,17 @@ class Obstacle extends Component {
 
       // Small yellow decorative spots on body rings
       if (!isHead) {
-        final spotPaint = Paint()..color = const Color(0xFFFACC15).withValues(alpha: 0.85);
-        canvas.drawCircle(Offset(segX, segY - radius * 0.45), radius * 0.28, spotPaint);
+        final spotPaint = Paint()
+          ..color = const Color(0xFFFACC15).withValues(alpha: 0.85);
+        canvas.drawCircle(
+            Offset(segX, segY - radius * 0.45), radius * 0.28, spotPaint);
 
         // Tiny cute caterpillar feet touching ground
         final footPaint = Paint()..color = const Color(0xFF15803D);
-        canvas.drawCircle(Offset(segX - radius * 0.35, segY + radius * 0.9), radius * 0.22, footPaint);
-        canvas.drawCircle(Offset(segX + radius * 0.35, segY + radius * 0.9), radius * 0.22, footPaint);
+        canvas.drawCircle(Offset(segX - radius * 0.35, segY + radius * 0.9),
+            radius * 0.22, footPaint);
+        canvas.drawCircle(Offset(segX + radius * 0.35, segY + radius * 0.9),
+            radius * 0.22, footPaint);
       }
 
       // Head Features (Eyes, Antennae, Smile, Cheeks)
@@ -349,7 +373,8 @@ class Obstacle extends Component {
             segY - radius * 1.8,
           );
         canvas.drawPath(leftAntenna, antennaPaint);
-        canvas.drawCircle(Offset(segX - radius * 0.6, segY - radius * 1.8), radius * 0.22, Paint()..color = const Color(0xFFFF4E50));
+        canvas.drawCircle(Offset(segX - radius * 0.6, segY - radius * 1.8),
+            radius * 0.22, Paint()..color = const Color(0xFFFF4E50));
 
         // Right antenna
         final rightAntenna = Path()
@@ -361,7 +386,8 @@ class Obstacle extends Component {
             segY - radius * 1.8,
           );
         canvas.drawPath(rightAntenna, antennaPaint);
-        canvas.drawCircle(Offset(segX + radius * 0.6, segY - radius * 1.8), radius * 0.22, Paint()..color = const Color(0xFFFF4E50));
+        canvas.drawCircle(Offset(segX + radius * 0.6, segY - radius * 1.8),
+            radius * 0.22, Paint()..color = const Color(0xFFFF4E50));
 
         // Big cartoon glossy eyes
         final eyeRadius = radius * 0.32;
@@ -369,21 +395,39 @@ class Obstacle extends Component {
         final rightEyePos = Offset(segX + radius * 0.36, segY - radius * 0.15);
 
         canvas.drawCircle(leftEyePos, eyeRadius, Paint()..color = Colors.white);
-        canvas.drawCircle(rightEyePos, eyeRadius, Paint()..color = Colors.white);
+        canvas.drawCircle(
+            rightEyePos, eyeRadius, Paint()..color = Colors.white);
 
         // Pupils looking forward
         final pupilRadius = eyeRadius * 0.55;
-        canvas.drawCircle(Offset(leftEyePos.dx, leftEyePos.dy + eyeRadius * 0.1), pupilRadius, Paint()..color = Colors.black);
-        canvas.drawCircle(Offset(rightEyePos.dx, rightEyePos.dy + eyeRadius * 0.1), pupilRadius, Paint()..color = Colors.black);
+        canvas.drawCircle(
+            Offset(leftEyePos.dx, leftEyePos.dy + eyeRadius * 0.1),
+            pupilRadius,
+            Paint()..color = Colors.black);
+        canvas.drawCircle(
+            Offset(rightEyePos.dx, rightEyePos.dy + eyeRadius * 0.1),
+            pupilRadius,
+            Paint()..color = Colors.black);
 
         // Eye glint
-        canvas.drawCircle(Offset(leftEyePos.dx - pupilRadius * 0.3, leftEyePos.dy - pupilRadius * 0.3), pupilRadius * 0.35, Paint()..color = Colors.white);
-        canvas.drawCircle(Offset(rightEyePos.dx - pupilRadius * 0.3, rightEyePos.dy - pupilRadius * 0.3), pupilRadius * 0.35, Paint()..color = Colors.white);
+        canvas.drawCircle(
+            Offset(leftEyePos.dx - pupilRadius * 0.3,
+                leftEyePos.dy - pupilRadius * 0.3),
+            pupilRadius * 0.35,
+            Paint()..color = Colors.white);
+        canvas.drawCircle(
+            Offset(rightEyePos.dx - pupilRadius * 0.3,
+                rightEyePos.dy - pupilRadius * 0.3),
+            pupilRadius * 0.35,
+            Paint()..color = Colors.white);
 
         // Cute rosy cheeks
-        final blushPaint = Paint()..color = const Color(0xFFFF69B4).withValues(alpha: 0.6);
-        canvas.drawCircle(Offset(segX - radius * 0.55, segY + radius * 0.25), radius * 0.22, blushPaint);
-        canvas.drawCircle(Offset(segX + radius * 0.55, segY + radius * 0.25), radius * 0.22, blushPaint);
+        final blushPaint = Paint()
+          ..color = const Color(0xFFFF69B4).withValues(alpha: 0.6);
+        canvas.drawCircle(Offset(segX - radius * 0.55, segY + radius * 0.25),
+            radius * 0.22, blushPaint);
+        canvas.drawCircle(Offset(segX + radius * 0.55, segY + radius * 0.25),
+            radius * 0.22, blushPaint);
 
         // Mischievous bug smile
         final mouthPaint = Paint()
@@ -393,7 +437,8 @@ class Obstacle extends Component {
           ..style = PaintingStyle.stroke;
         final mouthPath = Path()
           ..moveTo(segX - radius * 0.22, segY + radius * 0.35)
-          ..quadraticBezierTo(segX, segY + radius * 0.65, segX + radius * 0.22, segY + radius * 0.35);
+          ..quadraticBezierTo(segX, segY + radius * 0.65, segX + radius * 0.22,
+              segY + radius * 0.35);
         canvas.drawPath(mouthPath, mouthPaint);
       }
     }

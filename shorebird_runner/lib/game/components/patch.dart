@@ -100,7 +100,8 @@ class Patch extends Component {
     );
   }
 
-  void _drawShorebirdPatch(Canvas canvas, Offset pos, double scale, double size) {
+  void _drawShorebirdPatch(
+      Canvas canvas, Offset pos, double scale, double size) {
     final hoverBob = sin(_pulsePhase) * 5 * scale;
     final patchPos = Offset(pos.dx, pos.dy - 12 * scale + hoverBob);
 
@@ -122,8 +123,10 @@ class Patch extends Component {
     final badgeW = r * 1.8 * absCos;
     final badgeH = r * 1.8;
 
-    final patchRect = Rect.fromCenter(center: Offset.zero, width: badgeW, height: badgeH);
-    final rrect = RRect.fromRectAndRadius(patchRect, Radius.circular(r * 0.38 * absCos));
+    final patchRect =
+        Rect.fromCenter(center: Offset.zero, width: badgeW, height: badgeH);
+    final rrect =
+        RRect.fromRectAndRadius(patchRect, Radius.circular(r * 0.38 * absCos));
 
     // Badge Gradient (Shorebird Cyan into Deep Indigo)
     final bgPaint = Paint()
@@ -183,7 +186,8 @@ class _Sparkle {
           (rng.nextDouble() - 0.5) * 190,
           -rng.nextDouble() * 170 - 40,
         ),
-        color = rng.nextBool() ? const Color(0xFF00E5FF) : const Color(0xFFFFD700),
+        color =
+            rng.nextBool() ? const Color(0xFF00E5FF) : const Color(0xFFFFD700),
         radius = rng.nextDouble() * 3.5 + 2.0;
 
   void update(double dt) {

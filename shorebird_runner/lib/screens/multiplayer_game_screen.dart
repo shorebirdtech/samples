@@ -227,11 +227,16 @@ class _VsScoreboard extends StatelessWidget {
             decoration: BoxDecoration(
               color: const Color(0xFF00D4FF).withValues(alpha: 0.2),
               borderRadius: BorderRadius.circular(6),
-              border: Border.all(color: const Color(0xFF00D4FF).withValues(alpha: 0.5)),
+              border: Border.all(
+                  color: const Color(0xFF00D4FF).withValues(alpha: 0.5)),
             ),
             child: Row(
               children: [
-                const Text('P1', style: TextStyle(color: Color(0xFF00D4FF), fontWeight: FontWeight.w900, fontSize: 12)),
+                const Text('P1',
+                    style: TextStyle(
+                        color: Color(0xFF00D4FF),
+                        fontWeight: FontWeight.w900,
+                        fontSize: 12)),
                 if (p1Crashed)
                   const Padding(
                     padding: EdgeInsets.only(left: 4),
@@ -286,11 +291,16 @@ class _VsScoreboard extends StatelessWidget {
             decoration: BoxDecoration(
               color: const Color(0xFFFFB347).withValues(alpha: 0.2),
               borderRadius: BorderRadius.circular(6),
-              border: Border.all(color: const Color(0xFFFFB347).withValues(alpha: 0.5)),
+              border: Border.all(
+                  color: const Color(0xFFFFB347).withValues(alpha: 0.5)),
             ),
             child: Row(
               children: [
-                const Text('P2', style: TextStyle(color: Color(0xFFFFB347), fontWeight: FontWeight.w900, fontSize: 12)),
+                const Text('P2',
+                    style: TextStyle(
+                        color: Color(0xFFFFB347),
+                        fontWeight: FontWeight.w900,
+                        fontSize: 12)),
                 if (p2Crashed)
                   const Padding(
                     padding: EdgeInsets.only(left: 4),
@@ -322,9 +332,17 @@ class _MultiplayerControlsBar extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const Text('🔵 P1: [A][D] Move · [W]/[Space] Jump', style: TextStyle(color: Color(0xFF00D4FF), fontSize: 11, fontWeight: FontWeight.w700)),
+          const Text('🔵 P1: [A][D] Move · [W]/[Space] Jump',
+              style: TextStyle(
+                  color: Color(0xFF00D4FF),
+                  fontSize: 11,
+                  fontWeight: FontWeight.w700)),
           const SizedBox(width: 20),
-          const Text('🟡 P2: [←][→] Move · [↑] Jump', style: TextStyle(color: Color(0xFFFFB347), fontSize: 11, fontWeight: FontWeight.w700)),
+          const Text('🟡 P2: [←][→] Move · [↑] Jump',
+              style: TextStyle(
+                  color: Color(0xFFFFB347),
+                  fontSize: 11,
+                  fontWeight: FontWeight.w700)),
           const SizedBox(width: 20),
           GestureDetector(
             onTap: onExit,
@@ -334,7 +352,11 @@ class _MultiplayerControlsBar extends StatelessWidget {
                 color: const Color(0xFF1E293B),
                 borderRadius: BorderRadius.circular(8),
               ),
-              child: const Text('✕ QUIT', style: TextStyle(color: Color(0xFF94A3B8), fontSize: 10, fontWeight: FontWeight.bold)),
+              child: const Text('✕ QUIT',
+                  style: TextStyle(
+                      color: Color(0xFF94A3B8),
+                      fontSize: 10,
+                      fontWeight: FontWeight.bold)),
             ),
           ),
         ],
@@ -390,7 +412,8 @@ class _MatchResultOverlay extends StatelessWidget {
               end: Alignment.bottomRight,
               colors: [Color(0xFF131C31), Color(0xFF090E1A)],
             ),
-            border: Border.all(color: winnerColor.withValues(alpha: 0.6), width: 2),
+            border:
+                Border.all(color: winnerColor.withValues(alpha: 0.6), width: 2),
             boxShadow: [
               BoxShadow(
                 color: winnerColor.withValues(alpha: 0.25),
@@ -513,7 +536,9 @@ class _PlayerMatchCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: color.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: color.withValues(alpha: isWinner ? 0.7 : 0.25), width: isWinner ? 1.8 : 1),
+        border: Border.all(
+            color: color.withValues(alpha: isWinner ? 0.7 : 0.25),
+            width: isWinner ? 1.8 : 1),
       ),
       child: Column(
         children: [
@@ -522,7 +547,11 @@ class _PlayerMatchCard extends StatelessWidget {
             children: [
               Text(
                 tag,
-                style: TextStyle(color: color, fontWeight: FontWeight.w900, fontSize: 13, letterSpacing: 1),
+                style: TextStyle(
+                    color: color,
+                    fontWeight: FontWeight.w900,
+                    fontSize: 13,
+                    letterSpacing: 1),
               ),
               if (isWinner)
                 const Padding(
@@ -534,12 +563,19 @@ class _PlayerMatchCard extends StatelessWidget {
           const SizedBox(height: 10),
           Text(
             score.toString().padLeft(6, '0'),
-            style: TextStyle(color: color, fontSize: 24, fontWeight: FontWeight.w900, letterSpacing: 1),
+            style: TextStyle(
+                color: color,
+                fontSize: 24,
+                fontWeight: FontWeight.w900,
+                letterSpacing: 1),
           ),
           const SizedBox(height: 8),
           Text(
             '${level.emoji} ${level.name}',
-            style: const TextStyle(color: Color(0xFF94A3B8), fontSize: 11, fontWeight: FontWeight.w700),
+            style: const TextStyle(
+                color: Color(0xFF94A3B8),
+                fontSize: 11,
+                fontWeight: FontWeight.w700),
           ),
           const SizedBox(height: 4),
           Text(

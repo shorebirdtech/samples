@@ -259,10 +259,7 @@ class TournamentPodiumScreen extends StatelessWidget {
     required Color color,
     bool isChampion = false,
   }) {
-    String skinEmoji = '🐦';
-    if (standing.skin == PlayerSkin.goldPhoenix) skinEmoji = '🦅';
-    if (standing.skin == PlayerSkin.emeraldFalcon) skinEmoji = '⚡';
-    if (standing.skin == PlayerSkin.violetRaven) skinEmoji = '🌌';
+    final skinEmoji = standing.skin.emoji;
 
     return Column(
       mainAxisSize: MainAxisSize.min,

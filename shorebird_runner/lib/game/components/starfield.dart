@@ -68,7 +68,8 @@ class _Star {
   }
 
   void render(Canvas canvas) {
-    final currentAlpha = (alpha * (0.6 + 0.4 * sin(_twinklePhase))).clamp(0.0, 1.0);
+    final currentAlpha =
+        (alpha * (0.6 + 0.4 * sin(_twinklePhase))).clamp(0.0, 1.0);
     final paint = Paint()
       ..color = _colorForAlpha(currentAlpha)
       ..style = PaintingStyle.fill;
