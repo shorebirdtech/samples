@@ -89,12 +89,18 @@ class Obstacle extends Component {
     final shadowCenter = Offset(pos.dx, pos.dy + 8 * scale);
     canvas.drawOval(
       Rect.fromCenter(
-          center: shadowCenter, width: size * 1.25, height: 16 * scale),
+        center: shadowCenter,
+        width: size * 1.25,
+        height: 16 * scale,
+      ),
       Paint()..color = const Color(0xFF001133).withValues(alpha: 0.25 * scale),
     );
     canvas.drawOval(
       Rect.fromCenter(
-          center: shadowCenter, width: size * 0.92, height: 10 * scale),
+        center: shadowCenter,
+        width: size * 0.92,
+        height: 10 * scale,
+      ),
       Paint()..color = const Color(0xFF001133).withValues(alpha: 0.55 * scale),
     );
 
@@ -136,9 +142,10 @@ class Obstacle extends Component {
 
     // Subtle Glass Top Sheen
     final sheenRect = Rect.fromCenter(
-        center: Offset(0, -boxH * 0.22),
-        width: boxW * 0.92,
-        height: boxH * 0.42);
+      center: Offset(0, -boxH * 0.22),
+      width: boxW * 0.92,
+      height: boxH * 0.42,
+    );
     final sheenPaint = Paint()
       ..shader = LinearGradient(
         begin: Alignment.topCenter,
@@ -150,8 +157,9 @@ class Obstacle extends Component {
       ).createShader(sheenRect)
       ..style = PaintingStyle.fill;
     canvas.drawRRect(
-        RRect.fromRectAndRadius(sheenRect, Radius.circular(boxW * 0.18)),
-        sheenPaint);
+      RRect.fromRectAndRadius(sheenRect, Radius.circular(boxW * 0.18)),
+      sheenPaint,
+    );
 
     // Outer Crisp Border
     final borderPaint = Paint()
@@ -175,15 +183,27 @@ class Obstacle extends Component {
     final crossY = boxH * 0.06;
 
     canvas.drawLine(
-        Offset(-boxW * 0.03, topPeakY), Offset(legLeftX, bottomY), aPaint);
+      Offset(-boxW * 0.03, topPeakY),
+      Offset(legLeftX, bottomY),
+      aPaint,
+    );
     canvas.drawLine(
-        Offset(boxW * 0.03, topPeakY), Offset(legRightX, bottomY), aPaint);
+      Offset(boxW * 0.03, topPeakY),
+      Offset(legRightX, bottomY),
+      aPaint,
+    );
     canvas.drawLine(
-        Offset(-boxW * 0.28, crossY), Offset(boxW * 0.28, crossY), aPaint);
+      Offset(-boxW * 0.28, crossY),
+      Offset(boxW * 0.28, crossY),
+      aPaint,
+    );
 
     final jointPaint = Paint()..color = const Color(0xFF0071E3);
     canvas.drawCircle(
-        Offset(-boxW * 0.14, crossY), aStrokeW * 0.22, jointPaint);
+      Offset(-boxW * 0.14, crossY),
+      aStrokeW * 0.22,
+      jointPaint,
+    );
     canvas.drawCircle(Offset(boxW * 0.14, crossY), aStrokeW * 0.22, jointPaint);
 
     canvas.restore();
@@ -198,12 +218,18 @@ class Obstacle extends Component {
     final shadowCenter = Offset(pos.dx, pos.dy + 8 * scale);
     canvas.drawOval(
       Rect.fromCenter(
-          center: shadowCenter, width: size * 1.25, height: 16 * scale),
+        center: shadowCenter,
+        width: size * 1.25,
+        height: 16 * scale,
+      ),
       Paint()..color = const Color(0xFF000000).withValues(alpha: 0.25 * scale),
     );
     canvas.drawOval(
       Rect.fromCenter(
-          center: shadowCenter, width: size * 0.92, height: 10 * scale),
+        center: shadowCenter,
+        width: size * 0.92,
+        height: 10 * scale,
+      ),
       Paint()..color = const Color(0xFF000000).withValues(alpha: 0.55 * scale),
     );
 
@@ -319,12 +345,18 @@ class Obstacle extends Component {
     final shadowCenter = Offset(pos.dx, pos.dy + 4 * scale);
     canvas.drawOval(
       Rect.fromCenter(
-          center: shadowCenter, width: size * 1.3, height: 14 * scale),
+        center: shadowCenter,
+        width: size * 1.3,
+        height: 14 * scale,
+      ),
       Paint()..color = const Color(0xFF000000).withValues(alpha: 0.22 * scale),
     );
     canvas.drawOval(
       Rect.fromCenter(
-          center: shadowCenter, width: size * 0.95, height: 8 * scale),
+        center: shadowCenter,
+        width: size * 0.95,
+        height: 8 * scale,
+      ),
       Paint()..color = const Color(0xFF000000).withValues(alpha: 0.52 * scale),
     );
 
@@ -363,13 +395,22 @@ class Obstacle extends Component {
         final spotPaint = Paint()
           ..color = const Color(0xFFFACC15).withValues(alpha: 0.85);
         canvas.drawCircle(
-            Offset(segX, segY - radius * 0.45), radius * 0.28, spotPaint);
+          Offset(segX, segY - radius * 0.45),
+          radius * 0.28,
+          spotPaint,
+        );
 
         final footPaint = Paint()..color = const Color(0xFF15803D);
-        canvas.drawCircle(Offset(segX - radius * 0.35, segY + radius * 0.9),
-            radius * 0.22, footPaint);
-        canvas.drawCircle(Offset(segX + radius * 0.35, segY + radius * 0.9),
-            radius * 0.22, footPaint);
+        canvas.drawCircle(
+          Offset(segX - radius * 0.35, segY + radius * 0.9),
+          radius * 0.22,
+          footPaint,
+        );
+        canvas.drawCircle(
+          Offset(segX + radius * 0.35, segY + radius * 0.9),
+          radius * 0.22,
+          footPaint,
+        );
       }
 
       if (isHead) {
@@ -388,8 +429,11 @@ class Obstacle extends Component {
             segY - radius * 1.8,
           );
         canvas.drawPath(leftAntenna, antennaPaint);
-        canvas.drawCircle(Offset(segX - radius * 0.6, segY - radius * 1.8),
-            radius * 0.22, Paint()..color = const Color(0xFFFF4E50));
+        canvas.drawCircle(
+          Offset(segX - radius * 0.6, segY - radius * 1.8),
+          radius * 0.22,
+          Paint()..color = const Color(0xFFFF4E50),
+        );
 
         final rightAntenna = Path()
           ..moveTo(segX + radius * 0.35, segY - radius * 0.7)
@@ -400,8 +444,11 @@ class Obstacle extends Component {
             segY - radius * 1.8,
           );
         canvas.drawPath(rightAntenna, antennaPaint);
-        canvas.drawCircle(Offset(segX + radius * 0.6, segY - radius * 1.8),
-            radius * 0.22, Paint()..color = const Color(0xFFFF4E50));
+        canvas.drawCircle(
+          Offset(segX + radius * 0.6, segY - radius * 1.8),
+          radius * 0.22,
+          Paint()..color = const Color(0xFFFF4E50),
+        );
 
         final eyeRadius = radius * 0.32;
         final leftEyePos = Offset(segX - radius * 0.36, segY - radius * 0.15);
@@ -409,35 +456,52 @@ class Obstacle extends Component {
 
         canvas.drawCircle(leftEyePos, eyeRadius, Paint()..color = Colors.white);
         canvas.drawCircle(
-            rightEyePos, eyeRadius, Paint()..color = Colors.white);
+          rightEyePos,
+          eyeRadius,
+          Paint()..color = Colors.white,
+        );
 
         final pupilRadius = eyeRadius * 0.55;
         canvas.drawCircle(
-            Offset(leftEyePos.dx, leftEyePos.dy + eyeRadius * 0.1),
-            pupilRadius,
-            Paint()..color = Colors.black);
+          Offset(leftEyePos.dx, leftEyePos.dy + eyeRadius * 0.1),
+          pupilRadius,
+          Paint()..color = Colors.black,
+        );
         canvas.drawCircle(
-            Offset(rightEyePos.dx, rightEyePos.dy + eyeRadius * 0.1),
-            pupilRadius,
-            Paint()..color = Colors.black);
+          Offset(rightEyePos.dx, rightEyePos.dy + eyeRadius * 0.1),
+          pupilRadius,
+          Paint()..color = Colors.black,
+        );
 
         canvas.drawCircle(
-            Offset(leftEyePos.dx - pupilRadius * 0.3,
-                leftEyePos.dy - pupilRadius * 0.3),
-            pupilRadius * 0.35,
-            Paint()..color = Colors.white);
+          Offset(
+            leftEyePos.dx - pupilRadius * 0.3,
+            leftEyePos.dy - pupilRadius * 0.3,
+          ),
+          pupilRadius * 0.35,
+          Paint()..color = Colors.white,
+        );
         canvas.drawCircle(
-            Offset(rightEyePos.dx - pupilRadius * 0.3,
-                rightEyePos.dy - pupilRadius * 0.3),
-            pupilRadius * 0.35,
-            Paint()..color = Colors.white);
+          Offset(
+            rightEyePos.dx - pupilRadius * 0.3,
+            rightEyePos.dy - pupilRadius * 0.3,
+          ),
+          pupilRadius * 0.35,
+          Paint()..color = Colors.white,
+        );
 
         final blushPaint = Paint()
           ..color = const Color(0xFFFF69B4).withValues(alpha: 0.6);
-        canvas.drawCircle(Offset(segX - radius * 0.55, segY + radius * 0.25),
-            radius * 0.22, blushPaint);
-        canvas.drawCircle(Offset(segX + radius * 0.55, segY + radius * 0.25),
-            radius * 0.22, blushPaint);
+        canvas.drawCircle(
+          Offset(segX - radius * 0.55, segY + radius * 0.25),
+          radius * 0.22,
+          blushPaint,
+        );
+        canvas.drawCircle(
+          Offset(segX + radius * 0.55, segY + radius * 0.25),
+          radius * 0.22,
+          blushPaint,
+        );
 
         final mouthPaint = Paint()
           ..color = const Color(0xFF052E16)
@@ -446,8 +510,12 @@ class Obstacle extends Component {
           ..style = PaintingStyle.stroke;
         final mouthPath = Path()
           ..moveTo(segX - radius * 0.22, segY + radius * 0.35)
-          ..quadraticBezierTo(segX, segY + radius * 0.65, segX + radius * 0.22,
-              segY + radius * 0.35);
+          ..quadraticBezierTo(
+            segX,
+            segY + radius * 0.65,
+            segX + radius * 0.22,
+            segY + radius * 0.35,
+          );
         canvas.drawPath(mouthPath, mouthPaint);
       }
     }
@@ -455,7 +523,11 @@ class Obstacle extends Component {
 
   // ── 🚧 Low Merge Barricade (Jumpable) ──────────────────────────────────────
   void _drawMergeBarricade(
-      Canvas canvas, Offset pos, double scale, double size) {
+    Canvas canvas,
+    Offset pos,
+    double scale,
+    double size,
+  ) {
     final barW = size * 1.35;
     final barH = size * 0.42;
     final groundY = pos.dy;
@@ -463,9 +535,10 @@ class Obstacle extends Component {
     // Ground shadow
     canvas.drawOval(
       Rect.fromCenter(
-          center: Offset(pos.dx, groundY + 4 * scale),
-          width: barW * 1.1,
-          height: 12 * scale),
+        center: Offset(pos.dx, groundY + 4 * scale),
+        width: barW * 1.1,
+        height: 12 * scale,
+      ),
       Paint()..color = const Color(0xFF000000).withValues(alpha: 0.45 * scale),
     );
 
@@ -474,10 +547,16 @@ class Obstacle extends Component {
       ..color = const Color(0xFF334155)
       ..strokeWidth = 4.0 * scale
       ..style = PaintingStyle.stroke;
-    canvas.drawLine(Offset(pos.dx - barW * 0.38, groundY),
-        Offset(pos.dx - barW * 0.38, groundY - barH), legPaint);
-    canvas.drawLine(Offset(pos.dx + barW * 0.38, groundY),
-        Offset(pos.dx + barW * 0.38, groundY - barH), legPaint);
+    canvas.drawLine(
+      Offset(pos.dx - barW * 0.38, groundY),
+      Offset(pos.dx - barW * 0.38, groundY - barH),
+      legPaint,
+    );
+    canvas.drawLine(
+      Offset(pos.dx + barW * 0.38, groundY),
+      Offset(pos.dx + barW * 0.38, groundY - barH),
+      legPaint,
+    );
 
     // Barricade Rail with Hazard Diagonal Stripes
     final railRect = Rect.fromCenter(
@@ -542,9 +621,10 @@ class Obstacle extends Component {
     // Ground shadow beneath posts
     canvas.drawOval(
       Rect.fromCenter(
-          center: Offset(pos.dx, groundY + 4 * scale),
-          width: gateW * 1.05,
-          height: 10 * scale),
+        center: Offset(pos.dx, groundY + 4 * scale),
+        width: gateW * 1.05,
+        height: 10 * scale,
+      ),
       Paint()..color = const Color(0xFF000000).withValues(alpha: 0.35 * scale),
     );
 
@@ -559,9 +639,15 @@ class Obstacle extends Component {
       ..strokeCap = StrokeCap.round
       ..style = PaintingStyle.stroke;
     canvas.drawLine(
-        Offset(leftPostX, groundY), Offset(leftPostX, topY), postPaint);
+      Offset(leftPostX, groundY),
+      Offset(leftPostX, topY),
+      postPaint,
+    );
     canvas.drawLine(
-        Offset(rightPostX, groundY), Offset(rightPostX, topY), postPaint);
+      Offset(rightPostX, groundY),
+      Offset(rightPostX, topY),
+      postPaint,
+    );
 
     // Cyan accent lines on pylons
     final neonLinePaint = Paint()
@@ -569,9 +655,15 @@ class Obstacle extends Component {
       ..strokeWidth = 2.0 * scale
       ..style = PaintingStyle.stroke;
     canvas.drawLine(
-        Offset(leftPostX, groundY), Offset(leftPostX, topY), neonLinePaint);
+      Offset(leftPostX, groundY),
+      Offset(leftPostX, topY),
+      neonLinePaint,
+    );
     canvas.drawLine(
-        Offset(rightPostX, groundY), Offset(rightPostX, topY), neonLinePaint);
+      Offset(rightPostX, groundY),
+      Offset(rightPostX, topY),
+      neonLinePaint,
+    );
 
     // Top Crossbar
     final crossbarRect = Rect.fromCenter(
@@ -583,16 +675,19 @@ class Obstacle extends Component {
         RRect.fromRectAndRadius(crossbarRect, Radius.circular(4 * scale));
     canvas.drawRRect(crossbarRRect, Paint()..color = const Color(0xFF0F172A));
     canvas.drawRRect(
-        crossbarRRect,
-        Paint()
-          ..color = const Color(0xFFFFC107).withValues(alpha: 0.7)
-          ..strokeWidth = 1.5 * scale
-          ..style = PaintingStyle.stroke);
+      crossbarRRect,
+      Paint()
+        ..color = const Color(0xFFFFC107).withValues(alpha: 0.7)
+        ..strokeWidth = 1.5 * scale
+        ..style = PaintingStyle.stroke,
+    );
 
     // "UNDER REVIEW" pre-cached text banner
     canvas.save();
-    canvas.translate(pos.dx - (_reviewGatePainter.width * scale * 0.9) / 2,
-        topY + 8 * scale - (_reviewGatePainter.height * scale * 0.9) / 2);
+    canvas.translate(
+      pos.dx - (_reviewGatePainter.width * scale * 0.9) / 2,
+      topY + 8 * scale - (_reviewGatePainter.height * scale * 0.9) / 2,
+    );
     canvas.scale(scale * 0.9, scale * 0.9);
     _reviewGatePainter.paint(canvas, Offset.zero);
     canvas.restore();

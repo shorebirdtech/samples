@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:qr_flutter/qr_flutter.dart';
+import 'package:shorebird_runner/core/constants/constants.dart';
 import 'package:shorebird_runner/features/start_menu/start_menu.dart';
 
 class RoomCodeCard extends StatelessWidget {
@@ -22,15 +23,15 @@ class RoomCodeCard extends StatelessWidget {
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: [
-            const Color(0xFF00D4FF).withValues(alpha: 0.15),
-            const Color(0xFF050A14),
+            AppColors.cyan.withValues(alpha: 0.15),
+            AppColors.roadDark,
           ],
         ),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0xFF00D4FF), width: 1.5),
+        border: Border.all(color: AppColors.cyan, width: 1.5),
         boxShadow: [
           BoxShadow(
-            color: const Color(0xFF00D4FF).withValues(alpha: 0.25),
+            color: AppColors.cyan.withValues(alpha: 0.25),
             blurRadius: 20,
             spreadRadius: 2,
           ),
@@ -54,13 +55,13 @@ class RoomCodeCard extends StatelessWidget {
               Text(
                 roomCode,
                 style: const TextStyle(
-                  color: Color(0xFF00D4FF),
+                  color: AppColors.cyan,
                   fontSize: 46,
                   fontWeight: FontWeight.w900,
                   letterSpacing: 8.0,
                   shadows: [
                     Shadow(
-                      color: Color(0xFF00D4FF),
+                      color: AppColors.cyan,
                       blurRadius: 18,
                     ),
                   ],
@@ -68,13 +69,14 @@ class RoomCodeCard extends StatelessWidget {
               ),
               const SizedBox(width: 12),
               IconButton(
-                icon: const Icon(Icons.copy, color: Color(0xFF00D4FF)),
+                icon: const Icon(Icons.copy, color: AppColors.cyan),
                 tooltip: 'Copy Code',
                 onPressed: () {
                   Clipboard.setData(ClipboardData(text: roomCode));
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(
-                        content: Text('Room code copied to clipboard!')),
+                      content: Text('Room code copied to clipboard!'),
+                    ),
                   );
                 },
               ),
@@ -86,7 +88,7 @@ class RoomCodeCard extends StatelessWidget {
                 ? '👑 YOU ARE THE TOURNAMENT HOST'
                 : 'WAITING FOR HOST TO START RACE...',
             style: TextStyle(
-              color: isHost ? const Color(0xFFFFD700) : Colors.white60,
+              color: isHost ? AppColors.goldMedal : Colors.white60,
               fontSize: 12,
               fontWeight: FontWeight.w800,
               letterSpacing: 1.0,
@@ -110,10 +112,10 @@ class _InviteQrSection extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: const Color(0xFF0A1424),
+        color: AppColors.cardSurface,
         borderRadius: BorderRadius.circular(14),
         border: Border.all(
-          color: const Color(0xFF00D4FF).withValues(alpha: 0.35),
+          color: AppColors.cyan.withValues(alpha: 0.35),
         ),
       ),
       child: Wrap(
@@ -142,8 +144,11 @@ class _InviteQrSection extends StatelessWidget {
               const Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(Icons.qr_code_scanner,
-                      color: Color(0xFF00D4FF), size: 16),
+                  Icon(
+                    Icons.qr_code_scanner,
+                    color: AppColors.cyan,
+                    size: 16,
+                  ),
                   SizedBox(width: 6),
                   Text(
                     'SCAN TO JOIN ON PHONE',
@@ -159,7 +164,7 @@ class _InviteQrSection extends StatelessWidget {
               const SizedBox(height: 6),
               const Text(
                 'Point any mobile phone camera\nto auto-join this room instantly.',
-                style: TextStyle(color: Color(0xFF94A3B8), fontSize: 11),
+                style: TextStyle(color: AppColors.slateBlue, fontSize: 11),
               ),
               const SizedBox(height: 10),
               Row(
@@ -167,42 +172,56 @@ class _InviteQrSection extends StatelessWidget {
                 children: [
                   OutlinedButton.icon(
                     style: OutlinedButton.styleFrom(
-                      foregroundColor: const Color(0xFF00D4FF),
+                      foregroundColor: AppColors.cyan,
                       side: BorderSide(
-                          color:
-                              const Color(0xFF00D4FF).withValues(alpha: 0.5)),
+                        color: AppColors.cyan.withValues(alpha: 0.5),
+                      ),
                       padding: const EdgeInsets.symmetric(
-                          horizontal: 12, vertical: 8),
+                        horizontal: 12,
+                        vertical: 8,
+                      ),
                       visualDensity: VisualDensity.compact,
                     ),
                     icon: const Icon(Icons.link, size: 14),
-                    label: const Text('Copy Invite Link',
-                        style: TextStyle(
-                            fontSize: 11, fontWeight: FontWeight.bold)),
+                    label: const Text(
+                      'Copy Invite Link',
+                      style: TextStyle(
+                        fontSize: 11,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
                     onPressed: () {
                       Clipboard.setData(ClipboardData(text: inviteUrl));
                       ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(
-                            content: Text(
-                                'Invite link copied! Share with attendees.')),
+                          content: Text(
+                            'Invite link copied! Share with attendees.',
+                          ),
+                        ),
                       );
                     },
                   ),
                   const SizedBox(width: 8),
                   OutlinedButton.icon(
                     style: OutlinedButton.styleFrom(
-                      foregroundColor: const Color(0xFF00FF88),
+                      foregroundColor: AppColors.neonGreen,
                       side: BorderSide(
-                          color:
-                              const Color(0xFF00FF88).withValues(alpha: 0.5)),
+                        color: AppColors.neonGreen.withValues(alpha: 0.5),
+                      ),
                       padding: const EdgeInsets.symmetric(
-                          horizontal: 10, vertical: 8),
+                        horizontal: 10,
+                        vertical: 8,
+                      ),
                       visualDensity: VisualDensity.compact,
                     ),
                     icon: const Icon(Icons.menu_book, size: 14),
-                    label: const Text('Rules',
-                        style: TextStyle(
-                            fontSize: 11, fontWeight: FontWeight.bold)),
+                    label: const Text(
+                      'Rules',
+                      style: TextStyle(
+                        fontSize: 11,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
                     onPressed: () => showGameRulesDialog(context),
                   ),
                 ],

@@ -38,8 +38,10 @@ class ShootingStar {
   void render(Canvas canvas) {
     if (life <= 0) return;
     final dir = velocity / velocity.distance;
-    final tail = Offset(current.dx - dir.dx * length * life,
-        current.dy - dir.dy * length * life);
+    final tail = Offset(
+      current.dx - dir.dx * length * life,
+      current.dy - dir.dy * length * life,
+    );
 
     _paint.shader = LinearGradient(
       colors: [

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:shorebird_runner/core/constants/constants.dart';
 
 class ShorebirdFooter extends StatelessWidget {
   const ShorebirdFooter({super.key});
@@ -13,7 +14,7 @@ class ShorebirdFooter extends StatelessWidget {
         const Text(
           'shorebird.dev',
           style: TextStyle(
-            color: Color(0xFF37474F),
+            color: AppColors.slateDark,
             fontSize: 12,
             letterSpacing: 2,
             fontWeight: FontWeight.w600,
@@ -24,7 +25,7 @@ class ShorebirdFooter extends StatelessWidget {
           width: 4,
           height: 4,
           decoration: const BoxDecoration(
-            color: Color(0xFFFFC107),
+            color: AppColors.shorebirdGold,
             shape: BoxShape.circle,
           ),
         ),
@@ -32,7 +33,7 @@ class ShorebirdFooter extends StatelessWidget {
         const Text(
           'Code Push · OTA Updates',
           style: TextStyle(
-            color: Color(0xFF37474F),
+            color: AppColors.slateDark,
             fontSize: 12,
             letterSpacing: 1,
           ),

@@ -37,7 +37,7 @@ class TournamentPodiumScreen extends StatelessWidget {
                   colors: [
                     AppColors.shorebirdGold.withValues(alpha: 0.12),
                     AppColors.cyan.withValues(alpha: 0.08),
-                    const Color(0xFF050A14),
+                    AppColors.roadDark,
                   ],
                 ),
               ),
@@ -59,44 +59,22 @@ class TournamentPodiumScreen extends StatelessWidget {
                           const Text('🏆', style: TextStyle(fontSize: 48)),
                           const SizedBox(height: 6),
                           const Text(
-                            'BOOTH TOURNAMENT PODIUM',
-                            textAlign: TextAlign.center,
+                            'TOURNAMENT FINISH',
                             style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 26,
+                              fontSize: 32,
                               fontWeight: FontWeight.w900,
-                              letterSpacing: 3.0,
+                              color: Colors.white,
+                              letterSpacing: 4.0,
                             ),
                           ),
                           const SizedBox(height: 4),
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 12, vertical: 4),
-                            decoration: BoxDecoration(
-                              color:
-                                  AppColors.neonGreen.withValues(alpha: 0.15),
-                              borderRadius: BorderRadius.circular(12),
-                              border: Border.all(
-                                color:
-                                    AppColors.neonGreen.withValues(alpha: 0.4),
-                              ),
-                            ),
-                            child: const Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Icon(Icons.storage,
-                                    color: AppColors.neonGreen, size: 14),
-                                SizedBox(width: 6),
-                                Text(
-                                  'SAVED TO BOOTH DATABASE',
-                                  style: TextStyle(
-                                    color: AppColors.neonGreen,
-                                    fontSize: 11,
-                                    fontWeight: FontWeight.w800,
-                                    letterSpacing: 1.2,
-                                  ),
-                                ),
-                              ],
+                          Text(
+                            'OFFICIAL SHOREBIRD CI/CD LEADERBOARD',
+                            style: TextStyle(
+                              color: AppColors.cyan.withValues(alpha: 0.8),
+                              fontSize: 12,
+                              fontWeight: FontWeight.bold,
+                              letterSpacing: 2.0,
                             ),
                           ),
                         ],
@@ -110,7 +88,7 @@ class TournamentPodiumScreen extends StatelessWidget {
                           padding: const EdgeInsets.fromLTRB(16, 24, 16, 0),
                           decoration: BoxDecoration(
                             color:
-                                const Color(0xFF0A1424).withValues(alpha: 0.8),
+                                AppColors.podiumCardNavy.withValues(alpha: 0.8),
                             borderRadius: BorderRadius.circular(20),
                             border: Border.all(
                               color: AppColors.shorebirdGold
@@ -134,7 +112,7 @@ class TournamentPodiumScreen extends StatelessWidget {
                                     ? PodiumPedestal(
                                         standing: second,
                                         rankText: '2ND',
-                                        color: const Color(0xFFC0C0C0),
+                                        color: AppColors.silverMedal,
                                         pedestalHeight: 110,
                                         isChampion: false,
                                       )
@@ -160,7 +138,7 @@ class TournamentPodiumScreen extends StatelessWidget {
                                     ? PodiumPedestal(
                                         standing: third,
                                         rankText: '3RD',
-                                        color: const Color(0xFFCD7F32),
+                                        color: AppColors.bronzeMedal,
                                         pedestalHeight: 80,
                                         isChampion: false,
                                       )
@@ -287,7 +265,7 @@ class _GuestActionButtons extends StatelessWidget {
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
           decoration: BoxDecoration(
-            color: const Color(0xFF0A192F).withValues(alpha: 0.9),
+            color: AppColors.panelNavy.withValues(alpha: 0.9),
             borderRadius: BorderRadius.circular(12),
             border: Border.all(
               color: AppColors.cyan.withValues(alpha: 0.4),

@@ -13,25 +13,31 @@ class BoothBattleBloc extends Bloc<BoothBattleEvent, BoothBattleState> {
   }
 
   void _onUpdateP1Score(UpdateP1Score event, Emitter<BoothBattleState> emit) {
-    emit(state.copyWith(
-      p1Score: event.score,
-      p1Patches: event.patches,
-      p1Level: event.level,
-      p1Crashed: !event.isAlive,
-    ));
+    emit(
+      state.copyWith(
+        p1Score: event.score,
+        p1Patches: event.patches,
+        p1Level: event.level,
+        p1Crashed: !event.isAlive,
+      ),
+    );
   }
 
   void _onUpdateP2Score(UpdateP2Score event, Emitter<BoothBattleState> emit) {
-    emit(state.copyWith(
-      p2Score: event.score,
-      p2Patches: event.patches,
-      p2Level: event.level,
-      p2Crashed: !event.isAlive,
-    ));
+    emit(
+      state.copyWith(
+        p2Score: event.score,
+        p2Patches: event.patches,
+        p2Level: event.level,
+        p2Crashed: !event.isAlive,
+      ),
+    );
   }
 
   void _onRestartBoothBattle(
-      RestartBoothBattle event, Emitter<BoothBattleState> emit) {
+    RestartBoothBattle event,
+    Emitter<BoothBattleState> emit,
+  ) {
     emit(BoothBattleState());
   }
 }

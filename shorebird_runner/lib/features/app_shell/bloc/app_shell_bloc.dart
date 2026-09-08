@@ -18,10 +18,12 @@ class AppShellBloc extends Bloc<AppShellEvent, AppShellState> {
     NavigateToMode event,
     Emitter<AppShellState> emit,
   ) {
-    emit(state.copyWith(
-      mode: event.mode,
-      podiumRankings: event.podiumRankings,
-    ));
+    emit(
+      state.copyWith(
+        mode: event.mode,
+        podiumRankings: event.podiumRankings,
+      ),
+    );
   }
 
   void _onRematchTriggered(

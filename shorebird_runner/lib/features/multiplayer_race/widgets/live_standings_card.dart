@@ -19,7 +19,7 @@ class LiveStandingsCard extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
         decoration: BoxDecoration(
-          color: const Color(0xFF0A192F).withValues(alpha: 0.88),
+          color: AppColors.panelNavy.withValues(alpha: 0.88),
           borderRadius: BorderRadius.circular(10),
           border: Border.all(
             color: AppColors.shorebirdGold.withValues(alpha: 0.4),

@@ -44,11 +44,13 @@ class PlayerListCard extends StatelessWidget {
           if (players.isEmpty)
             const _EmptyPlayersPlaceholder()
           else
-            ...players.map((p) => _PlayerRow(
-                  player: p,
-                  isMe: p.id == myPlayerId,
-                  isRoomHost: p.id == players.firstOrNull?.id,
-                )),
+            ...players.map(
+              (p) => _PlayerRow(
+                player: p,
+                isMe: p.id == myPlayerId,
+                isRoomHost: p.id == players.firstOrNull?.id,
+              ),
+            ),
         ],
       ),
     );
@@ -191,7 +193,9 @@ class _PlayerRow extends StatelessWidget {
                       const _PlayerBadge(label: 'YOU', color: AppColors.cyan),
                     if (isRoomHost)
                       const _PlayerBadge(
-                          label: '👑 HOST', color: AppColors.goldMedal),
+                        label: '👑 HOST',
+                        color: AppColors.goldMedal,
+                      ),
                   ],
                 ),
                 Text(

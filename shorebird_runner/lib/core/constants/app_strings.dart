@@ -105,4 +105,28 @@ class AppStrings {
   static const String rulesTiersTitle = 'TIER PROGRESSION';
   static const String rulesTiersDesc =
       'Advance through Hobby, Pro, Business, and Enterprise plans with speed boosts!';
+
+  // Booth Battle
+  static const String p1 = 'PLAYER 1';
+  static const String p2 = 'PLAYER 2';
+  static const String vs = 'VS';
+  static const String matchWinner = 'WINNER!';
+  static const String matchTie = "IT'S A TIE!";
+  static const String matchFinished = 'MATCH FINISHED';
+  static const String rematch = 'REMATCH';
+
+  // Lobby Extra Strings
+  static const String playerCallsign = 'PLAYER CALLSIGN';
+  static const String chooseYourPilot = 'CHOOSE YOUR PILOT';
+  static const String createARoom = 'CREATE A ROOM';
+  static const String enterRoomCode = 'ENTER ROOM CODE';
+  static const String joinRace = 'JOIN RACE';
+  static const String connectedDevelopers = 'CONNECTED DEVELOPERS';
+  static const String getReady = 'GET READY!';
+  static const String changeServer = 'Change Server';
+
+  // Start Menu Extra Strings
+  static const String roadmapTitle = 'STAGE PROGRESSION ROADMAP';
+  static const String instantUpdates = 'INSTANT OTA UPDATES FOR FLUTTER';
+  static const String codePush = 'CODE PUSH';
 }

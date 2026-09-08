@@ -16,7 +16,9 @@ class StartMenuBloc extends Bloc<StartMenuEvent, StartMenuState> {
   }
 
   void _onToggleRulesDialog(
-      ToggleRulesDialog event, Emitter<StartMenuState> emit) {
+    ToggleRulesDialog event,
+    Emitter<StartMenuState> emit,
+  ) {
     emit(state.copyWith(showRulesDialog: event.show));
   }
 }

@@ -35,7 +35,7 @@ class MatchResultOverlay extends StatelessWidget {
         : (p1Wins ? '🏆 PLAYER 1 VICTORIOUS!' : '🏆 PLAYER 2 VICTORIOUS!');
 
     final winnerColor = isTie
-        ? const Color(0xFFFFD166)
+        ? AppColors.goldLight
         : (p1Wins ? AppColors.cyan : AppColors.shorebirdGold);
 
     return Container(
@@ -45,7 +45,7 @@ class MatchResultOverlay extends StatelessWidget {
           constraints: const BoxConstraints(maxWidth: 540),
           padding: const EdgeInsets.all(32),
           decoration: BoxDecoration(
-            color: const Color(0xFF0F172A),
+            color: AppColors.darkNavy,
             borderRadius: BorderRadius.circular(20),
             border: Border.all(color: winnerColor, width: 2),
             boxShadow: [
@@ -104,7 +104,9 @@ class MatchResultOverlay extends StatelessWidget {
                       foregroundColor: Colors.white,
                       side: const BorderSide(color: Colors.white38),
                       padding: const EdgeInsets.symmetric(
-                          horizontal: 24, vertical: 14),
+                        horizontal: 24,
+                        vertical: 14,
+                      ),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(10),
                       ),
@@ -121,7 +123,9 @@ class MatchResultOverlay extends StatelessWidget {
                       backgroundColor: winnerColor,
                       foregroundColor: Colors.black,
                       padding: const EdgeInsets.symmetric(
-                          horizontal: 28, vertical: 14),
+                        horizontal: 28,
+                        vertical: 14,
+                      ),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(10),
                       ),

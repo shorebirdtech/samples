@@ -142,10 +142,11 @@ class WebSocketLobbyRepository implements ILobbyRepository {
   }
 
   @override
-  void createRoom(
-      {bool isParticipant = false,
-      String? playerName,
-      PlayerSkin? skin}) async {
+  void createRoom({
+    bool isParticipant = false,
+    String? playerName,
+    PlayerSkin? skin,
+  }) async {
     _myPlayerName =
         playerName?.trim().isNotEmpty == true ? playerName!.trim() : 'Host';
     if (skin != null) _mySkin = skin;
@@ -283,7 +284,9 @@ class WebSocketLobbyRepository implements ILobbyRepository {
           final rawStandings = (json['standings'] as List<dynamic>? ?? []);
           _standings = rawStandings.asMap().entries.map((e) {
             return RacerStanding.fromJson(
-                e.value as Map<String, dynamic>, e.key + 1);
+              e.value as Map<String, dynamic>,
+              e.key + 1,
+            );
           }).toList();
           _standingsController.add(_standings);
           break;
@@ -292,7 +295,9 @@ class WebSocketLobbyRepository implements ILobbyRepository {
           final rawRankings = (json['rankings'] as List<dynamic>? ?? []);
           _finalRankings = rawRankings.asMap().entries.map((e) {
             return RacerStanding.fromJson(
-                e.value as Map<String, dynamic>, e.key + 1);
+              e.value as Map<String, dynamic>,
+              e.key + 1,
+            );
           }).toList();
           _isRacing = false;
           _matchFinishedController.add(_finalRankings);

@@ -68,9 +68,15 @@ class Star {
       final spikeLen = size * 2.8 * currentAlpha;
       _sharedSpikePaint.color = tint.withValues(alpha: currentAlpha * 0.5);
       canvas.drawLine(
-          Offset(x - spikeLen, y), Offset(x + spikeLen, y), _sharedSpikePaint);
+        Offset(x - spikeLen, y),
+        Offset(x + spikeLen, y),
+        _sharedSpikePaint,
+      );
       canvas.drawLine(
-          Offset(x, y - spikeLen), Offset(x, y + spikeLen), _sharedSpikePaint);
+        Offset(x, y - spikeLen),
+        Offset(x, y + spikeLen),
+        _sharedSpikePaint,
+      );
     }
   }
 }

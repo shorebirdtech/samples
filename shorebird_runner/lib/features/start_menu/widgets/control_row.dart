@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:shorebird_runner/core/constants/constants.dart';
 
 class ControlRow extends StatelessWidget {
   final List<String> keys;
@@ -40,7 +41,7 @@ class ControlRow extends StatelessWidget {
         Text(
           label,
           style: const TextStyle(
-            color: Color(0xFF78909C),
+            color: AppColors.slateMuted,
             fontSize: 12,
             letterSpacing: 0.5,
           ),

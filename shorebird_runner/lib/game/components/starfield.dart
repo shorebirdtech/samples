@@ -117,8 +117,12 @@ class Starfield extends Component {
         const Color(0x00000000),
       ],
       radius: 0.85,
-    ).createShader(Rect.fromCircle(
-        center: Offset(w * 0.25 + sin1, h * 0.45), radius: 180));
+    ).createShader(
+      Rect.fromCircle(
+        center: Offset(w * 0.25 + sin1, h * 0.45),
+        radius: 180,
+      ),
+    );
     canvas.drawCircle(Offset(w * 0.25 + sin1, h * 0.45), 180, _cyanNebulaPaint);
 
     // Violet/Magenta cosmic dust cloud (right)
@@ -130,8 +134,12 @@ class Starfield extends Component {
       ],
       radius: 0.85,
     ).createShader(
-        Rect.fromCircle(center: Offset(w * 0.75 + sin2, h * 0.4), radius: 200));
+      Rect.fromCircle(center: Offset(w * 0.75 + sin2, h * 0.4), radius: 200),
+    );
     canvas.drawCircle(
-        Offset(w * 0.75 + sin2, h * 0.4), 200, _purpleNebulaPaint);
+      Offset(w * 0.75 + sin2, h * 0.4),
+      200,
+      _purpleNebulaPaint,
+    );
   }
 }

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:shorebird_runner/core/constants/constants.dart';
 import 'package:shorebird_runner/features/tournament_lobby/bloc/lobby_bloc.dart';
 import 'package:shorebird_runner/features/tournament_lobby/data/data.dart';
 
@@ -37,14 +38,14 @@ class _ServerConfigDialogState extends State<ServerConfigDialog> {
   Widget build(BuildContext context) {
     final repo = context.read<ILobbyRepository>();
     return AlertDialog(
-      backgroundColor: const Color(0xFF0F172A),
+      backgroundColor: AppColors.darkNavy,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16),
-        side: const BorderSide(color: Color(0xFF00D4FF), width: 1.5),
+        side: const BorderSide(color: AppColors.cyan, width: 1.5),
       ),
       title: const Row(
         children: [
-          Icon(Icons.dns, color: Color(0xFF00D4FF)),
+          Icon(Icons.dns, color: AppColors.cyan),
           SizedBox(width: 8),
           Text(
             'LOBBY SERVER CONFIG',
@@ -63,7 +64,7 @@ class _ServerConfigDialogState extends State<ServerConfigDialog> {
         children: [
           const Text(
             'Specify the WebSocket address of your lobby server (e.g. ws://localhost:8088, ws://192.168.1.50:8088, or wss://your-domain.com):',
-            style: TextStyle(color: Color(0xFF94A3B8), fontSize: 13),
+            style: TextStyle(color: AppColors.slateBlue, fontSize: 13),
           ),
           const SizedBox(height: 14),
           TextField(
@@ -73,7 +74,7 @@ class _ServerConfigDialogState extends State<ServerConfigDialog> {
               hintText: 'ws://localhost:8088',
               hintStyle: const TextStyle(color: Colors.white30),
               filled: true,
-              fillColor: const Color(0xFF1E293B),
+              fillColor: AppColors.darkSlate,
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(10),
                 borderSide: BorderSide.none,
@@ -89,7 +90,7 @@ class _ServerConfigDialogState extends State<ServerConfigDialog> {
         ),
         ElevatedButton(
           style: ElevatedButton.styleFrom(
-            backgroundColor: const Color(0xFF00D4FF),
+            backgroundColor: AppColors.cyan,
             foregroundColor: Colors.black,
           ),
           onPressed: () {

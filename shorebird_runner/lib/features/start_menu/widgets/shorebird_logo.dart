@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:shorebird_runner/core/constants/constants.dart';
 
 class ShorebirdLogo extends StatelessWidget {
   const ShorebirdLogo({super.key});
@@ -16,7 +17,7 @@ class ShorebirdLogo extends StatelessWidget {
             shape: BoxShape.circle,
             boxShadow: [
               BoxShadow(
-                color: const Color(0xFFFFC107).withValues(alpha: 0.30),
+                color: AppColors.shorebirdGold.withValues(alpha: 0.30),
                 blurRadius: 60,
                 spreadRadius: 10,
               ),
@@ -30,17 +31,17 @@ class ShorebirdLogo extends StatelessWidget {
           decoration: BoxDecoration(
             shape: BoxShape.circle,
             gradient: const RadialGradient(
-              colors: [Color(0xFF1A1C20), Color(0xFF0C0D10)],
+              colors: [AppColors.cardDarkAlt, AppColors.backgroundDark],
               center: Alignment.topLeft,
               radius: 1.5,
             ),
             border: Border.all(
-              color: const Color(0xFFFFC107).withValues(alpha: 0.6),
+              color: AppColors.shorebirdGold.withValues(alpha: 0.6),
               width: 2,
             ),
             boxShadow: [
               BoxShadow(
-                color: const Color(0xFFFFC107).withValues(alpha: 0.25),
+                color: AppColors.shorebirdGold.withValues(alpha: 0.25),
                 blurRadius: 24,
                 spreadRadius: 2,
               ),
@@ -58,15 +59,15 @@ class ShorebirdLogo extends StatelessWidget {
                 child: Container(
                   padding: const EdgeInsets.all(4),
                   decoration: BoxDecoration(
-                    color: const Color(0xFF0C0D10),
+                    color: AppColors.backgroundDark,
                     shape: BoxShape.circle,
                     border: Border.all(
-                      color: const Color(0xFFFFC107),
+                      color: AppColors.shorebirdGold,
                       width: 1.5,
                     ),
                     boxShadow: [
                       BoxShadow(
-                        color: const Color(0xFFFFC107).withValues(alpha: 0.5),
+                        color: AppColors.shorebirdGold.withValues(alpha: 0.5),
                         blurRadius: 10,
                       ),
                     ],

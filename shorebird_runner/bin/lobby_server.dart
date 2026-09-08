@@ -43,8 +43,11 @@ void main(List<String> args) async {
       if (path == '/api/health') {
         request.response
           ..headers.contentType = ContentType.json
-          ..write(jsonEncode(
-              {'status': 'ok', 'time': DateTime.now().toIso8601String()}));
+          ..write(
+            jsonEncode(
+              {'status': 'ok', 'time': DateTime.now().toIso8601String()},
+            ),
+          );
         await request.response.close();
       } else if (path == '/api/leaderboard') {
         final hallOfFame = db.getHallOfFame();
@@ -185,7 +188,8 @@ class LobbyManager {
           _processMessage(socket, message);
         } catch (e) {
           socket.add(
-              jsonEncode({'type': 'error', 'message': 'Invalid JSON: $e'}));
+            jsonEncode({'type': 'error', 'message': 'Invalid JSON: $e'}),
+          );
         }
       },
       onDone: () => _handleDisconnect(socket),
@@ -247,7 +251,8 @@ class LobbyManager {
         break;
       default:
         socket.add(
-            jsonEncode({'type': 'error', 'message': 'Unknown action: $type'}));
+          jsonEncode({'type': 'error', 'message': 'Unknown action: $type'}),
+        );
     }
   }
 
@@ -258,10 +263,12 @@ class LobbyManager {
 
     final room = rooms[code]!;
     if (room.hostId != pid) {
-      socket.add(jsonEncode({
-        'type': 'error',
-        'message': 'Only the room owner can initiate a rematch',
-      }));
+      socket.add(
+        jsonEncode({
+          'type': 'error',
+          'message': 'Only the room owner can initiate a rematch',
+        }),
+      );
       return;
     }
 
@@ -275,7 +282,8 @@ class LobbyManager {
     }
 
     print(
-        '🔄 Room $code: Host initiated rematch. Returning all players to lobby.');
+      '🔄 Room $code: Host initiated rematch. Returning all players to lobby.',
+    );
     room.broadcast({
       'type': 'room_rematch',
       'room': room.toJson(),
@@ -302,7 +310,7 @@ class LobbyManager {
       'MEGA',
       'TURB',
       'HERO',
-      'APEX'
+      'APEX',
     ];
     String code = words[_rng.nextInt(words.length)];
     if (rooms.containsKey(code)) {
@@ -326,15 +334,18 @@ class LobbyManager {
     socketToRoomCode[socket] = code;
 
     print(
-        '🏠 Room created: $code by host ($hostId), isParticipant: $isParticipant, racers: ${room.players.length}');
+      '🏠 Room created: $code by host ($hostId), isParticipant: $isParticipant, racers: ${room.players.length}',
+    );
 
-    socket.add(jsonEncode({
-      'type': 'room_created',
-      'roomCode': code,
-      'playerId': hostId,
-      'isParticipant': isParticipant,
-      'room': room.toJson(),
-    }));
+    socket.add(
+      jsonEncode({
+        'type': 'room_created',
+        'roomCode': code,
+        'playerId': hostId,
+        'isParticipant': isParticipant,
+        'room': room.toJson(),
+      }),
+    );
   }
 
   void _joinRoom(WebSocket socket, Map<String, dynamic> message) {
@@ -344,18 +355,22 @@ class LobbyManager {
 
     final room = rooms[code];
     if (room == null) {
-      socket.add(jsonEncode({
-        'type': 'join_failed',
-        'message': 'Room "$code" not found. Please check code or create new.',
-      }));
+      socket.add(
+        jsonEncode({
+          'type': 'join_failed',
+          'message': 'Room "$code" not found. Please check code or create new.',
+        }),
+      );
       return;
     }
 
     if (room.state == RoomState.racing) {
-      socket.add(jsonEncode({
-        'type': 'join_failed',
-        'message': 'Race already in progress in room "$code".',
-      }));
+      socket.add(
+        jsonEncode({
+          'type': 'join_failed',
+          'message': 'Race already in progress in room "$code".',
+        }),
+      );
       return;
     }
 
@@ -376,14 +391,17 @@ class LobbyManager {
     socketToRoomCode[socket] = code;
 
     print(
-        '👋 Player ${player.name} ($playerId) joined room $code (Total racers: ${room.players.length})');
+      '👋 Player ${player.name} ($playerId) joined room $code (Total racers: ${room.players.length})',
+    );
 
-    socket.add(jsonEncode({
-      'type': 'join_success',
-      'roomCode': code,
-      'playerId': playerId,
-      'room': room.toJson(),
-    }));
+    socket.add(
+      jsonEncode({
+        'type': 'join_success',
+        'roomCode': code,
+        'playerId': playerId,
+        'room': room.toJson(),
+      }),
+    );
 
     room.broadcast({
       'type': 'room_updated',
@@ -398,17 +416,22 @@ class LobbyManager {
 
     final room = rooms[code]!;
     if (room.hostId != pid) {
-      socket.add(jsonEncode(
-          {'type': 'error', 'message': 'Only the host can start the match'}));
+      socket.add(
+        jsonEncode(
+          {'type': 'error', 'message': 'Only the host can start the match'},
+        ),
+      );
       return;
     }
 
     if (room.players.isEmpty) {
-      socket.add(jsonEncode({
-        'type': 'error',
-        'message':
-            'Cannot start race: Waiting for participants to join with room code "$code"!'
-      }));
+      socket.add(
+        jsonEncode({
+          'type': 'error',
+          'message':
+              'Cannot start race: Waiting for participants to join with room code "$code"!',
+        }),
+      );
       return;
     }
 

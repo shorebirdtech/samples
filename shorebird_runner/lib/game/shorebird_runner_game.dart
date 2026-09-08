@@ -288,8 +288,11 @@ class ShorebirdRunnerGame extends FlameGame
         _hud.score = score;
         AudioService.playStomp();
         _addFloatingText(
-            '🦘 LEAP! +150', o.worldPosition, const Color(0xFF00E5FF),
-            size: 17);
+          '🦘 LEAP! +150',
+          o.worldPosition,
+          const Color(0xFF00E5FF),
+          size: 17,
+        );
       }
       return false;
     }
@@ -302,8 +305,11 @@ class ShorebirdRunnerGame extends FlameGame
         _hud.score = score;
         AudioService.playSlide();
         _addFloatingText(
-            '⚡ SLIDE! +150', o.worldPosition, const Color(0xFFFFD700),
-            size: 17);
+          '⚡ SLIDE! +150',
+          o.worldPosition,
+          const Color(0xFFFFD700),
+          size: 17,
+        );
       }
       return false;
     }
@@ -325,8 +331,11 @@ class ShorebirdRunnerGame extends FlameGame
     _screenShake = 0.8;
 
     _addFloatingText(
-        '💥 SQUASHED! +300', o.worldPosition, const Color(0xFF00FF88),
-        size: 18);
+      '💥 SQUASHED! +300',
+      o.worldPosition,
+      const Color(0xFF00FF88),
+      size: 18,
+    );
   }
 
   bool _checkPatchCollision(Patch p) {
@@ -351,20 +360,30 @@ class ShorebirdRunnerGame extends FlameGame
           .triggerHotReload(6.0); // 6 seconds of invincible Hot Reload power!
       _hud.triggerComboFlash();
       _screenShake = 0.5;
-      _addFloatingText('🔥 HOT RELOAD! +500', pos, const Color(0xFFFF9100),
-          size: 20);
+      _addFloatingText(
+        '🔥 HOT RELOAD! +500',
+        pos,
+        const Color(0xFFFF9100),
+        size: 20,
+      );
       score += 500;
     } else {
       _addFloatingText(
-          '+${GameConfig.patchPoints} 🐤 PATCH!', pos, const Color(0xFFFFD700));
+        '+${GameConfig.patchPoints} 🐤 PATCH!',
+        pos,
+        const Color(0xFFFFD700),
+      );
     }
 
     if (_combo > 0 && _combo % GameConfig.comboThreshold == 0) {
       score += GameConfig.comboBonus;
       _hud.triggerComboFlash();
       AudioService.playCombo();
-      _addFloatingText('COMBO ×$_combo! +${GameConfig.comboBonus}',
-          Offset(pos.dx, pos.dy - 30), const Color(GameConfig.colorAmber));
+      _addFloatingText(
+        'COMBO ×$_combo! +${GameConfig.comboBonus}',
+        Offset(pos.dx, pos.dy - 30),
+        const Color(GameConfig.colorAmber),
+      );
     }
 
     final newLevel = GameConfig.levelFor(totalPatches);
@@ -386,9 +405,12 @@ class ShorebirdRunnerGame extends FlameGame
     _hud.triggerMissFlash();
 
     AudioService.playMiss();
-    _addFloatingText('-${GameConfig.missedPatchPenalty} 🐤 MISSED!',
-        Offset(pos.dx, GameConfig.nearY - 20), const Color(0xFFFF2A4B),
-        size: 18);
+    _addFloatingText(
+      '-${GameConfig.missedPatchPenalty} 🐤 MISSED!',
+      Offset(pos.dx, GameConfig.nearY - 20),
+      const Color(0xFFFF2A4B),
+      size: 18,
+    );
   }
 
   void _triggerLevelUp(LevelConfig newLevel) {
@@ -401,10 +423,11 @@ class ShorebirdRunnerGame extends FlameGame
     _screenShake = 1.0;
 
     _addFloatingText(
-        '${newLevel.emoji} ${newLevel.name} UNLOCKED! +${GameConfig.levelUpBonus}',
-        Offset(GameConfig.designWidth / 2, 260),
-        Color(newLevel.accentColor),
-        size: 24);
+      '${newLevel.emoji} ${newLevel.name} UNLOCKED! +${GameConfig.levelUpBonus}',
+      Offset(GameConfig.designWidth / 2, 260),
+      Color(newLevel.accentColor),
+      size: 24,
+    );
 
     for (final o in List.of(_obstacles)) {
       if (o.depth > 0.35) {
@@ -414,8 +437,12 @@ class ShorebirdRunnerGame extends FlameGame
     }
   }
 
-  void _addFloatingText(String text, Offset pos, Color color,
-      {double size = 16}) {
+  void _addFloatingText(
+    String text,
+    Offset pos,
+    Color color, {
+    double size = 16,
+  }) {
     world.add(FloatingText(text, pos, color, size));
   }
 
@@ -441,7 +468,9 @@ class ShorebirdRunnerGame extends FlameGame
 
   @override
   KeyEventResult onKeyEvent(
-      KeyEvent event, Set<LogicalKeyboardKey> keysPressed) {
+    KeyEvent event,
+    Set<LogicalKeyboardKey> keysPressed,
+  ) {
     if (_isOver) return KeyEventResult.ignored;
 
     if (event is KeyDownEvent) {

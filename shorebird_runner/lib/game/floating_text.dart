@@ -50,8 +50,12 @@ class FloatingText extends Component {
     } else {
       // Fade out cleanly without layout recalculation
       canvas.saveLayer(
-        Rect.fromLTWH(paintOffset.dx - 8, paintOffset.dy - 4,
-            textPainter.width + 16, textPainter.height + 8),
+        Rect.fromLTWH(
+          paintOffset.dx - 8,
+          paintOffset.dy - 4,
+          textPainter.width + 16,
+          textPainter.height + 8,
+        ),
         Paint()..color = const Color(0xFFFFFFFF).withValues(alpha: life),
       );
       textPainter.paint(canvas, paintOffset);

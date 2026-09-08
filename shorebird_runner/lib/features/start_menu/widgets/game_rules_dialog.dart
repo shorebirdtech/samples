@@ -55,7 +55,7 @@ class GameRulesDialog extends StatelessWidget {
                 padding:
                     const EdgeInsets.symmetric(horizontal: 24, vertical: 18),
                 decoration: BoxDecoration(
-                  color: const Color(0xFF0F1E38),
+                  color: AppColors.dialogNavy,
                   borderRadius:
                       const BorderRadius.vertical(top: Radius.circular(18)),
                   border: Border(
@@ -104,8 +104,11 @@ class GameRulesDialog extends StatelessWidget {
                       ),
                     ),
                     IconButton(
-                      icon: const Icon(Icons.close,
-                          color: Colors.white60, size: 20),
+                      icon: const Icon(
+                        Icons.close,
+                        color: Colors.white60,
+                        size: 20,
+                      ),
                       onPressed: () {
                         AudioService.playSelect();
                         Navigator.of(context).pop();
@@ -200,7 +203,7 @@ class GameRulesDialog extends StatelessWidget {
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.shorebirdGold,
-                    foregroundColor: const Color(0xFF1A1200),
+                    foregroundColor: AppColors.buttonDarkText,
                     padding: const EdgeInsets.symmetric(vertical: 14),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),

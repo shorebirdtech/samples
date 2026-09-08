@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:shorebird_runner/core/constants/constants.dart';
 import 'package:shorebird_runner/features/tournament_lobby/bloc/lobby_bloc.dart';
 
 class SpectatorBanner extends StatelessWidget {
@@ -13,14 +14,13 @@ class SpectatorBanner extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: 16),
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       decoration: BoxDecoration(
-        color: const Color(0xFF00D4FF).withValues(alpha: 0.12),
+        color: AppColors.cyan.withValues(alpha: 0.12),
         borderRadius: BorderRadius.circular(12),
-        border:
-            Border.all(color: const Color(0xFF00D4FF).withValues(alpha: 0.4)),
+        border: Border.all(color: AppColors.cyan.withValues(alpha: 0.4)),
       ),
       child: Row(
         children: [
-          const Icon(Icons.tv, color: Color(0xFF00D4FF), size: 22),
+          const Icon(Icons.tv, color: AppColors.cyan, size: 22),
           const SizedBox(width: 12),
           const Expanded(
             child: Column(
@@ -29,7 +29,7 @@ class SpectatorBanner extends StatelessWidget {
                 Text(
                   'BIG SCREEN / SPECTATOR BOARD',
                   style: TextStyle(
-                    color: Color(0xFF00D4FF),
+                    color: AppColors.cyan,
                     fontWeight: FontWeight.w900,
                     fontSize: 12,
                     letterSpacing: 1.2,
@@ -54,12 +54,15 @@ class SpectatorBanner extends StatelessWidget {
                     ),
                   );
             },
-            icon: const Icon(Icons.sports_esports,
-                size: 16, color: Color(0xFF00FF88)),
+            icon: const Icon(
+              Icons.sports_esports,
+              size: 16,
+              color: AppColors.neonGreen,
+            ),
             label: const Text(
               'Join as Racer',
               style: TextStyle(
-                color: Color(0xFF00FF88),
+                color: AppColors.neonGreen,
                 fontWeight: FontWeight.bold,
                 fontSize: 11,
               ),

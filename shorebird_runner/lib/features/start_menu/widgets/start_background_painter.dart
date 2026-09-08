@@ -1,5 +1,6 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
+import 'package:shorebird_runner/core/constants/constants.dart';
 import 'package:shorebird_runner/features/start_menu/widgets/particle_data.dart';
 import 'package:shorebird_runner/features/start_menu/widgets/star_data.dart';
 
@@ -18,9 +19,9 @@ class StartBackgroundPainter extends CustomPainter {
         center: Alignment(0.0, -0.3),
         radius: 1.2,
         colors: [
-          Color(0xFF141820),
-          Color(0xFF0C0D10),
-          Color(0xFF080910),
+          AppColors.bgGradientTop,
+          AppColors.backgroundDark,
+          AppColors.bgGradientBottom,
         ],
         stops: [0.0, 0.5, 1.0],
       ).createShader(Rect.fromLTWH(0, 0, size.width, size.height));
@@ -31,8 +32,8 @@ class StartBackgroundPainter extends CustomPainter {
         center: const Alignment(0.0, -1.0),
         radius: 0.8,
         colors: [
-          const Color(0xFFFFC107).withValues(alpha: 0.06),
-          const Color(0xFFFFC107).withValues(alpha: 0.0),
+          AppColors.shorebirdGold.withValues(alpha: 0.06),
+          AppColors.shorebirdGold.withValues(alpha: 0.0),
         ],
       ).createShader(Rect.fromLTWH(0, 0, size.width, size.height));
     canvas.drawRect(Rect.fromLTWH(0, 0, size.width, size.height), auroraPaint);
@@ -64,12 +65,12 @@ class StartBackgroundPainter extends CustomPainter {
         Offset(x * size.width, y * size.height),
         p.size,
         Paint()
-          ..color = const Color(0xFFFFC107).withValues(alpha: lifeAlpha * 0.35),
+          ..color = AppColors.shorebirdGold.withValues(alpha: lifeAlpha * 0.35),
       );
     }
 
     final gridPaint = Paint()
-      ..color = const Color(0xFFFFC107).withValues(alpha: 0.04)
+      ..color = AppColors.shorebirdGold.withValues(alpha: 0.04)
       ..strokeWidth = 1;
     final cx = size.width / 2;
     final cy = size.height * 0.72;
@@ -83,7 +84,10 @@ class StartBackgroundPainter extends CustomPainter {
           size.width *
           0.5;
       canvas.drawLine(
-          Offset(cx - spread, y), Offset(cx + spread, y), gridPaint);
+        Offset(cx - spread, y),
+        Offset(cx + spread, y),
+        gridPaint,
+      );
     }
   }
 
