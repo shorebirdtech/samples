@@ -1,7 +1,7 @@
 import 'dart:math';
 import 'package:flame/components.dart';
 import 'package:flutter/painting.dart';
-import 'package:shorebird_runner/game/utils/game_config.dart';
+import 'package:shorebird_runner/game/utils/utils.dart';
 
 /// 3D Mario / Subway Surfers elevated runway with GTA 5 nighttime skyline,
 /// rolling hills horizon, checkered highway pavers, dynamic runway light bars,
@@ -11,22 +11,26 @@ class LaneWorld extends Component {
   int totalPatches = 0;
   double _scroll = 0;
 
-  static final _nearLeft = Offset(
-    GameConfig.nearLaneX[0] - 130,
-    GameConfig.nearY + 20,
-  );
-  static final _nearRight = Offset(
-    GameConfig.nearLaneX[2] + 130,
-    GameConfig.nearY + 20,
-  );
-  static final _farLeft = Offset(
-    GameConfig.farLaneX[0] - 25,
-    GameConfig.horizonY,
-  );
-  static final _farRight = Offset(
-    GameConfig.farLaneX[2] + 25,
-    GameConfig.horizonY,
-  );
+  Offset get _nearLeft => Offset(
+        GameConfig.nearLaneX[0] -
+            (GameConfig.nearLaneX[1] - GameConfig.nearLaneX[0]) * 0.65,
+        GameConfig.nearY + 20,
+      );
+  Offset get _nearRight => Offset(
+        GameConfig.nearLaneX[2] +
+            (GameConfig.nearLaneX[2] - GameConfig.nearLaneX[1]) * 0.65,
+        GameConfig.nearY + 20,
+      );
+  Offset get _farLeft => Offset(
+        GameConfig.farLaneX[0] -
+            (GameConfig.farLaneX[1] - GameConfig.farLaneX[0]) * 0.45,
+        GameConfig.horizonY,
+      );
+  Offset get _farRight => Offset(
+        GameConfig.farLaneX[2] +
+            (GameConfig.farLaneX[2] - GameConfig.farLaneX[1]) * 0.45,
+        GameConfig.horizonY,
+      );
 
   Color _curAccentColor = const Color(0xFFFFC107);
   Color _curRoadColor = const Color(0xFF0B1118);
@@ -88,9 +92,20 @@ class LaneWorld extends Component {
     _initCachedTextPainters();
   }
 
+  @override
+  void onGameResize(Vector2 size) {
+    super.onGameResize(size);
+    _initStaticGeometry();
+  }
+
   void _initStaticGeometry() {
-    const cy = GameConfig.horizonY;
-    const w = GameConfig.designWidth;
+    _mountainPath.reset();
+    _skylineBuildingsPath.reset();
+    _amberWindowsPath.reset();
+    _cyanWindowsPath.reset();
+
+    final cy = GameConfig.horizonY;
+    final w = GameConfig.designWidth;
 
     // Mountain Ridge
     _mountainPath
@@ -103,7 +118,7 @@ class LaneWorld extends Component {
       ..close();
 
     // Pre-bake Skyscraper Building blocks and window batches
-    const buildings = [
+    final buildings = [
       (8.0, 55.0, 90.0, 0),
       (68.0, 48.0, 120.0, 1),
       (122.0, 62.0, 75.0, 2),
@@ -221,15 +236,14 @@ class LaneWorld extends Component {
   }
 
   void _drawCinematicCityscape(Canvas canvas) {
-    const cy = GameConfig.horizonY;
+    final cy = GameConfig.horizonY;
 
     // 1. Distant Mountain Ridge Silhouettes against Twilight Sky
     _mountainPaint.shader = const LinearGradient(
       begin: Alignment.topCenter,
       end: Alignment.bottomCenter,
       colors: [Color(0xFF0F0826), Color(0xFF060312)],
-    ).createShader(
-        const Rect.fromLTWH(0, cy - 110, GameConfig.designWidth, 110));
+    ).createShader(Rect.fromLTWH(0, cy - 110, GameConfig.designWidth, 110));
     canvas.drawPath(_mountainPath, _mountainPaint);
 
     // 2. Deep Atmospheric Horizon Fog Haze
@@ -242,10 +256,9 @@ class LaneWorld extends Component {
         const Color(0xFF030712),
       ],
       stops: const [0.0, 0.65, 1.0],
-    ).createShader(
-        const Rect.fromLTWH(0, cy - 130, GameConfig.designWidth, 130));
+    ).createShader(Rect.fromLTWH(0, cy - 130, GameConfig.designWidth, 130));
     canvas.drawRect(
-      const Rect.fromLTWH(0, cy - 130, GameConfig.designWidth, 130),
+      Rect.fromLTWH(0, cy - 130, GameConfig.designWidth, 130),
       _hazePaint,
     );
 
@@ -264,8 +277,7 @@ class LaneWorld extends Component {
       begin: Alignment.topCenter,
       end: Alignment.bottomCenter,
       colors: [Color(0xFF0D1826), Color(0xFF040810)],
-    ).createShader(
-        const Rect.fromLTWH(0, cy - 150, GameConfig.designWidth, 150));
+    ).createShader(Rect.fromLTWH(0, cy - 150, GameConfig.designWidth, 150));
     canvas.drawPath(_skylineBuildingsPath, _bldFillPaint);
 
     canvas.drawPath(_amberWindowsPath, _amberWinPaint);
@@ -284,8 +296,8 @@ class LaneWorld extends Component {
         ],
         stops: const [0.0, 0.45, 1.0],
       ).createShader(Rect.fromCircle(
-          center: const Offset(GameConfig.vanishingX, cy), radius: 110));
-    canvas.drawCircle(const Offset(GameConfig.vanishingX, cy), 110, bloomPaint);
+          center: Offset(GameConfig.vanishingX, cy), radius: 110));
+    canvas.drawCircle(Offset(GameConfig.vanishingX, cy), 110, bloomPaint);
 
     // 7. Glowing Horizon Laser Neon Line
     final horizonGlow = Paint()
@@ -313,7 +325,7 @@ class LaneWorld extends Component {
   }
 
   void _drawRooftopElements(Canvas canvas, double cy) {
-    const w = GameConfig.designWidth;
+    final w = GameConfig.designWidth;
 
     // Billboards
     _renderCachedBillboard(

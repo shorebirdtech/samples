@@ -1,94 +1,66 @@
+import 'dart:math';
+import 'package:shorebird_runner/game/utils/level_config.dart';
+
 /// Central configuration for Patch Rush game balance, Mario 3D mechanics, and Booth Battle.
-library;
-
-/// Defines a single stage / world in the game.
-class LevelConfig {
-  final int level;
-  final String name;
-  final String subtitle;
-  final String emoji;
-
-  /// Total cumulative patches collected needed to *enter* this level.
-  final int patchThreshold;
-
-  /// Total cumulative patches collected to complete this level (or null if max/endless).
-  final int? nextThreshold;
-
-  /// Overall speed multiplier at this level.
-  final double speedMultiplier;
-
-  /// Seconds between obstacle spawns.
-  final double obstacleInterval;
-
-  /// Seconds between patch spawns.
-  final double patchInterval;
-
-  /// Probability of 2 lanes having obstacles simultaneously (forcing jump or precision steer).
-  final double doubleObstacleChance;
-
-  /// Theme accent color (HUD badges, level-up banners, particle flares).
-  final int accentColor;
-
-  /// Road surface tint.
-  final int roadColor;
-
-  /// Road edge glow color.
-  final int edgeColor;
-
-  /// Horizon glow color.
-  final int horizonColor;
-
-  final String planQuota;
-
-  const LevelConfig({
-    required this.level,
-    required this.name,
-    required this.planQuota,
-    required this.subtitle,
-    required this.emoji,
-    required this.patchThreshold,
-    required this.nextThreshold,
-    required this.speedMultiplier,
-    required this.obstacleInterval,
-    required this.patchInterval,
-    required this.doubleObstacleChance,
-    required this.accentColor,
-    required this.roadColor,
-    required this.edgeColor,
-    required this.horizonColor,
-  });
-
-  /// How many patches needed in this level alone to reach the next level.
-  int get patchesNeeded {
-    if (nextThreshold == null) return 20; // max level loop
-    return nextThreshold! - patchThreshold;
-  }
-}
-
 class GameConfig {
   GameConfig._();
 
-  // ── Canvas / viewport ─────────────────────────────────────────────────────
-  static const double designWidth = 800;
-  static const double designHeight = 600;
+  // ── Canvas / viewport (dynamically updated to fill 100% of screen) ─────────
+  static double designWidth = 800;
+  static double designHeight = 600;
 
   // ── Lane layout ───────────────────────────────────────────────────────────
   static const int laneCount = 3;
 
   /// X-positions of lane centers at the NEAR edge (bottom of the road).
-  static const List<double> nearLaneX = [190, 400, 610];
+  static List<double> nearLaneX = [190, 400, 610];
 
   /// X-positions of lane centers at the FAR edge (horizon/vanishing point).
-  static const List<double> farLaneX = [345, 400, 455];
+  static List<double> farLaneX = [345, 400, 455];
 
   /// Y-position of the horizon line.
-  static const double horizonY = 210;
+  static double horizonY = 210;
 
   /// Y-position of the near (player) edge.
-  static const double nearY = 560;
+  static double nearY = 560;
 
   /// Vanishing point X.
-  static const double vanishingX = 400;
+  static double vanishingX = 400;
+
+  /// Dynamically update viewport and lane layout for full-screen edge-to-edge rendering.
+  static void updateDimensions(double width, double height) {
+    if (width <= 0 || height <= 0) return;
+    designWidth = width;
+    designHeight = height;
+    vanishingX = width / 2;
+
+    final isPortrait = height > width;
+    if (isPortrait) {
+      horizonY = height * 0.28;
+      nearY = height * 0.84;
+      final roadWidth = width * 0.78;
+      final laneSpacing = roadWidth / 2;
+      nearLaneX = [
+        vanishingX - laneSpacing,
+        vanishingX,
+        vanishingX + laneSpacing
+      ];
+      final farSpread = laneSpacing * 0.18;
+      farLaneX = [vanishingX - farSpread, vanishingX, vanishingX + farSpread];
+    } else {
+      horizonY = height * 0.36;
+      nearY = height * 0.88;
+      final roadWidth = min(width * 0.65, height * 0.95);
+      final laneSpacing = roadWidth / 2;
+      nearLaneX = [
+        vanishingX - laneSpacing,
+        vanishingX,
+        vanishingX + laneSpacing
+      ];
+      final farSpread = laneSpacing * 0.20;
+      farLaneX = [vanishingX - farSpread, vanishingX, vanishingX + farSpread];
+    }
+  }
 
   // ── Penalty Rules (High Difficulty) ────────────────────────────────────────
   static const int missedPatchPenalty =

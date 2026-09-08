@@ -1,7 +1,9 @@
 import 'dart:math';
 import 'package:flame/components.dart';
 import 'package:flutter/painting.dart';
-import 'package:shorebird_runner/game/components/player.dart';
+import 'package:shorebird_runner/game/components/magnetic_trail_particle.dart';
+import 'package:shorebird_runner/game/components/perspective_helper.dart';
+import 'package:shorebird_runner/game/components/sparkle.dart';
 import 'package:shorebird_runner/game/utils/audio_service.dart';
 import 'package:shorebird_runner/game/utils/game_config.dart';
 
@@ -26,8 +28,8 @@ class Patch extends Component {
   final Random _rng;
 
   final void Function(Offset pos)? onMissed;
-  final List<_Sparkle> _sparkles = [];
-  final List<_MagneticTrailParticle> _magnetParticles = [];
+  final List<Sparkle> _sparkles = [];
+  final List<MagneticTrailParticle> _magnetParticles = [];
 
   static final TextPainter _staticChickPainter = TextPainter(
     text: const TextSpan(
@@ -64,7 +66,7 @@ class Patch extends Component {
     if (_rng.nextDouble() < 0.6 && _magnetParticles.length < 20) {
       final pos = worldPosition;
       final scale = worldScale;
-      _magnetParticles.add(_MagneticTrailParticle(
+      _magnetParticles.add(MagneticTrailParticle(
         pos,
         _rng,
         scale: scale,
@@ -126,7 +128,7 @@ class Patch extends Component {
     final rng = Random();
     final count = isHotReloadBooster ? 24 : 18;
     for (int i = 0; i < count; i++) {
-      _sparkles.add(_Sparkle(pos, rng, isBooster: isHotReloadBooster));
+      _sparkles.add(Sparkle(pos, rng, isBooster: isHotReloadBooster));
     }
   }
 
@@ -376,92 +378,22 @@ class Patch extends Component {
     for (final mp in _magnetParticles) {
       mp.render(canvas);
     }
-  }
-}
 
-class _MagneticTrailParticle {
-  Offset pos;
-  final Offset velocity;
-  final Color color;
-  final double radius;
-  double life = 1.0;
+    // Reusable paint instances with ZERO allocations in hot loop
+    final glowPaint = Paint()
+      ..color = const Color(0xFFFFD700).withValues(alpha: 0.85)
+      ..strokeWidth = 2.2
+      ..style = PaintingStyle.stroke;
+    final corePaint = Paint()
+      ..color = const Color(0xFFFFFFFF)
+      ..strokeWidth = 1.0
+      ..style = PaintingStyle.stroke;
 
-  _MagneticTrailParticle(
-    Offset origin,
-    Random rng, {
-    required double scale,
-    bool isBooster = false,
-    double dirX = 0.0,
-  })  : pos = origin,
-        velocity = Offset(
-          dirX * (30 + rng.nextDouble() * 50),
-          20 + rng.nextDouble() * 40,
-        ),
-        color = isBooster
-            ? const Color(0xFFFFD700)
-            : (rng.nextBool()
-                ? const Color(0xFF00FFCC)
-                : const Color(0xFFFFE066)),
-        radius = (rng.nextDouble() * 2.5 + 2.0) * scale;
+    canvas.drawLine(const Offset(-14, 0), const Offset(14, 0), glowPaint);
+    canvas.drawLine(const Offset(-14, 0), const Offset(14, 0), corePaint);
+    canvas.drawLine(const Offset(0, -14), const Offset(0, 14), glowPaint);
+    canvas.drawLine(const Offset(0, -14), const Offset(0, 14), corePaint);
 
-  void update(double dt) {
-    pos += velocity * dt;
-    life = (life - dt * 4.0).clamp(0.0, 1.0);
-  }
-
-  void render(Canvas canvas) {
-    if (life <= 0) return;
-    final outerPaint = Paint()
-      ..color = color.withValues(alpha: life * 0.35)
-      ..style = PaintingStyle.fill;
-    canvas.drawCircle(pos, radius * life * 1.8, outerPaint);
-
-    final innerPaint = Paint()
-      ..color = color.withValues(alpha: life * 0.90)
-      ..style = PaintingStyle.fill;
-    canvas.drawCircle(pos, radius * life, innerPaint);
-  }
-}
-
-class _Sparkle {
-  Offset pos;
-  final Offset velocity;
-  final Color color;
-  final double radius;
-  double life = 1.0;
-
-  _Sparkle(Offset origin, Random rng, {bool isBooster = false})
-      : pos = origin,
-        velocity = Offset(
-          (rng.nextDouble() - 0.5) * (isBooster ? 260 : 190),
-          -rng.nextDouble() * (isBooster ? 220 : 170) - 40,
-        ),
-        color = isBooster
-            ? (rng.nextBool()
-                ? const Color(0xFFFFD700)
-                : (rng.nextBool()
-                    ? const Color(0xFFFF007F)
-                    : const Color(0xFF00FFCC)))
-            : (rng.nextBool()
-                ? const Color(0xFF00E5FF)
-                : const Color(0xFFFFD700)),
-        radius = rng.nextDouble() * 3.5 + 2.0;
-
-  void update(double dt) {
-    pos += velocity * dt;
-    life = (life - dt * 2.8).clamp(0.0, 1.0);
-  }
-
-  void render(Canvas canvas) {
-    if (life <= 0) return;
-    final outerPaint = Paint()
-      ..color = color.withValues(alpha: life * 0.35)
-      ..style = PaintingStyle.fill;
-    canvas.drawCircle(pos, radius * life * 1.8, outerPaint);
-
-    final innerPaint = Paint()
-      ..color = color.withValues(alpha: life * 0.90)
-      ..style = PaintingStyle.fill;
-    canvas.drawCircle(pos, radius * life, innerPaint);
+    canvas.restore();
   }
 }
