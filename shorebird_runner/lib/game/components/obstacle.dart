@@ -2,16 +2,9 @@ import 'dart:math';
 import 'package:flame/components.dart';
 import 'package:flutter/material.dart' show Colors;
 import 'package:flutter/painting.dart';
-import 'package:shorebird_runner/game/components/player.dart';
+import 'package:shorebird_runner/game/components/obstacle_type.dart';
+import 'package:shorebird_runner/game/components/perspective_helper.dart';
 import 'package:shorebird_runner/game/utils/game_config.dart';
-
-enum ObstacleType {
-  appStore, // Apple App Store logo barrier (dodge sideways)
-  playStore, // Google Play Store 4-color polygon emblem (dodge sideways)
-  wormBug, // Animated 🐛 crawling caterpillar bug (jump over or dodge)
-  mergeBarricade, // 🚧 Low road construction barricade (jump over or dodge)
-  reviewGate, // 🚨 Overhead App Review Laser Gate (slide under or dodge)
-}
 
 /// 3D obstacle representing App Store & Play Store review delays, merge blocks, and runtime bugs.
 /// Designed for 120 FPS performance with zero MaskFilter.blur passes and cached TextPainters.

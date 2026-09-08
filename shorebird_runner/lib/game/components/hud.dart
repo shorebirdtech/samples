@@ -1,7 +1,7 @@
 import 'dart:math';
 import 'package:flame/components.dart';
 import 'package:flutter/painting.dart';
-import 'package:shorebird_runner/game/utils/game_config.dart';
+import 'package:shorebird_runner/game/utils/utils.dart';
 
 /// High-Performance Heads-Up Display overlay — Shorebird brand themed.
 /// Zero per-frame text layouts (cached TextPainters for 120 FPS smoothness),
@@ -293,7 +293,7 @@ class Hud extends Component {
     final accentColor = isMissing ? const Color(0xFFFF3D57) : _shorebirdGold;
 
     // Panel background — deep navy with subtle gradient
-    const panelRect = Rect.fromLTWH(0, 0, GameConfig.designWidth, 68);
+    final panelRect = Rect.fromLTWH(0, 0, GameConfig.designWidth, 68);
     _bgPaint.shader = const LinearGradient(
       begin: Alignment.topCenter,
       end: Alignment.bottomCenter,
@@ -305,7 +305,7 @@ class Hud extends Component {
     canvas.drawRect(panelRect, _bgPaint);
 
     // Top sheen
-    const sheenRect = Rect.fromLTWH(0, 0, GameConfig.designWidth, 18);
+    final sheenRect = Rect.fromLTWH(0, 0, GameConfig.designWidth, 18);
     _sheenPaint.shader = const LinearGradient(
       begin: Alignment.topCenter,
       end: Alignment.bottomCenter,
@@ -317,7 +317,7 @@ class Hud extends Component {
     canvas.drawRect(sheenRect, _sheenPaint);
 
     // Shorebird gold bottom border
-    const borderRect = Rect.fromLTWH(0, 67, GameConfig.designWidth, 1.5);
+    final borderRect = Rect.fromLTWH(0, 67, GameConfig.designWidth, 1.5);
     _borderPaint.shader = LinearGradient(
       colors: [
         accentColor.withValues(alpha: 0.0),
@@ -353,11 +353,11 @@ class Hud extends Component {
     }
 
     // ── RIGHT: Next Level Progress ──
-    _tpNextLabel?.paint(canvas, const Offset(GameConfig.designWidth - 178, 10));
-    _tpNextValue?.paint(canvas, const Offset(GameConfig.designWidth - 178, 26));
+    _tpNextLabel?.paint(canvas, Offset(GameConfig.designWidth - 178, 10));
+    _tpNextValue?.paint(canvas, Offset(GameConfig.designWidth - 178, 26));
 
     // 🐤 Shorebird logo mark on the far right
-    _tpLogo?.paint(canvas, const Offset(GameConfig.designWidth - 30, 24));
+    _tpLogo?.paint(canvas, Offset(GameConfig.designWidth - 30, 24));
   }
 
   void _drawStageProgressBar(Canvas canvas) {
@@ -369,7 +369,7 @@ class Hud extends Component {
 
     // Track
     canvas.drawRect(
-      const Rect.fromLTWH(0, barY, GameConfig.designWidth, barH),
+      Rect.fromLTWH(0, barY, GameConfig.designWidth, barH),
       _trackPaint,
     );
 
@@ -429,7 +429,7 @@ class Hud extends Component {
 
     const bannerW = 500.0;
     const bannerH = 120.0;
-    const cx = GameConfig.designWidth / 2;
+    final cx = GameConfig.designWidth / 2;
     const cy = 190.0;
 
     canvas.save();

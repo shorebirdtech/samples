@@ -2,85 +2,11 @@ import 'dart:math';
 import 'package:flame/components.dart';
 import 'package:flutter/animation.dart' show Curves;
 import 'package:flutter/painting.dart';
+import 'package:shorebird_runner/game/components/dash_spark.dart';
+import 'package:shorebird_runner/game/components/perspective_helper.dart';
+import 'package:shorebird_runner/game/components/player_skin.dart';
 import 'package:shorebird_runner/game/utils/audio_service.dart';
 import 'package:shorebird_runner/game/utils/game_config.dart';
-
-enum PlayerSkin { blueBird, goldPhoenix, emeraldFalcon, violetRaven }
-
-extension PlayerSkinDetails on PlayerSkin {
-  String get displayName {
-    switch (this) {
-      case PlayerSkin.blueBird:
-        return 'Shorebird Dev';
-      case PlayerSkin.goldPhoenix:
-        return 'Frontend Ninja';
-      case PlayerSkin.emeraldFalcon:
-        return 'Fullstack Hero';
-      case PlayerSkin.violetRaven:
-        return 'Bug Hunter';
-    }
-  }
-
-  String get roleTitle {
-    switch (this) {
-      case PlayerSkin.blueBird:
-        return 'CodePush Specialist';
-      case PlayerSkin.goldPhoenix:
-        return 'UI / Flutter Architect';
-      case PlayerSkin.emeraldFalcon:
-        return 'Fullstack Hacker';
-      case PlayerSkin.violetRaven:
-        return 'QA Bug Terminator';
-    }
-  }
-
-  String get emoji {
-    switch (this) {
-      case PlayerSkin.blueBird:
-        return '👨‍💻';
-      case PlayerSkin.goldPhoenix:
-        return '🧑‍💻';
-      case PlayerSkin.emeraldFalcon:
-        return '⚡';
-      case PlayerSkin.violetRaven:
-        return '👾';
-    }
-  }
-}
-
-/// Perspective helper: maps normalized depth t (0=horizon, 1=near player)
-/// and lane index to a canvas position and scale factor.
-class PerspectiveHelper {
-  const PerspectiveHelper._();
-
-  static Offset lanePosition(int lane, double t) {
-    return fractionalLanePosition(lane.toDouble(), t);
-  }
-
-  static Offset fractionalLanePosition(double laneFrac, double t) {
-    final tPow = pow(t, 1.6).toDouble();
-    final clampedLane =
-        laneFrac.clamp(0.0, (GameConfig.laneCount - 1).toDouble());
-    final leftIdx = clampedLane.floor();
-    final rightIdx = min(leftIdx + 1, GameConfig.laneCount - 1);
-    final frac = clampedLane - leftIdx;
-
-    final farX = GameConfig.farLaneX[leftIdx] +
-        (GameConfig.farLaneX[rightIdx] - GameConfig.farLaneX[leftIdx]) * frac;
-    final nearX = GameConfig.nearLaneX[leftIdx] +
-        (GameConfig.nearLaneX[rightIdx] - GameConfig.nearLaneX[leftIdx]) * frac;
-    final x = farX + (nearX - farX) * tPow;
-    final y =
-        GameConfig.horizonY + (GameConfig.nearY - GameConfig.horizonY) * tPow;
-    return Offset(x, y);
-  }
-
-  static double scaleAtDepth(double t) {
-    final tPow = pow(t, 1.6).toDouble();
-    return GameConfig.horizonSizeMultiplier +
-        (1.0 - GameConfig.horizonSizeMultiplier) * tPow;
-  }
-}
 
 /// The player character — an animated 3D human developer seen from behind,
 /// sprinting down the 3-lane production highway with alternating running legs,
@@ -96,7 +22,7 @@ class Player extends Component {
   final PlayerSkin skin;
 
   double _runPhase = 0.0;
-  final List<_DashSpark> _particles = [];
+  final List<DashSpark> _particles = [];
   final Random _rng = Random();
 
   // Jump state
@@ -224,7 +150,7 @@ class Player extends Component {
         final pos = worldPosition;
         for (int i = 0; i < 6; i++) {
           if (_particles.length < 24) {
-            _particles.add(_DashSpark(
+            _particles.add(DashSpark(
                 Offset(pos.dx + (_rng.nextDouble() - 0.5) * 24, pos.dy + 34),
                 _rng,
                 _getAuraColor()));
@@ -242,7 +168,7 @@ class Player extends Component {
       _slideTime += dt;
       final pos = worldPosition;
       if (_particles.length < 24) {
-        _particles.add(_DashSpark(
+        _particles.add(DashSpark(
             Offset(pos.dx + (_rng.nextDouble() - 0.5) * 26, pos.dy + 30),
             _rng,
             const Color(0xFFFFB300)));
@@ -258,7 +184,7 @@ class Player extends Component {
       _invincibleTimer = max(0.0, _invincibleTimer - dt);
       final pos = worldPosition;
       if (_particles.length < 24) {
-        _particles.add(_DashSpark(
+        _particles.add(DashSpark(
             Offset(pos.dx + (_rng.nextDouble() - 0.5) * 36,
                 pos.dy + (_rng.nextDouble() - 0.5) * 30),
             _rng,
@@ -275,8 +201,7 @@ class Player extends Component {
       if (stride.abs() > 0.85 && _particles.length < 24) {
         final footX = pos.dx + (stride > 0 ? 12.0 : -12.0);
         final sparkColor = _getAuraColor();
-        _particles
-            .add(_DashSpark(Offset(footX, pos.dy + 32), _rng, sparkColor));
+        _particles.add(DashSpark(Offset(footX, pos.dy + 32), _rng, sparkColor));
       }
     }
 
@@ -842,35 +767,5 @@ class Player extends Component {
     canvas.drawCircle(const Offset(0, 0), 3.5, screenGlowInner);
 
     canvas.restore();
-  }
-}
-
-class _DashSpark {
-  Offset pos;
-  final Offset vel;
-  double life = 1.0;
-  final Color color;
-
-  static final Paint _sharedSparkOuter = Paint()..style = PaintingStyle.fill;
-  static final Paint _sharedSparkInner = Paint()..style = PaintingStyle.fill;
-
-  _DashSpark(this.pos, Random rng, this.color)
-      : vel = Offset(
-          (rng.nextDouble() - 0.5) * 24,
-          15 + rng.nextDouble() * 30,
-        );
-
-  void update(double dt) {
-    pos = Offset(pos.dx + vel.dx * dt, pos.dy + vel.dy * dt);
-    life = (life - dt * 4.2).clamp(0.0, 1.0);
-  }
-
-  void render(Canvas canvas) {
-    if (life <= 0) return;
-    _sharedSparkOuter.color = color.withValues(alpha: life * 0.35);
-    canvas.drawCircle(pos, 4.0 * life, _sharedSparkOuter);
-
-    _sharedSparkInner.color = color.withValues(alpha: life * 0.90);
-    canvas.drawCircle(pos, 1.8 * life, _sharedSparkInner);
   }
 }

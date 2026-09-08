@@ -1,25 +1,14 @@
 import 'dart:math';
+import 'package:flame/components.dart';
 import 'package:flame/events.dart';
 import 'package:flame/game.dart';
-import 'package:flame/components.dart' show Anchor;
 import 'package:flutter/material.dart' show KeyEventResult;
-import 'package:flutter/services.dart';
 import 'package:flutter/painting.dart';
-import 'package:shorebird_runner/game/components/hud.dart';
-import 'package:shorebird_runner/game/components/lane_world.dart';
-import 'package:shorebird_runner/game/components/obstacle.dart';
-import 'package:shorebird_runner/game/components/patch.dart';
-import 'package:shorebird_runner/game/components/player.dart';
-import 'package:shorebird_runner/game/components/starfield.dart';
-import 'package:shorebird_runner/game/utils/audio_service.dart';
-import 'package:shorebird_runner/game/utils/game_config.dart';
-import 'package:shorebird_runner/game/utils/high_score_service.dart';
-
-enum ControlScheme {
-  both, // Solo: A/D/W/S, Space, and Arrow keys all work
-  wasd, // Player 1 in Booth Battle: A/D move, W/Space jump, S slide
-  arrows, // Player 2 in Booth Battle: Left/Right move, Up jump, Down slide
-}
+import 'package:flutter/services.dart';
+import 'package:shorebird_runner/game/components/components.dart';
+import 'package:shorebird_runner/game/control_scheme.dart';
+import 'package:shorebird_runner/game/floating_text.dart';
+import 'package:shorebird_runner/game/utils/utils.dart';
 
 /// The core Shorebird Runner engine.
 /// Engineered for 120 FPS buttery-smooth performance, zero per-frame text layouts,
@@ -62,7 +51,6 @@ class ShorebirdRunnerGame extends FlameGame
   late final LaneWorld _laneWorld;
   final List<Obstacle> _obstacles = [];
   final List<Patch> _patches = [];
-  final List<_FloatingText> _floatingTexts = [];
   final _rng = Random();
 
   // Screen shake & crash flash
@@ -81,15 +69,9 @@ class ShorebirdRunnerGame extends FlameGame
 
   @override
   Future<void> onLoad() async {
-    camera.viewfinder.position = Vector2(
-      GameConfig.designWidth / 2,
-      GameConfig.designHeight / 2,
-    );
-    camera.viewfinder.anchor = Anchor.center;
-    camera.viewfinder.visibleGameSize = Vector2(
-      GameConfig.designWidth,
-      GameConfig.designHeight,
-    );
+    GameConfig.updateDimensions(size.x, size.y);
+    camera.viewfinder.anchor = Anchor.topLeft;
+    camera.viewfinder.position = Vector2.zero();
 
     highScore = await HighScoreService.load();
 
@@ -103,6 +85,12 @@ class ShorebirdRunnerGame extends FlameGame
     _hud = Hud(playerTag: playerTag);
     _hud.highScore = highScore;
     await world.add(_hud);
+  }
+
+  @override
+  void onGameResize(Vector2 size) {
+    super.onGameResize(size);
+    GameConfig.updateDimensions(size.x, size.y);
   }
 
   @override
@@ -188,14 +176,6 @@ class ShorebirdRunnerGame extends FlameGame
       }
     }
 
-    // Update floating texts
-    for (final ft in List.of(_floatingTexts)) {
-      ft.update(safeDt);
-      if (ft.isDone) {
-        _floatingTexts.remove(ft);
-      }
-    }
-
     // Screen shake
     if (_screenShake > 0) {
       _screenShake = (_screenShake - safeDt * 3.5).clamp(0, 10);
@@ -215,11 +195,6 @@ class ShorebirdRunnerGame extends FlameGame
   @override
   void render(Canvas canvas) {
     super.render(canvas);
-
-    // Floating text rendering (zero per-frame text layouts)
-    for (final ft in _floatingTexts) {
-      ft.render(canvas);
-    }
 
     // Fullscreen Red Danger Flash & Vignette (covers entire canvas seamlessly)
     if (_crashFlash > 0) {
@@ -427,7 +402,7 @@ class ShorebirdRunnerGame extends FlameGame
 
     _addFloatingText(
         '${newLevel.emoji} ${newLevel.name} UNLOCKED! +${GameConfig.levelUpBonus}',
-        const Offset(GameConfig.designWidth / 2, 260),
+        Offset(GameConfig.designWidth / 2, 260),
         Color(newLevel.accentColor),
         size: 24);
 
@@ -441,7 +416,7 @@ class ShorebirdRunnerGame extends FlameGame
 
   void _addFloatingText(String text, Offset pos, Color color,
       {double size = 16}) {
-    _floatingTexts.add(_FloatingText(text, pos, color, size));
+    world.add(FloatingText(text, pos, color, size));
   }
 
   void _triggerCrash() {
@@ -576,59 +551,6 @@ class ShorebirdRunnerGame extends FlameGame
       _player.moveToLane(2);
     } else {
       _player.moveToLane(1);
-    }
-  }
-}
-
-/// Zero-allocation, cached floating text indicator.
-/// TextPainter is laid out ONCE at creation — never in render loops!
-class _FloatingText {
-  Offset pos;
-  double life = 1.0;
-  final TextPainter textPainter;
-
-  _FloatingText(String text, this.pos, Color color, double size)
-      : textPainter = TextPainter(
-          text: TextSpan(
-            text: text,
-            style: TextStyle(
-              color: color,
-              fontSize: size,
-              fontWeight: FontWeight.w900,
-              letterSpacing: 1.4,
-              shadows: const [
-                Shadow(
-                  color: Color(0xDD000000),
-                  blurRadius: 4,
-                  offset: Offset(1, 1),
-                ),
-              ],
-            ),
-          ),
-          textDirection: TextDirection.ltr,
-        )..layout();
-
-  bool get isDone => life <= 0;
-
-  void update(double dt) {
-    pos = Offset(pos.dx, pos.dy - dt * 45);
-    life = (life - dt * 1.5).clamp(0.0, 1.0);
-  }
-
-  void render(Canvas canvas) {
-    if (life <= 0) return;
-    final paintOffset = Offset(pos.dx - textPainter.width / 2, pos.dy);
-    if (life >= 0.9) {
-      textPainter.paint(canvas, paintOffset);
-    } else {
-      // Fade out cleanly without layout recalculation
-      canvas.saveLayer(
-        Rect.fromLTWH(paintOffset.dx - 8, paintOffset.dy - 4,
-            textPainter.width + 16, textPainter.height + 8),
-        Paint()..color = const Color(0xFFFFFFFF).withValues(alpha: life),
-      );
-      textPainter.paint(canvas, paintOffset);
-      canvas.restore();
     }
   }
 }

@@ -31,14 +31,23 @@ As you collect patches, your deployment infrastructure upgrades through Shorebir
 
 ---
 
-## 🕹️ Subway Surfers Signature Controls
+## 🕹️ Controls
 
-| Input (Desktop) | Input (Mobile / Touch) | Action |
-|---|---|---|
-| `←` / `A` | **Swipe Left** or Tap Left | Steer Left Lane |
-| `→` / `D` | **Swipe Right** or Tap Right | Steer Right Lane |
-| `↑` / `W` / `Space` | **Swipe Up** or Tap Top Half | **Jump** (Leap over low barricades & bugs) |
-| `↓` / `S` | **Swipe Down** or Tap Bottom Half | **Slide** (Crouch under review gates; dive down in mid-air) |
+### Desktop
+| Key | Action |
+|---|---|
+| `←` / `A` | Steer Left Lane |
+| `→` / `D` | Steer Right Lane |
+| `↑` / `W` / `Space` | **Jump** (Leap over low barricades & bugs) |
+| `↓` / `S` | **Slide** (Crouch under review gates) |
+
+### Mobile / Touch
+| Input | Action |
+|---|---|
+| **Tap Left Third** | Move to Left Lane |
+| **Tap Center Third** | Move to Center Lane |
+| **Tap Right Third** | Move to Right Lane |
+| Touch control bar buttons | Jump / Slide / Lane buttons |
 
 > *Tip: Weaving past obstacles at the last millisecond triggers **`NEAR MISS! +250 PTS`**!*
 
@@ -196,7 +205,11 @@ A production-ready [`Dockerfile`](file:///Users/abhishekdoshi/Documents/shorebir
 4. **Launch Race**:
    * Once attendees appear in the **CONNECTED DEVELOPERS** list, the host taps **LAUNCH RACE**.
    * A synchronized 3-2-1 countdown begins simultaneously across all devices.
-5. **Live Standings & Tournament Podium**:
+5. **Rematch**:
+   * After the race, the **Tournament Podium** is shown.
+   * Only the **room owner (host)** can trigger a rematch via the **REMATCH RACE** button.
+   * Non-host players see a waiting state and can **LEAVE ROOM** if they don't wish to continue.
+6. **Live Standings & Tournament Podium**:
    * During the race, live telemetry updates rank changes, scores, and crash status in real-time.
    * When the race concludes, all devices transition to the **Tournament Podium** showing 🥇 1st, 2nd, and 3rd place pedestals with match stats persisted to the database!
 
@@ -220,6 +233,8 @@ The game is pre-configured with `netlify.toml` for instant continuous deployment
 
 ## 🗂️ Project Architecture
 
+The project follows a **feature-first architecture** with BLoC pattern, SOLID principles, and barrel exports:
+
 ```
 shorebird_runner/
 ├── bin/
@@ -227,26 +242,61 @@ shorebird_runner/
 │   └── data/
 │       └── db.json                    # Persistent tournament database
 ├── lib/
-│   ├── main.dart                      # App entry point & responsive Game Over dialog
-│   ├── game/
+│   ├── main.dart                      # App entry point & dependency injection
+│   ├── core/                          # Shared utilities & constants
+│   │   ├── audio/                     # AudioService
+│   │   ├── constants/                 # AppColors, AppStrings, GameConfig
+│   │   ├── storage/                   # IHighScoreRepository, HighScoreRepository
+│   │   └── theme/                     # AppTheme
+│   ├── game/                          # Flame game engine layer
 │   │   ├── shorebird_runner_game.dart # FlameGame loop, obstacle spawning, scoring
-│   │   ├── components/
-│   │   │   ├── player.dart            # Player ship with 4 custom skins & motion trails
-│   │   │   ├── patch.dart             # Shorebird Patch (🐤) with 3D rotation & glow
-│   │   │   ├── obstacle.dart          # App Store, Google Play, and 🐛 caterpillar bugs
-│   │   │   ├── hud.dart               # Live score, combo streaks, plan tier & quota
-│   │   │   └── lane_world.dart        # 3D perspective road & horizon vanishing point
-│   │   └── utils/
-│   │       └── game_config.dart       # Tuning, Shorebird plans, penalty rules
-│   ├── screens/
-│   │   ├── start_screen.dart          # Home menu with Shorebird Plans roadmap
-│   │   ├── lobby_screen.dart          # Callsign, skin selector, 4-letter room codes
-│   │   ├── multiplayer_race_screen.dart # Live racing screen with rankings mini-HUD
-│   │   └── tournament_podium_screen.dart # Pedestal podium (1st, 2nd, 3rd) & stats
-│   └── services/
-│       ├── lobby_service.dart         # WebSocket client networking & state management
-│       └── audio_service.dart         # Sound effects & synthesized audio
+│   │   └── components/
+│   │       ├── player.dart            # Player with 4 custom skins & motion trails
+│   │       ├── patch.dart             # Shorebird Patch (🐤) with 3D rotation & glow
+│   │       ├── obstacle.dart          # App Store, Google Play, and 🐛 caterpillar bugs
+│   │       ├── hud.dart               # Live score, combo streaks, plan tier & quota
+│   │       └── lane_world.dart        # 3D perspective road & horizon vanishing point
+│   └── features/
+│       ├── app_shell/                 # Root navigator & application mode state
+│       │   ├── bloc/                  # AppShellBloc, AppMode, AppShellEvent/State
+│       │   └── screens/               # AppShellScreen (routes between features)
+│       ├── start_menu/                # Home screen & game rules
+│       │   ├── bloc/                  # StartMenuBloc
+│       │   ├── screens/               # StartScreen
+│       │   └── widgets/               # ShorebirdLogo, GameRulesDialog, PlanChip, etc.
+│       ├── solo_runner/               # Single-player campaign
+│       │   ├── bloc/                  # SoloRunnerBloc
+│       │   ├── screens/               # SoloRunnerScreen
+│       │   └── widgets/               # GameOverOverlay, MobileTouchBar, StatTile, etc.
+│       ├── booth_battle/              # Local 2-player split-screen mode
+│       │   ├── bloc/                  # BoothBattleBloc
+│       │   ├── screens/               # BoothBattleScreen
+│       │   └── widgets/               # VsScoreboard, ScoreCard, MatchResultOverlay, etc.
+│       ├── tournament_lobby/          # WebSocket multiplayer lobby & room management
+│       │   ├── bloc/                  # LobbyBloc, LobbyEvent/State
+│       │   ├── data/                  # ILobbyRepository, WebSocketLobbyRepository
+│       │   ├── models/                # LobbyPlayer, RacerStanding, RoomStatus
+│       │   ├── screens/               # LobbyScreen
+│       │   └── widgets/               # RoomCodeCard, PlayerListCard, SetupView, etc.
+│       ├── multiplayer_race/          # Live synchronized race screen
+│       │   ├── bloc/                  # RaceBloc, RaceEvent/State
+│       │   ├── screens/               # MultiplayerRaceScreen
+│       │   └── widgets/               # LiveStandingsCard, CrashedSpectatorOverlay
+│       └── tournament_podium/         # Post-race results & rematch flow
+│           ├── screens/               # TournamentPodiumScreen
+│           └── widgets/               # PodiumPedestal, StandingRow
 ```
+
+### Architectural Principles
+
+- **Feature-First**: All code is co-located by feature, not by type
+- **BLoC Pattern**: All state management via `flutter_bloc` with `copyWith` state updates — no `setState`
+- **SOLID Principles**:
+  - **SRP**: Each file contains a single class/widget
+  - **OCP**: Features extended via interfaces (`ILobbyRepository`, `IHighScoreRepository`)
+  - **DIP**: Screens depend on repository interfaces, not concrete implementations
+- **Barrel Exports**: Each folder has an export file (`*.dart` or `widgets.dart`, `screens.dart`, etc.). Import the barrel, not individual files
+- **Constants**: All strings in `AppStrings`, colors in `AppColors`, game values in `GameConfig`
 
 ---
 
