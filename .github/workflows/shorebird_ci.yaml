@@ -20,6 +20,7 @@ jobs:
       progressive_rollout_demo: ${{ steps.filter.outputs.progressive_rollout_demo }}
       shorebird_fintech_wallet: ${{ steps.filter.outputs.shorebird_fintech_wallet }}
       clear_skies: ${{ steps.filter.outputs.clear_skies }}
+      shorebird_runner: ${{ steps.filter.outputs.shorebird_runner }}
     steps:
       - uses: actions/checkout@v7
         with:
@@ -45,6 +46,8 @@ jobs:
               - shorebird_fintech_wallet/**
             clear_skies:
               - clear_skies/**
+            shorebird_runner:
+              - shorebird_runner/**
 
   flavors:
     needs: changes
@@ -124,6 +127,19 @@ jobs:
       flutter_version: ""
       has_integration_tests: false
 
+  shorebird_runner:
+    needs: changes
+    if: needs.changes.outputs.shorebird_runner == 'true'
+    uses: ./.github/workflows/_shorebird_ci_flutter.yaml
+    with:
+      package_name: shorebird_runner
+      package_path: shorebird_runner
+      has_bloc_lint: false
+      has_unit_tests: true
+      subpackages: ""
+      flutter_version: ""
+      has_integration_tests: false
+
   required:
     name: required
     if: ${{ always() }}
@@ -135,6 +151,7 @@ jobs:
       - progressive_rollout_demo
       - shorebird_fintech_wallet
       - clear_skies
+      - shorebird_runner
     runs-on: ubuntu-latest
     steps:
       - name: Check required jobs
