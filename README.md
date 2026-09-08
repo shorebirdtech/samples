@@ -16,6 +16,7 @@ Below is a list of the available samples. Each directory contains a specific use
 | [**Progressive Rollout Demo**](./progressive_rollout_demo) | Illustrates how to mitigate risk by performing percentage-based patch rollouts using Shorebird tracks. |
 | [**Shorebird Fintech Wallet**](./shorebird_fintech_wallet) | An enterprise-grade example of a logic-level hotfix using a decoupled Reactive Store + BLoC architecture. |
 | [**Clear Skies**](./clear_skies) | A beautifully designed, premium weather application with dynamic glassmorphic UI. |
+| [**Patch Rush**](./shorebird_runner) | 🎮 A fast-paced 3D endless runner arcade game for booth events. Dodge bugs, collect patches, keep flying! |
 
 ## 🛠 Getting Started
 

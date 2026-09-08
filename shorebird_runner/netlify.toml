@@ -1,0 +1,15 @@
+[build]
+  publish = "build/web"
+  command = "flutter build web --release"
+
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options = "DENY"
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "no-referrer-when-downgrade"
+
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200

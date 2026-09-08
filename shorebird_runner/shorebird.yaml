@@ -1,0 +1,8 @@
+# This file is used by the Shorebird CLI to manage your app.
+# It contains information about your app's build configuration.
+# See https://docs.shorebird.dev/ for more information.
+
+# Your app_id is the unique identifier assigned to your app.
+# It is used by the Shorebird CLI and servers to identify your app.
+# Replace this with your real app_id after running `shorebird init`.
+app_id: your-app-id-here
