@@ -65,7 +65,8 @@ class PodiumPedestal extends StatelessWidget {
                 color.withValues(alpha: 0.1),
               ],
             ),
-            borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
+            borderRadius:
+                const BorderRadius.vertical(top: Radius.circular(12)),
             border: Border.all(color: color, width: isChampion ? 2 : 1),
             boxShadow: [
               BoxShadow(
@@ -97,37 +98,34 @@ class StandingRow extends StatelessWidget {
 
   const StandingRow({super.key, required this.standing});
 
+  Color get _rankColor {
+    switch (standing.rank) {
+      case 1:
+        return AppColors.shorebirdGold;
+      case 2:
+        return AppColors.silverMedal;
+      case 3:
+        return AppColors.bronzeMedal;
+      default:
+        return Colors.white70;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    Color rankColor = Colors.white70;
-    if (standing.rank == 1) rankColor = AppColors.shorebirdGold;
-    if (standing.rank == 2) rankColor = const Color(0xFFC0C0C0);
-    if (standing.rank == 3) rankColor = const Color(0xFFCD7F32);
+    final rankColor = _rankColor;
 
     return Container(
       margin: const EdgeInsets.only(bottom: 8),
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
       decoration: BoxDecoration(
-        color: const Color(0xFF050F1E),
+        color: AppColors.cardSurface,
         borderRadius: BorderRadius.circular(8),
         border: Border.all(color: rankColor.withValues(alpha: 0.3)),
       ),
       child: Row(
         children: [
-          Container(
-            width: 28,
-            height: 28,
-            alignment: Alignment.center,
-            decoration: BoxDecoration(
-              color: rankColor.withValues(alpha: 0.2),
-              shape: BoxShape.circle,
-            ),
-            child: Text(
-              '${standing.rank}',
-              style: TextStyle(
-                  color: rankColor, fontWeight: FontWeight.w900, fontSize: 13),
-            ),
-          ),
+          _RankCircle(rank: standing.rank, color: rankColor),
           const SizedBox(width: 12),
           Expanded(
             child: Column(
@@ -136,13 +134,17 @@ class StandingRow extends StatelessWidget {
                 Text(
                   standing.name,
                   style: const TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.w800,
-                      fontSize: 14),
+                    color: Colors.white,
+                    fontWeight: FontWeight.w800,
+                    fontSize: 14,
+                  ),
                 ),
                 Text(
                   'Stage ${standing.level} • ${standing.patches} patches',
-                  style: const TextStyle(color: Colors.white54, fontSize: 11),
+                  style: const TextStyle(
+                    color: Colors.white54,
+                    fontSize: 11,
+                  ),
                 ),
               ],
             ),
@@ -156,6 +158,34 @@ class StandingRow extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _RankCircle extends StatelessWidget {
+  final int rank;
+  final Color color;
+
+  const _RankCircle({required this.rank, required this.color});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 28,
+      height: 28,
+      alignment: Alignment.center,
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.2),
+        shape: BoxShape.circle,
+      ),
+      child: Text(
+        '$rank',
+        style: TextStyle(
+          color: color,
+          fontWeight: FontWeight.w900,
+          fontSize: 13,
+        ),
       ),
     );
   }

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:shorebird_runner/core/core.dart';
 
 class ErrorBanner extends StatelessWidget {
   final String message;
@@ -16,25 +17,25 @@ class ErrorBanner extends StatelessWidget {
       margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 6),
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       decoration: BoxDecoration(
-        color: const Color(0xFFFF2A4B).withValues(alpha: 0.2),
+        color: AppColors.errorRed.withValues(alpha: 0.2),
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: const Color(0xFFFF2A4B)),
+        border: Border.all(color: AppColors.errorRed),
       ),
       child: Row(
         children: [
-          const Icon(Icons.error_outline, color: Color(0xFFFF2A4B), size: 18),
+          const Icon(Icons.error_outline, color: AppColors.errorRed, size: 18),
           const SizedBox(width: 10),
           Expanded(
             child: Text(
               message,
-              style: const TextStyle(color: Color(0xFFFF8899), fontSize: 12),
+              style: const TextStyle(color: AppColors.errorText, fontSize: 12),
             ),
           ),
           const SizedBox(width: 8),
           OutlinedButton(
             style: OutlinedButton.styleFrom(
-              foregroundColor: const Color(0xFF00D4FF),
-              side: const BorderSide(color: Color(0xFF00D4FF)),
+              foregroundColor: AppColors.cyan,
+              side: const BorderSide(color: AppColors.cyan),
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
               visualDensity: VisualDensity.compact,
             ),

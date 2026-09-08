@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:shorebird_runner/core/core.dart';
 
 class CountdownOverlay extends StatelessWidget {
   final int count;
@@ -26,11 +27,11 @@ class CountdownOverlay extends StatelessWidget {
             Text(
               '$count',
               style: const TextStyle(
-                color: Color(0xFF00FF88),
+                color: AppColors.neonGreen,
                 fontSize: 120,
                 fontWeight: FontWeight.w900,
                 shadows: [
-                  Shadow(color: Color(0xFF00FF88), blurRadius: 40),
+                  Shadow(color: AppColors.neonGreen, blurRadius: 40),
                 ],
               ),
             ),

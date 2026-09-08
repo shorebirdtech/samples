@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:shorebird_runner/core/core.dart';
 import 'package:shorebird_runner/features/tournament_lobby/models/models.dart';
 import 'package:shorebird_runner/game/game.dart';
 
@@ -17,9 +18,9 @@ class PlayerListCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: const Color(0xFF0A192F).withValues(alpha: 0.8),
+        color: AppColors.panelNavy.withValues(alpha: 0.8),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
+        border: Border.all(color: AppColors.cardBorderSubtle),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -36,31 +37,12 @@ class PlayerListCard extends StatelessWidget {
                   letterSpacing: 2.0,
                 ),
               ),
-              Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                decoration: BoxDecoration(
-                  color: players.isEmpty
-                      ? Colors.orange.withValues(alpha: 0.15)
-                      : const Color(0xFF00FF88).withValues(alpha: 0.15),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Text(
-                  players.isEmpty ? '0 JOINED' : '${players.length} READY',
-                  style: TextStyle(
-                    color: players.isEmpty
-                        ? Colors.orange
-                        : const Color(0xFF00FF88),
-                    fontSize: 11,
-                    fontWeight: FontWeight.w900,
-                  ),
-                ),
-              ),
+              _PlayerCountBadge(count: players.length),
             ],
           ),
           const SizedBox(height: 14),
           if (players.isEmpty)
-            _EmptyPlayersPlaceholder()
+            const _EmptyPlayersPlaceholder()
           else
             ...players.map((p) => _PlayerRow(
                   player: p,
@@ -73,14 +55,44 @@ class PlayerListCard extends StatelessWidget {
   }
 }
 
+class _PlayerCountBadge extends StatelessWidget {
+  final int count;
+
+  const _PlayerCountBadge({required this.count});
+
+  @override
+  Widget build(BuildContext context) {
+    final isEmpty = count == 0;
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+      decoration: BoxDecoration(
+        color: isEmpty
+            ? Colors.orange.withValues(alpha: 0.15)
+            : AppColors.neonGreen.withValues(alpha: 0.15),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Text(
+        isEmpty ? '0 JOINED' : '$count READY',
+        style: TextStyle(
+          color: isEmpty ? Colors.orange : AppColors.neonGreen,
+          fontSize: 11,
+          fontWeight: FontWeight.w900,
+        ),
+      ),
+    );
+  }
+}
+
 class _EmptyPlayersPlaceholder extends StatelessWidget {
+  const _EmptyPlayersPlaceholder();
+
   @override
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 16),
       alignment: Alignment.center,
       decoration: BoxDecoration(
-        color: const Color(0xFF050F1E),
+        color: AppColors.cardSurface,
         borderRadius: BorderRadius.circular(10),
         border: Border.all(color: Colors.white10),
       ),
@@ -91,14 +103,14 @@ class _EmptyPlayersPlaceholder extends StatelessWidget {
             height: 28,
             child: CircularProgressIndicator(
               strokeWidth: 2.5,
-              valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF00D4FF)),
+              valueColor: AlwaysStoppedAnimation<Color>(AppColors.cyan),
             ),
           ),
           SizedBox(height: 12),
           Text(
             'AWAITING DEVELOPERS TO JOIN...',
             style: TextStyle(
-              color: Color(0xFF00D4FF),
+              color: AppColors.cyan,
               fontWeight: FontWeight.w900,
               fontSize: 13,
               letterSpacing: 1.5,
@@ -127,31 +139,34 @@ class _PlayerRow extends StatelessWidget {
     required this.isRoomHost,
   });
 
+  Color get _skinColor {
+    switch (player.skin) {
+      case PlayerSkin.goldPhoenix:
+        return AppColors.skinAmber;
+      case PlayerSkin.emeraldFalcon:
+        return AppColors.skinGreen;
+      case PlayerSkin.violetRaven:
+        return AppColors.skinPurple;
+      case PlayerSkin.blueBird:
+        return AppColors.skinBlue;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    Color skinColor = const Color(0xFF00D4FF);
-    String skinEmoji = '👨‍💻';
-    if (player.skin == PlayerSkin.goldPhoenix) {
-      skinColor = const Color(0xFFFFB347);
-      skinEmoji = '🧑‍💻';
-    } else if (player.skin == PlayerSkin.emeraldFalcon) {
-      skinColor = const Color(0xFF00FF88);
-      skinEmoji = '⚡';
-    } else if (player.skin == PlayerSkin.violetRaven) {
-      skinColor = const Color(0xFFA855F7);
-      skinEmoji = '👾';
-    }
+    final skinColor = _skinColor;
+    final skinEmoji = player.skin.emoji;
 
     return Container(
       margin: const EdgeInsets.only(bottom: 8),
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
       decoration: BoxDecoration(
         color: isMe
-            ? const Color(0xFF00D4FF).withValues(alpha: 0.12)
-            : const Color(0xFF050F1E),
+            ? AppColors.cyan.withValues(alpha: 0.12)
+            : AppColors.cardSurface,
         borderRadius: BorderRadius.circular(10),
         border: Border.all(
-          color: isMe ? const Color(0xFF00D4FF) : Colors.white10,
+          color: isMe ? AppColors.cyan : Colors.white10,
         ),
       ),
       child: Row(
@@ -167,30 +182,29 @@ class _PlayerRow extends StatelessWidget {
                     Text(
                       player.name,
                       style: TextStyle(
-                        color: isMe ? const Color(0xFF00D4FF) : Colors.white,
+                        color: isMe ? AppColors.cyan : Colors.white,
                         fontWeight: FontWeight.w900,
                         fontSize: 14,
                       ),
                     ),
                     if (isMe)
-                      const _PlayerBadge(
-                          label: 'YOU', color: Color(0xFF00D4FF)),
+                      const _PlayerBadge(label: 'YOU', color: AppColors.cyan),
                     if (isRoomHost)
-                      const _PlayerBadge(
-                          label: '👑 HOST', color: Color(0xFFFFD700)),
+                      const _PlayerBadge(label: '👑 HOST', color: AppColors.goldMedal),
                   ],
                 ),
                 Text(
                   player.skin.displayName,
                   style: TextStyle(
-                      color: skinColor,
-                      fontSize: 11,
-                      fontWeight: FontWeight.w600),
+                    color: skinColor,
+                    fontSize: 11,
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
               ],
             ),
           ),
-          const Icon(Icons.check_circle, color: Color(0xFF00FF88), size: 18),
+          const Icon(Icons.check_circle, color: AppColors.neonGreen, size: 18),
         ],
       ),
     );

@@ -48,16 +48,17 @@ class GameConfig {
       final farSpread = laneSpacing * 0.18;
       farLaneX = [vanishingX - farSpread, vanishingX, vanishingX + farSpread];
     } else {
-      horizonY = height * 0.36;
-      nearY = height * 0.88;
-      final roadWidth = min(width * 0.65, height * 0.95);
+      // Desktop / landscape: compact sky so game road dominates the screen
+      horizonY = height * 0.22; // Was 0.36 — only 22% sky area
+      nearY = height * 0.92; // Was 0.88 — road extends to 92%
+      final roadWidth = min(width * 0.55, height * 1.1);
       final laneSpacing = roadWidth / 2;
       nearLaneX = [
         vanishingX - laneSpacing,
         vanishingX,
         vanishingX + laneSpacing
       ];
-      final farSpread = laneSpacing * 0.20;
+      final farSpread = laneSpacing * 0.16;
       farLaneX = [vanishingX - farSpread, vanishingX, vanishingX + farSpread];
     }
   }

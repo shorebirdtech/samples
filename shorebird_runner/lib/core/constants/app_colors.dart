@@ -35,4 +35,15 @@ class AppColors {
   static const Color goldMedal = Color(0xFFFFD700);
   static const Color silverMedal = Color(0xFFC0C0C0);
   static const Color bronzeMedal = Color(0xFFCD7F32);
+
+  // Skin / Player Colors
+  static const Color skinBlue = Color(0xFF00D4FF); // Shorebird Dev
+  static const Color skinAmber = Color(0xFFFFB347); // Frontend Ninja
+  static const Color skinGreen = Color(0xFF00FF88); // Fullstack Hero
+  static const Color skinPurple = Color(0xFFA855F7); // Bug Hunter
+
+  // UI Surfaces
+  static const Color cardSurface = Color(0xFF050F1E); // Inner card bg
+  static const Color cardBorderSubtle = Color(0x1AFFFFFF); // 10% white border
+  static const Color errorText = Color(0xFFFF8899); // Error message text
 }

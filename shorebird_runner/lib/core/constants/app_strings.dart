@@ -69,7 +69,7 @@ class AppStrings {
   static const String createAsPlayer = 'Host & Race as Player';
   static const String startingIn = 'STARTING IN';
   static const String startRace = 'START RACE';
-  static const String waitingForHost = 'WAITING FOR HOST TO START...';
+  static const String waitingForHost = 'WAITING FOR HOST TO LAUNCH...';
   static const String waitingForPilots = 'Waiting for pilots to join...';
   static const String pilotsReady = 'PILOTS IN LOBBY';
   static const String scanQrPrompt = 'Scan to join on mobile:';

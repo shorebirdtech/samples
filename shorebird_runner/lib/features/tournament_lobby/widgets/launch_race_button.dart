@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:shorebird_runner/core/core.dart';
 
 class LaunchRaceButton extends StatelessWidget {
   final int playerCount;
@@ -33,11 +34,11 @@ class LaunchRaceButton extends StatelessWidget {
       ),
       style: ElevatedButton.styleFrom(
         backgroundColor:
-            hasPlayers ? const Color(0xFF00FF88) : Colors.grey.shade600,
+            hasPlayers ? AppColors.neonGreen : Colors.grey.shade600,
         disabledBackgroundColor: Colors.grey.shade700,
         padding: const EdgeInsets.symmetric(vertical: 18),
         elevation: hasPlayers ? 12 : 0,
-        shadowColor: const Color(0xFF00FF88).withValues(alpha: 0.6),
+        shadowColor: AppColors.neonGreen.withValues(alpha: 0.6),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       ),
     );
@@ -60,14 +61,14 @@ class WaitingForHostBanner extends StatelessWidget {
             height: 18,
             child: CircularProgressIndicator(
               strokeWidth: 2.5,
-              valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF00D4FF)),
+              valueColor: AlwaysStoppedAnimation<Color>(AppColors.cyan),
             ),
           ),
           SizedBox(width: 14),
           Text(
-            'WAITING FOR HOST TO LAUNCH...',
+            AppStrings.waitingForHost,
             style: TextStyle(
-              color: Color(0xFF00D4FF),
+              color: AppColors.cyan,
               fontWeight: FontWeight.w800,
               letterSpacing: 1.5,
             ),
