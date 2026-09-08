@@ -154,13 +154,16 @@ class LobbyService extends ChangeNotifier {
       }
 
       final host = Uri.base.host.isEmpty ? 'localhost' : Uri.base.host;
+      final hasNonStandardPort =
+          Uri.base.hasPort && Uri.base.port != 80 && Uri.base.port != 443;
+      final portSuffix = hasNonStandardPort
+          ? ':${Uri.base.port}'
+          : (host == 'localhost' || host == '127.0.0.1' ? ':8088' : '');
+
       if (Uri.base.scheme == 'https') {
-        if (host == 'localhost' || host == '127.0.0.1') {
-          return 'ws://localhost:8088';
-        }
-        return 'wss://$host:8088';
+        return 'wss://$host$portSuffix';
       }
-      return 'ws://$host:8088';
+      return 'ws://$host$portSuffix';
     }
     return 'ws://localhost:8088';
   }

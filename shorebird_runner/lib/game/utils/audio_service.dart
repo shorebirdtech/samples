@@ -16,6 +16,8 @@ class AudioService {
   static void playCombo() => _play('combo');
   static void playLevelUp() => _play('levelup');
   static void playJump() => _play('jump');
+  static void playSlide() => _play('slide');
+  static void playPowerUp() => _play('powerup');
   static void playMiss() => _play('miss');
   static void playStomp() => _play('stomp');
   static void playCrash() => _play('crash');

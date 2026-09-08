@@ -16,12 +16,17 @@ import 'package:shorebird_runner/game/utils/game_config.dart';
 import 'package:shorebird_runner/game/utils/high_score_service.dart';
 
 enum ControlScheme {
-  both, // Solo: A/D/W, Space, and Arrow keys all work
-  wasd, // Player 1 in Booth Battle: A/D move, W/Space jump
-  arrows, // Player 2 in Booth Battle: Left/Right move, Up jump
+  both, // Solo: A/D/W/S, Space, and Arrow keys all work
+  wasd, // Player 1 in Booth Battle: A/D move, W/Space jump, S slide
+  arrows, // Player 2 in Booth Battle: Left/Right move, Up jump, Down slide
 }
 
-class ShorebirdRunnerGame extends FlameGame with KeyboardEvents, TapCallbacks {
+/// The core Shorebird Runner engine.
+/// Engineered for 120 FPS buttery-smooth performance, zero per-frame text layouts,
+/// clamped delta timing, responsive multi-input controls (Keyboard, Swipe, Tap),
+/// magnetic Hot Reload powerups, and Subway Surfers style jump/slide clearances.
+class ShorebirdRunnerGame extends FlameGame
+    with KeyboardEvents, TapCallbacks, DragCallbacks {
   final void Function(int score, int patches, LevelConfig level) onGameOver;
   final void Function(int score, int patches, LevelConfig level, bool isAlive)?
       onScoreUpdate;
@@ -64,6 +69,13 @@ class ShorebirdRunnerGame extends FlameGame with KeyboardEvents, TapCallbacks {
   double _screenShake = 0;
   double _crashFlash = 0;
 
+  // Swipe gesture accumulator
+  Vector2 _swipeDelta = Vector2.zero();
+  static const double _swipeThreshold = 24.0;
+
+  // Track cleared obstacles to award leap/slide bonuses once
+  final Set<Obstacle> _clearedObstacles = {};
+
   @override
   Color backgroundColor() => const Color(GameConfig.colorBg);
 
@@ -92,15 +104,18 @@ class ShorebirdRunnerGame extends FlameGame with KeyboardEvents, TapCallbacks {
   @override
   void update(double dt) {
     if (_isOver) return;
-    super.update(dt);
 
-    _elapsed += dt;
+    // Clamp delta time to prevent physics tunneling or large spikes
+    final safeDt = dt.clamp(0.001, 0.033);
+    super.update(safeDt);
+
+    _elapsed += safeDt;
     _hud.elapsed = _elapsed;
     _hud.totalPatches = totalPatches;
     _laneWorld.totalPatches = totalPatches;
 
     // Survival points
-    _timePointTimer += dt;
+    _timePointTimer += safeDt;
     if (_timePointTimer >= GameConfig.timePointInterval) {
       _timePointTimer -= GameConfig.timePointInterval;
       score += GameConfig.timePoints;
@@ -108,14 +123,14 @@ class ShorebirdRunnerGame extends FlameGame with KeyboardEvents, TapCallbacks {
     }
 
     // Broadcast score updates for lobby / multiplayer
-    _scoreBroadcastTimer += dt;
+    _scoreBroadcastTimer += safeDt;
     if (_scoreBroadcastTimer >= 0.15) {
       _scoreBroadcastTimer = 0;
       onScoreUpdate?.call(score, totalPatches, currentLevel, !_isOver);
     }
 
     // Spawn obstacles (guaranteeing at least 1 open lane)
-    _obstacleTimer += dt;
+    _obstacleTimer += safeDt;
     final obstInterval = GameConfig.obstacleInterval(totalPatches);
     if (_obstacleTimer >= obstInterval) {
       _obstacleTimer = 0;
@@ -123,17 +138,27 @@ class ShorebirdRunnerGame extends FlameGame with KeyboardEvents, TapCallbacks {
     }
 
     // Spawn patches
-    _patchTimer += dt;
+    _patchTimer += safeDt;
     final patchInterval = GameConfig.patchInterval(totalPatches);
     if (_patchTimer >= patchInterval) {
       _patchTimer = 0;
       _spawnPatch();
     }
 
+    // Hot Reload Magnetic Pull on Collectibles
+    if (_player.isInvincible) {
+      for (final p in _patches) {
+        if (!p.isCollected && p.depth > 0.10) {
+          p.attractTowards(_player.currentLane, safeDt);
+        }
+      }
+    }
+
     // Update obstacles
     for (final o in List.of(_obstacles)) {
       o.totalPatches = totalPatches;
       if (o.isPastPlayer) {
+        _clearedObstacles.remove(o);
         _obstacles.remove(o);
         world.remove(o);
         continue;
@@ -155,13 +180,13 @@ class ShorebirdRunnerGame extends FlameGame with KeyboardEvents, TapCallbacks {
 
       if (!p.isCollected && _checkPatchCollision(p)) {
         p.collect();
-        _onPatchCollected(p.worldPosition);
+        _onPatchCollected(p);
       }
     }
 
     // Update floating texts
     for (final ft in List.of(_floatingTexts)) {
-      ft.update(dt);
+      ft.update(safeDt);
       if (ft.isDone) {
         _floatingTexts.remove(ft);
       }
@@ -169,7 +194,7 @@ class ShorebirdRunnerGame extends FlameGame with KeyboardEvents, TapCallbacks {
 
     // Screen shake
     if (_screenShake > 0) {
-      _screenShake = (_screenShake - dt * 3.5).clamp(0, 10);
+      _screenShake = (_screenShake - safeDt * 3.5).clamp(0, 10);
       final shakeX = (_rng.nextDouble() - 0.5) * _screenShake * 12;
       final shakeY = (_rng.nextDouble() - 0.5) * _screenShake * 12;
       camera.viewfinder.position = Vector2(shakeX, shakeY);
@@ -177,9 +202,9 @@ class ShorebirdRunnerGame extends FlameGame with KeyboardEvents, TapCallbacks {
       camera.viewfinder.position = Vector2.zero();
     }
 
-    // Crash flash
+    // Crash flash fade
     if (_crashFlash > 0) {
-      _crashFlash = (_crashFlash - dt * 2.5).clamp(0, 1);
+      _crashFlash = (_crashFlash - safeDt * 2.5).clamp(0, 1);
     }
   }
 
@@ -187,18 +212,31 @@ class ShorebirdRunnerGame extends FlameGame with KeyboardEvents, TapCallbacks {
   void render(Canvas canvas) {
     super.render(canvas);
 
+    // Floating text rendering (zero per-frame text layouts)
     for (final ft in _floatingTexts) {
       ft.render(canvas);
     }
 
+    // Fullscreen Red Danger Flash & Vignette (covers entire canvas seamlessly)
     if (_crashFlash > 0) {
+      final fullRect = Rect.fromLTWH(0, 0, size.x, size.y);
       canvas.drawRect(
-        const Rect.fromLTWH(
-            0, 0, GameConfig.designWidth, GameConfig.designHeight),
+        fullRect,
         Paint()
-          ..color = const Color(GameConfig.colorCoral)
-              .withValues(alpha: _crashFlash * 0.65),
+          ..color =
+              const Color(0xFFFF2A4B).withValues(alpha: _crashFlash * 0.45),
       );
+      // Soft radial edge vignette
+      final vignettePaint = Paint()
+        ..shader = RadialGradient(
+          center: Alignment.center,
+          radius: 0.85,
+          colors: [
+            const Color(0x00000000),
+            const Color(0xFFFF1744).withValues(alpha: _crashFlash * 0.75),
+          ],
+        ).createShader(fullRect);
+      canvas.drawRect(fullRect, vignettePaint);
     }
   }
 
@@ -230,9 +268,13 @@ class ShorebirdRunnerGame extends FlameGame with KeyboardEvents, TapCallbacks {
 
   void _spawnPatch() {
     final lane = _rng.nextInt(GameConfig.laneCount);
+    // 16% chance of spawning a glowing Hot Reload Booster patch
+    final isBooster = _rng.nextDouble() < 0.16;
+
     final patch = Patch(
       lane: lane,
       rng: _rng,
+      isHotReloadBooster: isBooster,
       onMissed: (pos) => _onPatchMissed(pos),
     );
     patch.totalPatches = totalPatches;
@@ -253,9 +295,57 @@ class ShorebirdRunnerGame extends FlameGame with KeyboardEvents, TapCallbacks {
         dy < GameConfig.collisionRadius * 1.5;
     if (!isHorizontallyColliding) return false;
 
+    // 1. Hot Reload Invincible Forcefield: Smash through obstacle!
+    if (_player.isInvincible) {
+      _smashObstacle(o);
+      return false;
+    }
+
+    // 2. Jumping clearance over low obstacles (Worm Bug, Merge Barricade)
+    if (o.isJumpable && _player.isJumping) {
+      if (!_clearedObstacles.contains(o)) {
+        _clearedObstacles.add(o);
+        score += 150;
+        _hud.score = score;
+        AudioService.playStomp();
+        _addFloatingText('🦘 LEAP! +150', o.worldPosition, const Color(0xFF00E5FF),
+            size: 17);
+      }
+      return false;
+    }
+
+    // 3. Sliding clearance under high obstacles (Overhead Review Laser Gate)
+    if (o.isSlideable && _player.isSliding) {
+      if (!_clearedObstacles.contains(o)) {
+        _clearedObstacles.add(o);
+        score += 150;
+        _hud.score = score;
+        AudioService.playSlide();
+        _addFloatingText('⚡ SLIDE! +150', o.worldPosition, const Color(0xFFFFD700),
+            size: 17);
+      }
+      return false;
+    }
+
     // Crashed!
     _triggerCrash();
     return true;
+  }
+
+  void _smashObstacle(Obstacle o) {
+    o.isDead = true;
+    _clearedObstacles.remove(o);
+    _obstacles.remove(o);
+    world.remove(o);
+
+    score += 300;
+    _hud.score = score;
+    AudioService.playStomp();
+    _screenShake = 0.8;
+
+    _addFloatingText('💥 SQUASHED! +300', o.worldPosition,
+        const Color(0xFF00FF88),
+        size: 18);
   }
 
   bool _checkPatchCollision(Patch p) {
@@ -269,13 +359,23 @@ class ShorebirdRunnerGame extends FlameGame with KeyboardEvents, TapCallbacks {
         dy < GameConfig.collisionRadius * 1.8;
   }
 
-  void _onPatchCollected(Offset pos) {
+  void _onPatchCollected(Patch p) {
+    final pos = p.worldPosition;
     totalPatches++;
     _combo++;
     score += GameConfig.patchPoints;
 
-    _addFloatingText(
-        '+${GameConfig.patchPoints} 🐤 PATCH!', pos, const Color(0xFFFFD700));
+    if (p.isHotReloadBooster) {
+      _player.triggerHotReload(6.0); // 6 seconds of invincible Hot Reload power!
+      _hud.triggerComboFlash();
+      _screenShake = 0.5;
+      _addFloatingText('🔥 HOT RELOAD! +500', pos, const Color(0xFFFF9100),
+          size: 20);
+      score += 500;
+    } else {
+      _addFloatingText(
+          '+${GameConfig.patchPoints} 🐤 PATCH!', pos, const Color(0xFFFFD700));
+    }
 
     if (_combo > 0 && _combo % GameConfig.comboThreshold == 0) {
       score += GameConfig.comboBonus;
@@ -355,7 +455,7 @@ class ShorebirdRunnerGame extends FlameGame with KeyboardEvents, TapCallbacks {
     });
   }
 
-  // ── Input Handling (Pure Lane Dodging) ──────────────────────────────────────
+  // ── Input Handling (WASD, Arrows, Space, Touch, Swipe) ────────────────────
 
   @override
   KeyEventResult onKeyEvent(
@@ -381,6 +481,24 @@ class ShorebirdRunnerGame extends FlameGame with KeyboardEvents, TapCallbacks {
           (controlScheme == ControlScheme.arrows &&
               key == LogicalKeyboardKey.arrowRight);
 
+      final allowJump = (controlScheme == ControlScheme.both &&
+              (key == LogicalKeyboardKey.arrowUp ||
+                  key == LogicalKeyboardKey.keyW ||
+                  key == LogicalKeyboardKey.space)) ||
+          (controlScheme == ControlScheme.wasd &&
+              (key == LogicalKeyboardKey.keyW ||
+                  key == LogicalKeyboardKey.space)) ||
+          (controlScheme == ControlScheme.arrows &&
+              key == LogicalKeyboardKey.arrowUp);
+
+      final allowSlide = (controlScheme == ControlScheme.both &&
+              (key == LogicalKeyboardKey.arrowDown ||
+                  key == LogicalKeyboardKey.keyS)) ||
+          (controlScheme == ControlScheme.wasd &&
+              key == LogicalKeyboardKey.keyS) ||
+          (controlScheme == ControlScheme.arrows &&
+              key == LogicalKeyboardKey.arrowDown);
+
       if (allowLeft) {
         _player.moveLeft();
         return KeyEventResult.handled;
@@ -389,16 +507,67 @@ class ShorebirdRunnerGame extends FlameGame with KeyboardEvents, TapCallbacks {
         _player.moveRight();
         return KeyEventResult.handled;
       }
+      if (allowJump) {
+        _player.jump();
+        return KeyEventResult.handled;
+      }
+      if (allowSlide) {
+        _player.slide();
+        return KeyEventResult.handled;
+      }
     }
     return KeyEventResult.ignored;
   }
+
+  // ── Swipe Drag Gestures (Subway Surfers Style) ───────────────────────────
+
+  @override
+  void onDragStart(DragStartEvent event) {
+    super.onDragStart(event);
+    _swipeDelta = Vector2.zero();
+  }
+
+  @override
+  void onDragUpdate(DragUpdateEvent event) {
+    super.onDragUpdate(event);
+    if (_isOver) return;
+    _swipeDelta += event.canvasDelta;
+
+    if (_swipeDelta.x < -_swipeThreshold) {
+      _player.moveLeft();
+      _swipeDelta = Vector2.zero();
+    } else if (_swipeDelta.x > _swipeThreshold) {
+      _player.moveRight();
+      _swipeDelta = Vector2.zero();
+    } else if (_swipeDelta.y < -_swipeThreshold) {
+      _player.jump();
+      _swipeDelta = Vector2.zero();
+    } else if (_swipeDelta.y > _swipeThreshold) {
+      _player.slide();
+      _swipeDelta = Vector2.zero();
+    }
+  }
+
+  // ── Tap Zones (Mobile Accessibility) ─────────────────────────────────────
 
   @override
   void onTapDown(TapDownEvent event) {
     if (_isOver) return;
     final tapX = event.canvasPosition.x;
-    const midX = GameConfig.designWidth / 2;
-    if (tapX < midX) {
+    final tapY = event.canvasPosition.y;
+
+    // Top 28% triggers Jump
+    if (tapY < size.y * 0.28) {
+      _player.jump();
+      return;
+    }
+    // Bottom 25% triggers Slide
+    if (tapY > size.y * 0.75) {
+      _player.slide();
+      return;
+    }
+    // Left/Right half lane steers
+    if (tapX < size.x / 2) {
       _player.moveLeft();
     } else {
       _player.moveRight();
@@ -406,14 +575,33 @@ class ShorebirdRunnerGame extends FlameGame with KeyboardEvents, TapCallbacks {
   }
 }
 
+/// Zero-allocation, cached floating text indicator.
+/// TextPainter is laid out ONCE at creation — never in render loops!
 class _FloatingText {
-  final String text;
   Offset pos;
-  final Color color;
-  final double size;
   double life = 1.0;
+  final TextPainter textPainter;
 
-  _FloatingText(this.text, this.pos, this.color, this.size);
+  _FloatingText(String text, this.pos, Color color, double size)
+      : textPainter = TextPainter(
+          text: TextSpan(
+            text: text,
+            style: TextStyle(
+              color: color,
+              fontSize: size,
+              fontWeight: FontWeight.w900,
+              letterSpacing: 1.4,
+              shadows: const [
+                Shadow(
+                  color: Color(0xDD000000),
+                  blurRadius: 4,
+                  offset: Offset(1, 1),
+                ),
+              ],
+            ),
+          ),
+          textDirection: TextDirection.ltr,
+        )..layout();
 
   bool get isDone => life <= 0;
 
@@ -423,24 +611,19 @@ class _FloatingText {
   }
 
   void render(Canvas canvas) {
-    final tp = TextPainter(
-      text: TextSpan(
-        text: text,
-        style: TextStyle(
-          color: color.withValues(alpha: life),
-          fontSize: size,
-          fontWeight: FontWeight.w900,
-          letterSpacing: 1.5,
-          shadows: [
-            Shadow(
-              color: const Color(0xFF000000).withValues(alpha: life * 0.8),
-              blurRadius: 6,
-            ),
-          ],
-        ),
-      ),
-      textDirection: TextDirection.ltr,
-    )..layout();
-    tp.paint(canvas, Offset(pos.dx - tp.width / 2, pos.dy));
+    if (life <= 0) return;
+    final paintOffset = Offset(pos.dx - textPainter.width / 2, pos.dy);
+    if (life >= 0.9) {
+      textPainter.paint(canvas, paintOffset);
+    } else {
+      // Fade out cleanly without layout recalculation
+      canvas.saveLayer(
+        Rect.fromLTWH(paintOffset.dx - 8, paintOffset.dy - 4,
+            textPainter.width + 16, textPainter.height + 8),
+        Paint()..color = const Color(0xFFFFFFFF).withValues(alpha: life),
+      );
+      textPainter.paint(canvas, paintOffset);
+      canvas.restore();
+    }
   }
 }

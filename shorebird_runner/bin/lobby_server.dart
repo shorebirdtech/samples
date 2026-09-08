@@ -59,14 +59,47 @@ void main(List<String> args) async {
           ..write(jsonEncode({'matches': matches}));
         await request.response.close();
       } else {
-        request.response
-          ..headers.contentType = ContentType.json
-          ..statusCode = HttpStatus.notFound
-          ..write(jsonEncode({'error': 'Not found'}));
-        await request.response.close();
+        // Serve static web build (Flutter Web) if present
+        final staticDir = Directory('build/web');
+        var reqPath = path.startsWith('/') ? path.substring(1) : path;
+        if (reqPath.isEmpty) reqPath = 'index.html';
+
+        var targetFile = File('${staticDir.path}/$reqPath');
+        if (!targetFile.existsSync() && !path.startsWith('/api/')) {
+          targetFile = File('${staticDir.path}/index.html');
+        }
+
+        if (targetFile.existsSync()) {
+          final mime = _getMimeType(targetFile.path);
+          request.response.headers.set('Content-Type', mime);
+          await request.response.addStream(targetFile.openRead());
+          await request.response.close();
+        } else {
+          request.response
+            ..headers.contentType = ContentType.json
+            ..statusCode = HttpStatus.notFound
+            ..write(jsonEncode({'error': 'Not found'}));
+          await request.response.close();
+        }
       }
     }
   }
+}
+
+String _getMimeType(String path) {
+  if (path.endsWith('.html')) return 'text/html; charset=utf-8';
+  if (path.endsWith('.js') || path.endsWith('.mjs')) {
+    return 'application/javascript; charset=utf-8';
+  }
+  if (path.endsWith('.wasm')) return 'application/wasm';
+  if (path.endsWith('.json')) return 'application/json';
+  if (path.endsWith('.png')) return 'image/png';
+  if (path.endsWith('.svg')) return 'image/svg+xml';
+  if (path.endsWith('.jpg') || path.endsWith('.jpeg')) return 'image/jpeg';
+  if (path.endsWith('.ico')) return 'image/x-icon';
+  if (path.endsWith('.css')) return 'text/css; charset=utf-8';
+  if (path.endsWith('.otf') || path.endsWith('.ttf')) return 'font/otf';
+  return 'application/octet-stream';
 }
 
 class PlayerInfo {

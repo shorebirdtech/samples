@@ -15,8 +15,11 @@
   <meta name="apple-mobile-web-app-title" content="Patch Rush">
   <link rel="apple-touch-icon" href="icons/Icon-192.png">
 
-  <!-- Favicon -->
-  <link rel="icon" type="image/png" href="favicon.png" />
+  <!-- Favicon 🐤 -->
+  <link rel="icon" type="image/svg+xml" href="favicon.svg" />
+  <link rel="icon" type="image/png" sizes="64x64" href="favicon.png" />
+  <link rel="icon"
+    href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🐤</text></svg>" />
 
   <title>Patch Rush — by Shorebird</title>
   <link rel="manifest" href="manifest.json">
@@ -197,6 +200,31 @@
             gain.connect(ctx.destination);
             osc.start(now);
             osc.stop(now + 0.14);
+          } else if (type === 'slide') {
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.type = 'sawtooth';
+            osc.frequency.setValueAtTime(420, now);
+            osc.frequency.exponentialRampToValueAtTime(130, now + 0.18);
+            gain.gain.setValueAtTime(0.14, now);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + 0.18);
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+            osc.start(now);
+            osc.stop(now + 0.18);
+          } else if (type === 'powerup') {
+            [440, 554.37, 659.25, 880, 1108.73].forEach((freq, i) => {
+              const osc = ctx.createOscillator();
+              const gain = ctx.createGain();
+              osc.type = 'triangle';
+              osc.frequency.setValueAtTime(freq, now + i * 0.04);
+              gain.gain.setValueAtTime(0.18, now + i * 0.04);
+              gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.04 + 0.2);
+              osc.connect(gain);
+              gain.connect(ctx.destination);
+              osc.start(now + i * 0.04);
+              osc.stop(now + i * 0.04 + 0.2);
+            });
           } else if (type === 'miss') {
             [110, 116].forEach(freq => {
               const osc = ctx.createOscillator();

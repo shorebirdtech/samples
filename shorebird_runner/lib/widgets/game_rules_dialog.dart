@@ -127,48 +127,53 @@ class GameRulesDialog extends StatelessWidget {
                       // Rule 2: Controls
                       _buildRuleCard(
                         icon: '🎮',
-                        title: 'LANE NAVIGATION & CONTROLS',
+                        title: 'SUBWAY SURFERS STYLE CONTROLS',
                         color: const Color(0xFF00FF88),
                         content:
-                            '• Desktop: Press A / D or Arrow Keys (← / →) to dodge between 3 lanes.\n'
-                            '• Mobile / Touch: Tap the Left, Middle, or Right lanes directly on the screen.',
+                            '• Steer Lanes: A / D or Arrow Keys (← / →), or Swipe Left / Right.\n'
+                            '• Jump: W / Space / ArrowUp or Swipe Up to leap over low barricades & bugs (+150 LEAP!).\n'
+                            '• Slide: S / ArrowDown or Swipe Down to crouch-slide under high review gates (+150 SLIDE!). In mid-air, slide triggers a fast dive-down.\n'
+                            '• Mobile Touch: Tap top for Jump, bottom for Slide, left/right for lanes.',
                       ),
                       const SizedBox(height: 14),
 
                       // Rule 3: Collect Patches & Tier Up
                       _buildRuleCard(
                         icon: '🐤',
-                        title: 'COLLECT 🐤 PATCHES TO UPGRADE PLANS',
+                        title: 'COLLECT 🐤 PATCHES & ⚡ HOT RELOAD',
                         color: const Color(0xFFFFD700),
                         content:
-                            'Collect Shorebird 🐤 patches on the track to boost your score and unlock higher plans:\n'
-                            '• 🐣 HOBBY: 5,000 Patches (Standard speed)\n'
-                            '• ⚡ PRO: 50,000 Patches (+35% Speed)\n'
-                            '• 🚀 BUSINESS: 1,000,000 Patches (+85% Speed)\n'
-                            '• 👑 ENTERPRISE: Custom Patches (Apex Speed)',
+                            '• 🐤 Shorebird Patches: Grab patches to unlock higher plan tiers:\n'
+                            '  - 🐣 HOBBY: 5,000 Patches\n'
+                            '  - ⚡ PRO: 50,000 Patches\n'
+                            '  - 💼 BUSINESS: 1,000,000 Patches\n'
+                            '  - 👑 ENTERPRISE: Custom Patches (Apex Speed)\n'
+                            '• ⚡ Hot Reload Booster: Grants 6s invincibility shield, speed boost, patch magnet, and smashes obstacles (+300 SMASH!).',
                       ),
                       const SizedBox(height: 14),
 
                       // Rule 4: Hazards to Avoid
                       _buildRuleCard(
                         icon: '⚠️',
-                        title: 'HAZARDS: AVOID STORES & BUGS',
+                        title: 'HAZARDS & CLEARANCES',
                         color: const Color(0xFFFF2A4B),
                         content:
-                            '• 🍏 / ▶️ App Store & Play Store Delays: Review queues stall your deployment! Steer clear.\n'
-                            '• 🐛 Production Bugs: Fatal crash! Hitting a bug immediately crashes production and ends your run.',
+                            '• 🍏 / ▶️ App & Play Stores: Tall monoliths — must dodge sideways!\n'
+                            '• 🐛 Worm Bugs & 🚧 Merge Barricades: Low hazards — jump over or steer around.\n'
+                            '• 🚨 App Review Laser Gate: High barrier — slide underneath or steer around.\n'
+                            '• 🔥 Near Miss: Weaving past obstacles at the last millisecond earns +250 NEAR MISS bonus!',
                       ),
                       const SizedBox(height: 14),
 
                       // Rule 5: Multiplayer & Tournaments
                       _buildRuleCard(
                         icon: '🏆',
-                        title: 'MULTIPLAYER TOURNAMENTS',
+                        title: 'MULTIPLAYER BOOTH TOURNAMENTS',
                         color: const Color(0xFFA855F7),
                         content:
-                            '• Create a room on a TV / Big Screen display (0 participants).\n'
-                            '• Attendees scan the QR code to join from their phones.\n'
-                            '• All developers race simultaneously. Last survivors take 1st, 2nd, and 3rd on the Shorebird Champion Podium!',
+                            '• Big-Screen Spectator Mode: Host creates a room with 0 racers for a booth TV display.\n'
+                            '• Instant Join: Attendees scan the on-screen QR code from their mobile devices.\n'
+                            '• Simultaneous Race: Everyone races live. Survivors climb the real-time leaderboard!',
                       ),
                     ],
                   ),

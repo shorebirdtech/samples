@@ -29,7 +29,6 @@ class _LobbyScreenState extends State<LobbyScreen> {
   final _codeController = TextEditingController();
   PlayerSkin _selectedSkin = PlayerSkin.blueBird;
   bool _isConnecting = false;
-  bool _hostAlsoRaces = false;
 
   final List<String> _suggestedNames = [
     'SkyWalker',
@@ -94,12 +93,12 @@ class _LobbyScreenState extends State<LobbyScreen> {
     }
   }
 
-  void _onCreateRoom() {
+  void _onCreateRoom({required bool hostRaces}) {
     AudioService.playSelect();
     _lobby.createRoom(
-      isParticipant: _hostAlsoRaces,
-      playerName: _hostAlsoRaces ? _nameController.text.trim() : null,
-      skin: _hostAlsoRaces ? _selectedSkin : null,
+      isParticipant: hostRaces,
+      playerName: hostRaces ? _nameController.text.trim() : null,
+      skin: hostRaces ? _selectedSkin : null,
     );
   }
 
@@ -603,86 +602,93 @@ class _LobbyScreenState extends State<LobbyScreen> {
             ],
           ),
           const SizedBox(height: 16),
-          // Toggle whether host also participates as a racer
-          InkWell(
-            onTap: () {
-              setState(() {
-                _hostAlsoRaces = !_hostAlsoRaces;
-              });
-            },
-            borderRadius: BorderRadius.circular(8),
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-              decoration: BoxDecoration(
-                color: Colors.black.withValues(alpha: 0.3),
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(
-                  color: _hostAlsoRaces
-                      ? const Color(0xFF00FF88).withValues(alpha: 0.5)
-                      : Colors.white12,
-                ),
-              ),
-              child: Row(
-                children: [
-                  Icon(
-                    _hostAlsoRaces
-                        ? Icons.check_box
-                        : Icons.check_box_outline_blank,
-                    color: _hostAlsoRaces
-                        ? const Color(0xFF00FF88)
-                        : Colors.white54,
-                    size: 20,
-                  ),
-                  const SizedBox(width: 10),
-                  const Expanded(
-                    child: Text(
-                      'Host also races on this device',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 12,
-                        fontWeight: FontWeight.w600,
+          // Option 1: Host as Spectator (Booth big screen, 0 racers)
+          ElevatedButton(
+            onPressed: () => _onCreateRoom(hostRaces: false),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFF00D4FF),
+              foregroundColor: Colors.black,
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+              elevation: 8,
+              shadowColor: const Color(0xFF00D4FF).withValues(alpha: 0.4),
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12)),
+            ),
+            child: const Row(
+              children: [
+                Icon(Icons.tv, color: Colors.black, size: 24),
+                SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'HOST AS SPECTATOR (BOOTH DISPLAY)',
+                        style: TextStyle(
+                          color: Colors.black,
+                          fontWeight: FontWeight.w900,
+                          fontSize: 12,
+                          letterSpacing: 1.0,
+                        ),
                       ),
-                    ),
+                      SizedBox(height: 2),
+                      Text(
+                        'Creates room with 0 racers. Attendees join from their phones!',
+                        style: TextStyle(
+                          color: Colors.black87,
+                          fontSize: 10.5,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ],
                   ),
-                  Text(
-                    _hostAlsoRaces ? 'PARTICIPATING' : 'SPECTATOR ONLY',
-                    style: TextStyle(
-                      color: _hostAlsoRaces
-                          ? const Color(0xFF00FF88)
-                          : const Color(0xFF00D4FF),
-                      fontSize: 10,
-                      fontWeight: FontWeight.w900,
-                      letterSpacing: 0.8,
-                    ),
-                  ),
-                ],
-              ),
+                ),
+                Icon(Icons.arrow_forward_ios, size: 14, color: Colors.black54),
+              ],
             ),
           ),
-          const SizedBox(height: 16),
-          ElevatedButton.icon(
-            onPressed: _onCreateRoom,
-            icon: Icon(
-              _hostAlsoRaces ? Icons.sports_esports : Icons.tv,
-              color: Colors.black,
-              size: 20,
-            ),
-            label: Text(
-              _hostAlsoRaces ? 'CREATE ROOM & RACE' : 'CREATE ROOM (SPECTATOR)',
-              style: const TextStyle(
-                color: Colors.black,
-                fontWeight: FontWeight.w900,
-                fontSize: 13,
-                letterSpacing: 1.2,
-              ),
-            ),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF00FF88),
-              padding: const EdgeInsets.symmetric(vertical: 16),
-              elevation: 8,
-              shadowColor: const Color(0xFF00FF88).withValues(alpha: 0.5),
+          const SizedBox(height: 12),
+          // Option 2: Host and race on this device
+          OutlinedButton(
+            onPressed: () => _onCreateRoom(hostRaces: true),
+            style: OutlinedButton.styleFrom(
+              foregroundColor: const Color(0xFF00FF88),
+              side: const BorderSide(color: Color(0xFF00FF88), width: 1.5),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
               shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10)),
+                  borderRadius: BorderRadius.circular(12)),
+            ),
+            child: const Row(
+              children: [
+                Icon(Icons.sports_esports, color: Color(0xFF00FF88), size: 24),
+                SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'HOST & RACE ON THIS DEVICE',
+                        style: TextStyle(
+                          color: Color(0xFF00FF88),
+                          fontWeight: FontWeight.w900,
+                          fontSize: 12,
+                          letterSpacing: 1.0,
+                        ),
+                      ),
+                      SizedBox(height: 2),
+                      Text(
+                        'Creates room and adds you as Racer #1 on this screen.',
+                        style: TextStyle(
+                          color: Colors.white70,
+                          fontSize: 10.5,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Icon(Icons.arrow_forward_ios,
+                    size: 14, color: Color(0xFF00FF88)),
+              ],
             ),
           ),
         ],

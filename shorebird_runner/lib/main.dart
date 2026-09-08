@@ -23,7 +23,17 @@ class PatchRushApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         brightness: Brightness.dark,
-        scaffoldBackgroundColor: const Color(0xFF0A0E1A),
+        scaffoldBackgroundColor: const Color(0xFF0C0D10),
+        colorScheme: const ColorScheme.dark(
+          primary: Color(0xFFFFC107),   // Shorebird Gold
+          secondary: Color(0xFF00BCD4), // Pro Cyan
+          surface: Color(0xFF111520),
+          onPrimary: Color(0xFF1A1200),
+          onSurface: Color(0xFFECEFF1),
+        ),
+        textSelectionTheme: const TextSelectionThemeData(
+          cursorColor: Color(0xFFFFC107),
+        ),
       ),
       home: const GameShell(),
     );
@@ -115,7 +125,7 @@ class _GameShellState extends State<GameShell> {
 
       case AppMode.solo:
         return Scaffold(
-          backgroundColor: const Color(0xFF050A14),
+          backgroundColor: const Color(0xFF0C0D10),
           body: Center(
             child: AspectRatio(
               aspectRatio: 800 / 600,
@@ -124,13 +134,13 @@ class _GameShellState extends State<GameShell> {
                 child: Container(
                   decoration: BoxDecoration(
                     border: Border.all(
-                      color: const Color(0xFF00D4FF).withValues(alpha: 0.25),
+                      color: const Color(0xFFFFC107).withValues(alpha: 0.20),
                       width: 1.5,
                     ),
                     boxShadow: [
                       BoxShadow(
-                        color: const Color(0xFF00D4FF).withValues(alpha: 0.12),
-                        blurRadius: 40,
+                        color: const Color(0xFFFFC107).withValues(alpha: 0.08),
+                        blurRadius: 48,
                         spreadRadius: 4,
                       ),
                     ],
@@ -154,7 +164,7 @@ class _GameShellState extends State<GameShell> {
                       },
                     },
                     backgroundBuilder: (context) => Container(
-                      color: const Color(0xFF0A0E1A),
+                      color: const Color(0xFF0C0D10),
                     ),
                   ),
                 ),
@@ -187,9 +197,11 @@ class _GameOverOverlay extends StatelessWidget {
   Widget build(BuildContext context) {
     final isNewRecord = score >= highScore && score > 0;
     final accentColor = Color(level.accentColor);
+    // Use Shorebird gold as the primary action color in game over
+    const shorebirdGold = Color(0xFFFFC107);
 
     return Container(
-      color: Colors.black.withValues(alpha: 0.88),
+      color: Colors.black.withValues(alpha: 0.90),
       child: Center(
         child: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
@@ -202,16 +214,19 @@ class _GameOverOverlay extends StatelessWidget {
               gradient: const LinearGradient(
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
-                colors: [Color(0xFF131C31), Color(0xFF090E1A)],
+                colors: [
+                  Color(0xFF14161C),
+                  Color(0xFF0C0D10),
+                ],
               ),
               border: Border.all(
-                color: accentColor.withValues(alpha: 0.5),
+                color: shorebirdGold.withValues(alpha: 0.45),
                 width: 1.8,
               ),
               boxShadow: [
                 BoxShadow(
-                  color: accentColor.withValues(alpha: 0.25),
-                  blurRadius: 40,
+                  color: shorebirdGold.withValues(alpha: 0.18),
+                  blurRadius: 50,
                   spreadRadius: 4,
                 ),
               ],
@@ -219,36 +234,59 @@ class _GameOverOverlay extends StatelessWidget {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
+                // Shorebird logo mark
+                Container(
+                  width: 56,
+                  height: 56,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: const Color(0xFF1A1600),
+                    border: Border.all(
+                      color: shorebirdGold.withValues(alpha: 0.5),
+                      width: 1.5,
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: shorebirdGold.withValues(alpha: 0.3),
+                        blurRadius: 20,
+                      ),
+                    ],
+                  ),
+                  child: const Center(
+                    child: Text('🐤', style: TextStyle(fontSize: 26)),
+                  ),
+                ),
+                const SizedBox(height: 14),
                 const Text(
-                  '💥 RUN ENDED',
+                  'RUN ENDED',
                   style: TextStyle(
-                    fontSize: 32,
+                    fontSize: 28,
                     fontWeight: FontWeight.w900,
-                    color: Color(0xFFFF5D73),
-                    letterSpacing: 4,
+                    color: Color(0xFFFF5252),
+                    letterSpacing: 5,
                   ),
                 ),
                 const SizedBox(height: 6),
                 const Text(
-                  'A runtime crash occurred before patching.',
+                  'A runtime crash occurred before code push.',
                   style: TextStyle(
-                    fontSize: 13,
-                    color: Color(0xFF94A3B8),
+                    fontSize: 12,
+                    color: Color(0xFF546E7A),
                     letterSpacing: 0.5,
                   ),
                 ),
                 const SizedBox(height: 20),
 
-                // Stage Reached Badge (Flexible layout prevents any overflow)
+                // Stage Reached Badge
                 Container(
                   width: double.infinity,
                   padding:
                       const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                   decoration: BoxDecoration(
-                    color: accentColor.withValues(alpha: 0.12),
+                    color: accentColor.withValues(alpha: 0.10),
                     borderRadius: BorderRadius.circular(12),
                     border:
-                        Border.all(color: accentColor.withValues(alpha: 0.4)),
+                        Border.all(color: accentColor.withValues(alpha: 0.35)),
                   ),
                   child: Row(
                     children: [
@@ -259,22 +297,22 @@ class _GameOverOverlay extends StatelessWidget {
                             const Text(
                               'SHOREBIRD PLAN TIER',
                               style: TextStyle(
-                                color: Color(0xFF94A3B8),
-                                fontSize: 10,
+                                color: Color(0xFF546E7A),
+                                fontSize: 9.5,
                                 fontWeight: FontWeight.bold,
                                 letterSpacing: 1.5,
                               ),
                             ),
                             const SizedBox(height: 2),
                             Text(
-                              '${level.emoji} ${level.name}',
+                              '${level.emoji}  ${level.name}',
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                               style: TextStyle(
                                 color: accentColor,
-                                fontSize: 16,
+                                fontSize: 18,
                                 fontWeight: FontWeight.w900,
-                                letterSpacing: 0.5,
+                                letterSpacing: 1,
                               ),
                             ),
                           ],
@@ -285,7 +323,7 @@ class _GameOverOverlay extends StatelessWidget {
                         padding: const EdgeInsets.symmetric(
                             horizontal: 10, vertical: 6),
                         decoration: BoxDecoration(
-                          color: Colors.black.withValues(alpha: 0.45),
+                          color: accentColor.withValues(alpha: 0.10),
                           borderRadius: BorderRadius.circular(8),
                           border: Border.all(
                               color: accentColor.withValues(alpha: 0.35)),
@@ -310,16 +348,15 @@ class _GameOverOverlay extends StatelessWidget {
                     padding:
                         const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
                     decoration: BoxDecoration(
-                      color: const Color(0xFFFFB347).withValues(alpha: 0.2),
+                      color: shorebirdGold.withValues(alpha: 0.15),
                       borderRadius: BorderRadius.circular(8),
                       border: Border.all(
-                          color:
-                              const Color(0xFFFFB347).withValues(alpha: 0.5)),
+                          color: shorebirdGold.withValues(alpha: 0.5)),
                     ),
                     child: const Text(
-                      '🏆 NEW HIGH SCORE!',
+                      '🏆  NEW HIGH SCORE!',
                       style: TextStyle(
-                        color: Color(0xFFFFB347),
+                        color: Color(0xFFFFC107),
                         fontWeight: FontWeight.bold,
                         fontSize: 12,
                         letterSpacing: 2,
@@ -332,17 +369,17 @@ class _GameOverOverlay extends StatelessWidget {
                 _ScoreRow(
                     label: 'SCORE',
                     value: score.toString().padLeft(6, '0'),
-                    color: const Color(0xFF00D4FF)),
+                    color: shorebirdGold),
                 const SizedBox(height: 10),
                 _ScoreRow(
                     label: 'PATCHES DEPLOYED',
                     value: '×$totalPatches',
-                    color: const Color(0xFFFFB347)),
+                    color: const Color(0xFF00BCD4)),
                 const SizedBox(height: 10),
                 _ScoreRow(
                     label: 'ALL-TIME BEST',
                     value: highScore.toString().padLeft(6, '0'),
-                    color: const Color(0xFF00FF88)),
+                    color: const Color(0xFF4CAF50)),
                 const SizedBox(height: 28),
 
                 SizedBox(
@@ -350,8 +387,8 @@ class _GameOverOverlay extends StatelessWidget {
                   child: ElevatedButton(
                     onPressed: onRestart,
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF00D4FF),
-                      foregroundColor: const Color(0xFF0A0E1A),
+                      backgroundColor: shorebirdGold,
+                      foregroundColor: const Color(0xFF1A1200),
                       padding: const EdgeInsets.symmetric(vertical: 16),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
@@ -373,8 +410,9 @@ class _GameOverOverlay extends StatelessWidget {
                   child: const Text(
                     'MAIN MENU',
                     style: TextStyle(
-                      color: Color(0xFF94A3B8),
+                      color: Color(0xFF546E7A),
                       letterSpacing: 2,
+                      fontSize: 13,
                     ),
                   ),
                 ),

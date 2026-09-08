@@ -22,6 +22,7 @@ RUN apt-get update && apt-get install -y ca-certificates && rm -rf /var/lib/apt/
 
 WORKDIR /app
 COPY --from=build /app/bin/server /app/server
+COPY --from=build /app/build/web /app/build/web
 RUN mkdir -p /app/bin/data
 
 ENV PORT=8088

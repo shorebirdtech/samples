@@ -108,10 +108,10 @@ class GameConfig {
       obstacleInterval: 1.75,
       patchInterval: 1.45,
       doubleObstacleChance: 0.15,
-      accentColor: 0xFF00D4FF, // Cyan
-      roadColor: 0xFF0B1726,
-      edgeColor: 0xFF00D4FF,
-      horizonColor: 0xFF0088CC,
+      accentColor: 0xFFFFC107, // Shorebird Gold — Hobby
+      roadColor: 0xFF0B1118,
+      edgeColor: 0xFFFFC107,
+      horizonColor: 0xFFFF8F00,
     ),
     LevelConfig(
       level: 2,
@@ -125,10 +125,10 @@ class GameConfig {
       obstacleInterval: 1.35,
       patchInterval: 1.20,
       doubleObstacleChance: 0.35,
-      accentColor: 0xFF00FF88, // Emerald Green
-      roadColor: 0xFF081C1B,
-      edgeColor: 0xFF00FF88,
-      horizonColor: 0xFF00B050,
+      accentColor: 0xFF00BCD4, // Electric Cyan — Pro
+      roadColor: 0xFF071318,
+      edgeColor: 0xFF00BCD4,
+      horizonColor: 0xFF0097A7,
     ),
     LevelConfig(
       level: 3,
@@ -142,10 +142,10 @@ class GameConfig {
       obstacleInterval: 1.00,
       patchInterval: 1.05,
       doubleObstacleChance: 0.50,
-      accentColor: 0xFFFFB347, // Amber / Solar
-      roadColor: 0xFF1C1408,
-      edgeColor: 0xFFFFB347,
-      horizonColor: 0xFFE67E22,
+      accentColor: 0xFF4CAF50, // Shorebird Green — Business
+      roadColor: 0xFF071410,
+      edgeColor: 0xFF4CAF50,
+      horizonColor: 0xFF2E7D32,
     ),
     LevelConfig(
       level: 4,
@@ -159,10 +159,10 @@ class GameConfig {
       obstacleInterval: 0.72,
       patchInterval: 0.85,
       doubleObstacleChance: 0.70,
-      accentColor: 0xFFA855F7, // Cosmic Violet
-      roadColor: 0xFF120824,
-      edgeColor: 0xFFA855F7,
-      horizonColor: 0xFF6D28D9,
+      accentColor: 0xFF9C27B0, // Royal Violet — Enterprise
+      roadColor: 0xFF0E0718,
+      edgeColor: 0xFF9C27B0,
+      horizonColor: 0xFF6A1B9A,
     ),
   ];
 
@@ -237,12 +237,13 @@ class GameConfig {
   static const double timePointInterval = 0.5;
   static const int timePoints = 2;
 
-  // ── Colors ────────────────────────────────────────────────────────────────
-  static const int colorBg = 0xFF050A14;
-  static const int colorCyan = 0xFF00D4FF;
-  static const int colorCoral = 0xFFFF5D73;
-  static const int colorAmber = 0xFFFFB347;
-  static const int colorPurple = 0xFF8B5CF6;
-  static const int colorGreen = 0xFF00FF88;
-  static const int colorGrid = 0xFF0D2035;
+  // ── Shorebird Brand Colors ────────────────────────────────────────────────
+  static const int colorBg = 0xFF0C0D10;        // Deep black-navy
+  static const int colorGold = 0xFFFFC107;       // Shorebird primary gold
+  static const int colorAmber = 0xFFFF8F00;      // Shorebird amber
+  static const int colorCyan = 0xFF00BCD4;       // Pro tier electric cyan
+  static const int colorGreen = 0xFF4CAF50;      // Business tier green
+  static const int colorPurple = 0xFF9C27B0;     // Enterprise violet
+  static const int colorCoral = 0xFFFF5252;      // Error/danger red
+  static const int colorGrid = 0xFF111520;
 }

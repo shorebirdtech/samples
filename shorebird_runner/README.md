@@ -1,6 +1,6 @@
 # 🐤 Shorebird Patch Rush
 
-**A fast-paced 3D arcade runner and live multiplayer booth battle for events.**
+**A fast-paced AAA 3D arcade runner and live multiplayer booth battle for events.**
 
 > Dodge store reviews and production bugs. Collect Shorebird patches (🐤). Upgrade your plan and race live with booth attendees!
 
@@ -8,15 +8,18 @@
 
 ## 🎮 Game Concept & Shorebird Lore
 
-You pilot **Shorebird (🐤)** through high-velocity production tunnels. Deploy instant Over-The-Air (OTA) patches to bypass app review queues and fix production bugs before users notice.
+You sprint as a **Mobile Developer** through the neon-lit production highway against a GTA 5 Los Santos night skyline. Deploy instant Over-The-Air (OTA) patches to bypass app review queues, leap over bug barricades, and slide under code review gates.
 
 | Element | In-Game Symbol | Real-World Shorebird Concept |
 |---|---|---|
-| **Player Hero** | 🐤 Shorebird Chick | Your Flutter app deploying instant OTA updates |
-| **Collectible** | 🐤 Shorebird Patch | OTA patch update (+25 pts) |
-| **Obstacle 1** | 🍏 App Store Logo | App Store review delays |
-| **Obstacle 2** | ▶️ Google Play Logo | Play Store review delays |
-| **Obstacle 3** | 🐛 Caterpillar Worm | Production crash bug |
+| **Player Hero** | 👨‍💻 Developer | Mobile engineer deploying instant OTA updates |
+| **Collectible** | 🐤 Shorebird Patch | Instant OTA patch update (+25 pts) |
+| **Power-Up** | ⚡ Hot Reload Core | 6s invincibility shield, speed boost, magnet & obstacle smashing (+500 pts) |
+| **Obstacle 1** | 🍏 App Store Logo | Monolithic App Store review delays (dodge sideways) |
+| **Obstacle 2** | ▶️ Google Play Logo | Monolithic Play Store review delays (dodge sideways) |
+| **Obstacle 3** | 🐛 Caterpillar Worm | Production crash bugs (low — jump over or dodge) |
+| **Obstacle 4** | 🚧 Merge Barricade | Warning construction barricade (low — jump over or dodge) |
+| **Obstacle 5** | 🚨 App Review Laser Gate | Overhead review barrier (high — slide underneath or dodge) |
 | **Missed Patch** | ⚠️ -15 pts penalty | Unpatched bug reaching users & streak reset |
 
 ### 📈 Shorebird Plan Tiers & Level Progression
@@ -28,16 +31,16 @@ As you collect patches, your deployment infrastructure upgrades through Shorebir
 
 ---
 
-## 🕹️ Controls
+## 🕹️ Subway Surfers Signature Controls
 
-| Input | Action |
-|---|---|
-| `←` / `A` | Steer Left |
-| `→` / `D` | Steer Right |
-| **Tap Left Half** | Steer Left (Touch / Trackpad) |
-| **Tap Right Half** | Steer Right (Touch / Trackpad) |
+| Input (Desktop) | Input (Mobile / Touch) | Action |
+|---|---|---|
+| `←` / `A` | **Swipe Left** or Tap Left | Steer Left Lane |
+| `→` / `D` | **Swipe Right** or Tap Right | Steer Right Lane |
+| `↑` / `W` / `Space` | **Swipe Up** or Tap Top Half | **Jump** (Leap over low barricades & bugs) |
+| `↓` / `S` | **Swipe Down** or Tap Bottom Half | **Slide** (Crouch under review gates; dive down in mid-air) |
 
-> *Tip: Pure lane dodging — jump mechanics have been removed to ensure fast arcade reflexes.*
+> *Tip: Weaving past obstacles at the last millisecond triggers **`NEAR MISS! +250 PTS`**!*
 
 ---
 
@@ -167,33 +170,51 @@ A production-ready [`Dockerfile`](file:///Users/abhishekdoshi/Documents/shorebir
 * **Render**: Create "New Web Service" ➔ select repo ➔ Docker runtime ➔ Port `8088`.
 * **Fly.io**: Run `fly launch` in the project directory.
 
----
-
 ## 🏁 How to Play in Multiplayer Lobby Mode
 
 1. **Enter the Lobby**:
    * On the home screen, tap **MULTIPLAYER LOBBY**.
-2. **Select Chassis & Callsign**:
-   * Enter your name / callsign (e.g. `Maverick`, `DevPilot`).
-   * Choose your ship skin:
-     * `Blue Jet 🐤`
-     * `Cyber Gold ⚡`
-     * `Crimson Ace 🔴`
-     * `Shadow Stealth 🟣`
+2. **Select Developer Handle & Persona**:
+   * Enter your handle (e.g. `SkyWalker`, `CodeNinja`).
+   * Choose your developer persona:
+     * `Shorebird Dev 👨‍💻` (Cyan hoodie with Shorebird bird emblem)
+     * `Frontend Ninja 🧑‍💻` (Amber hoodie with code brackets)
+     * `Fullstack Hero ⚡` (Emerald hoodie with code brackets)
+     * `Bug Hunter 👾` (Purple hoodie with code brackets)
 3. **Create or Join a Room (Multi-Device Flow)**:
-   * **Host a Room**: Tap **CREATE NEW ROOM**. The screen will display:
-     * A large 4-letter room code (e.g. `FLUT`).
-     * A **live QR Code**: Attendees at the booth simply point their iPhone or Android camera at the host's screen to open the game and auto-join!
-     * A **"Copy Invite Link"** button to share via Slack, Discord, or group chat.
+   * **Host as Spectator (Conference Booth TV Display)**:
+     * Tap **HOST AS SPECTATOR (BOOTH DISPLAY)**.
+     * Creates a room with **0 racers**.
+     * The host screen acts as a big-screen esports leaderboard.
+     * Displays a large 4-letter room code (e.g. `BIRD`) and a **live QR Code**.
+     * Booth attendees point their phone camera at the host's screen to open the game and auto-join instantly!
+   * **Host & Race on This Device**:
+     * Tap **HOST & RACE ON THIS DEVICE** to create the room and join immediately as Racer #1.
    * **Attendees Joining on Phones / Laptops**:
-     * **Method A (Scan QR)**: Point camera at host's screen ➔ taps link ➔ opens lobby with room code pre-filled!
-     * **Method B (Direct Code)**: Tap **MULTIPLAYER LOBBY** on their device ➔ enter the 4-letter code ➔ tap **JOIN ROOM**.
+     * **Scan QR**: Point camera at host's screen ➔ tap link ➔ auto-joins room!
+     * **Direct Code**: Tap **MULTIPLAYER LOBBY** on their device ➔ enter the 4-letter code ➔ tap **JOIN**.
 4. **Launch Race**:
-   * Once attendees appear in the **CONNECTED PILOTS** list, the host taps **LAUNCH RACE**.
+   * Once attendees appear in the **CONNECTED DEVELOPERS** list, the host taps **LAUNCH RACE**.
    * A synchronized 3-2-1 countdown begins simultaneously across all devices.
 5. **Live Standings & Tournament Podium**:
-   * During the race, a live mini-HUD shows real-time rank changes and crash status across all devices.
-   * When the race concludes, all devices transition to the **Tournament Podium** showing 🥇 1st, 🥈 2nd, and 🥉 3rd place pedestals with match stats persisted to the database!
+   * During the race, live telemetry updates rank changes, scores, and crash status in real-time.
+   * When the race concludes, all devices transition to the **Tournament Podium** showing 🥇 1st, 2nd, and 3rd place pedestals with match stats persisted to the database!
+
+---
+
+## 🚀 Deploying Web Client to Netlify
+
+The game is pre-configured with `netlify.toml` for instant continuous deployment:
+
+1. **Netlify Build Settings**:
+   * **Build command**: `flutter build web --release`
+   * **Publish directory**: `build/web`
+2. **Headers & SPA Routing**:
+   * `netlify.toml` includes automatic SPA redirect rules (`/*` -> `/index.html 200`) and security headers.
+3. **Connecting Web Clients to Live Lobby Server**:
+   * In the lobby screen, click the **⚙️ Server Config** icon next to "SERVER CONNECTED".
+   * Enter your deployed WebSocket server URL (e.g. `wss://your-lobby-server.onrender.com` or `ws://192.168.1.50:8088`).
+   * Share the invite link — any attendee opening the link will auto-connect to your server!
 
 ---
 
