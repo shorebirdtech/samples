@@ -65,8 +65,7 @@ class PodiumPedestal extends StatelessWidget {
                 color.withValues(alpha: 0.1),
               ],
             ),
-            borderRadius:
-                const BorderRadius.vertical(top: Radius.circular(12)),
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
             border: Border.all(color: color, width: isChampion ? 2 : 1),
             boxShadow: [
               BoxShadow(

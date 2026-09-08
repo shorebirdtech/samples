@@ -190,7 +190,8 @@ class _PlayerRow extends StatelessWidget {
                     if (isMe)
                       const _PlayerBadge(label: 'YOU', color: AppColors.cyan),
                     if (isRoomHost)
-                      const _PlayerBadge(label: '👑 HOST', color: AppColors.goldMedal),
+                      const _PlayerBadge(
+                          label: '👑 HOST', color: AppColors.goldMedal),
                   ],
                 ),
                 Text(
