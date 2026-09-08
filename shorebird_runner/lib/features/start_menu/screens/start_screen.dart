@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:shorebird_runner/core/constants/constants.dart';
 import 'package:shorebird_runner/features/start_menu/widgets/widgets.dart';
 
 /// Full Shorebird-branded start screen with cinematic parallax background,
@@ -72,7 +73,7 @@ class _StartScreenState extends State<StartScreen>
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
     return Scaffold(
-      backgroundColor: const Color(0xFF0C0D10),
+      backgroundColor: AppColors.backgroundDark,
       body: Stack(
         children: [
           // === ANIMATED BACKGROUND ===
@@ -111,9 +112,9 @@ class _StartScreenState extends State<StartScreen>
                         ShaderMask(
                           shaderCallback: (bounds) => const LinearGradient(
                             colors: [
-                              Color(0xFFFFC107),
-                              Color(0xFFFFE082),
-                              Color(0xFFFFC107),
+                              AppColors.shorebirdGold,
+                              AppColors.goldPale,
+                              AppColors.shorebirdGold,
                             ],
                             stops: [0.0, 0.5, 1.0],
                           ).createShader(bounds),
@@ -136,7 +137,7 @@ class _StartScreenState extends State<StartScreen>
                         const Text(
                           'BY SHOREBIRD',
                           style: TextStyle(
-                            color: Color(0xFF78909C),
+                            color: AppColors.slateMuted,
                             fontSize: 12,
                             fontWeight: FontWeight.w700,
                             letterSpacing: 6,
@@ -148,13 +149,15 @@ class _StartScreenState extends State<StartScreen>
                         // Tagline
                         Container(
                           padding: const EdgeInsets.symmetric(
-                              horizontal: 16, vertical: 8),
+                            horizontal: 16,
+                            vertical: 8,
+                          ),
                           decoration: BoxDecoration(
                             color:
-                                const Color(0xFFFFC107).withValues(alpha: 0.08),
+                                AppColors.shorebirdGold.withValues(alpha: 0.08),
                             borderRadius: BorderRadius.circular(24),
                             border: Border.all(
-                              color: const Color(0xFFFFC107)
+                              color: AppColors.shorebirdGold
                                   .withValues(alpha: 0.2),
                             ),
                           ),
@@ -162,7 +165,7 @@ class _StartScreenState extends State<StartScreen>
                             'Run as a Developer · Collect 🐤 Patches · Dodge App Store Delays',
                             textAlign: TextAlign.center,
                             style: TextStyle(
-                              color: Color(0xFF90A4AE),
+                              color: AppColors.slateSubtle,
                               fontSize: 13,
                               letterSpacing: 0.8,
                               fontWeight: FontWeight.w500,
@@ -207,7 +210,7 @@ class _StartScreenState extends State<StartScreen>
                                       icon: '🌐',
                                       title: 'MULTIPLAYER',
                                       subtitle: 'LOBBY · COMPETE',
-                                      color: const Color(0xFF26C6DA),
+                                      color: AppColors.lightCyan,
                                       onTap: widget.onOpenLobby,
                                     ),
                                   ),
@@ -217,7 +220,7 @@ class _StartScreenState extends State<StartScreen>
                                       icon: '📜',
                                       title: 'HOW TO PLAY',
                                       subtitle: 'RULES · CONTROLS',
-                                      color: const Color(0xFF66BB6A),
+                                      color: AppColors.lightGreen,
                                       onTap: () => showGameRulesDialog(context),
                                     ),
                                   ),

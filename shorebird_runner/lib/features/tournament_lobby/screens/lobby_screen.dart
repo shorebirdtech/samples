@@ -6,7 +6,6 @@ import 'package:shorebird_runner/core/core.dart';
 import 'package:shorebird_runner/features/tournament_lobby/bloc/lobby_bloc.dart';
 import 'package:shorebird_runner/features/tournament_lobby/data/data.dart';
 import 'package:shorebird_runner/features/tournament_lobby/widgets/widgets.dart';
-import 'package:shorebird_runner/game/game.dart';
 
 class LobbyScreen extends StatefulWidget {
   final VoidCallback onBackToMenu;
@@ -137,8 +136,8 @@ class _LobbyScreenState extends State<LobbyScreen> {
                       center: Alignment.topCenter,
                       radius: 1.2,
                       colors: [
-                        const Color(0xFF0D253A).withValues(alpha: 0.8),
-                        const Color(0xFF050A14),
+                        AppColors.deepNavy.withValues(alpha: 0.8),
+                        AppColors.roadDark,
                       ],
                     ),
                   ),
@@ -197,7 +196,10 @@ class _LobbyScreenState extends State<LobbyScreen> {
   }
 
   Widget _buildRoomWaitingView(
-      BuildContext context, LobbyState state, ILobbyRepository repo) {
+    BuildContext context,
+    LobbyState state,
+    ILobbyRepository repo,
+  ) {
     final isHost = state.isHost;
     final players = state.players;
     final inviteUrl =
@@ -247,7 +249,8 @@ class _LobbyScreenState extends State<LobbyScreen> {
               side: const BorderSide(color: Colors.white24),
               padding: const EdgeInsets.symmetric(vertical: 14),
               shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10)),
+                borderRadius: BorderRadius.circular(10),
+              ),
             ),
             child:
                 const Text('LEAVE ROOM', style: TextStyle(letterSpacing: 1.5)),

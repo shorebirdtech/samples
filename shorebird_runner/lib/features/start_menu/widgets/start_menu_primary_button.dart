@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:shorebird_runner/core/constants/constants.dart';
 
 class StartMenuPrimaryButton extends StatelessWidget {
   final String icon;
@@ -33,14 +34,14 @@ class StartMenuPrimaryButton extends StatelessWidget {
                 borderRadius: BorderRadius.circular(16),
                 gradient: LinearGradient(
                   colors: isHovered
-                      ? [const Color(0xFFFFD54F), const Color(0xFFFFA000)]
-                      : [const Color(0xFFFFC107), const Color(0xFFFF8F00)],
+                      ? [AppColors.goldBright, AppColors.goldAmber]
+                      : [AppColors.shorebirdGold, AppColors.shorebirdAmber],
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                 ),
                 boxShadow: [
                   BoxShadow(
-                    color: const Color(0xFFFFC107)
+                    color: AppColors.shorebirdGold
                         .withValues(alpha: isHovered ? 0.65 : 0.40),
                     blurRadius: isHovered ? 40 : 24,
                     spreadRadius: 2,
@@ -54,7 +55,7 @@ class StartMenuPrimaryButton extends StatelessWidget {
                     icon,
                     style: const TextStyle(
                       fontSize: 20,
-                      color: Color(0xFF1A1200),
+                      color: AppColors.buttonDarkText,
                     ),
                   ),
                   const SizedBox(width: 14),
@@ -66,7 +67,7 @@ class StartMenuPrimaryButton extends StatelessWidget {
                         style: const TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.w900,
-                          color: Color(0xFF1A1200),
+                          color: AppColors.buttonDarkText,
                           letterSpacing: 3,
                         ),
                       ),
@@ -75,7 +76,7 @@ class StartMenuPrimaryButton extends StatelessWidget {
                         style: const TextStyle(
                           fontSize: 10,
                           fontWeight: FontWeight.w700,
-                          color: Color(0xFF5D4037),
+                          color: AppColors.darkBrown,
                           letterSpacing: 1.5,
                         ),
                       ),

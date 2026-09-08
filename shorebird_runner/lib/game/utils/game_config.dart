@@ -43,23 +43,32 @@ class GameConfig {
       nearLaneX = [
         vanishingX - laneSpacing,
         vanishingX,
-        vanishingX + laneSpacing
+        vanishingX + laneSpacing,
       ];
       final farSpread = laneSpacing * 0.18;
       farLaneX = [vanishingX - farSpread, vanishingX, vanishingX + farSpread];
+      playerNearSize = (laneSpacing * 0.36).clamp(48.0, 60.0);
+      obstacleNearSize = (laneSpacing * 0.42).clamp(56.0, 72.0);
+      patchNearSize = (laneSpacing * 0.28).clamp(38.0, 50.0);
+      collisionRadius = playerNearSize * 0.52;
     } else {
-      // Desktop / landscape: compact sky so game road dominates the screen
-      horizonY = height * 0.22; // Was 0.36 — only 22% sky area
-      nearY = height * 0.92; // Was 0.88 — road extends to 92%
-      final roadWidth = min(width * 0.55, height * 1.1);
+      // Desktop / landscape: compact skyline backdrop so game road and action dominate
+      horizonY = height * 0.17; // Only 17% of screen height for sky
+      nearY = height * 0.94; // Road extends down to 94%
+      final roadWidth =
+          min(width * 0.72, height * 1.35); // Generous, immersive road
       final laneSpacing = roadWidth / 2;
       nearLaneX = [
         vanishingX - laneSpacing,
         vanishingX,
-        vanishingX + laneSpacing
+        vanishingX + laneSpacing,
       ];
       final farSpread = laneSpacing * 0.16;
       farLaneX = [vanishingX - farSpread, vanishingX, vanishingX + farSpread];
+      playerNearSize = (laneSpacing * 0.28).clamp(56.0, 80.0);
+      obstacleNearSize = (laneSpacing * 0.34).clamp(66.0, 94.0);
+      patchNearSize = (laneSpacing * 0.24).clamp(44.0, 62.0);
+      collisionRadius = playerNearSize * 0.52;
     }
   }
 
@@ -190,9 +199,9 @@ class GameConfig {
   }
 
   // ── 3D Object sizes and scaling ───────────────────────────────────────────
-  static const double playerNearSize = 54;
-  static const double obstacleNearSize = 62;
-  static const double patchNearSize = 42;
+  static double playerNearSize = 54;
+  static double obstacleNearSize = 62;
+  static double patchNearSize = 42;
   static const double horizonSizeMultiplier = 0.10;
 
   // ── Player ────────────────────────────────────────────────────────────────
@@ -200,7 +209,7 @@ class GameConfig {
   static const double laneChangeDuration = 0.14;
 
   // ── Collision ─────────────────────────────────────────────────────────────
-  static const double collisionRadius = 28;
+  static double collisionRadius = 28;
 
   // ── Scoring ───────────────────────────────────────────────────────────────
   static const int patchPoints = 25;

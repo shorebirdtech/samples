@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:shorebird_runner/core/constants/constants.dart';
 
 class LobbyHeader extends StatelessWidget {
   final VoidCallback onBack;
@@ -43,13 +44,14 @@ class LobbyHeader extends StatelessWidget {
                     height: 8,
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
-                      color:
-                          isConnected ? const Color(0xFF00FF88) : Colors.amber,
+                      color: isConnected
+                          ? AppColors.neonGreen
+                          : AppColors.shorebirdAmber,
                       boxShadow: [
                         BoxShadow(
                           color: isConnected
-                              ? const Color(0xFF00FF88)
-                              : Colors.amber,
+                              ? AppColors.neonGreen
+                              : AppColors.shorebirdAmber,
                           blurRadius: 6,
                         ),
                       ],
@@ -61,15 +63,17 @@ class LobbyHeader extends StatelessWidget {
                     borderRadius: BorderRadius.circular(4),
                     child: Padding(
                       padding: const EdgeInsets.symmetric(
-                          horizontal: 4, vertical: 2),
+                        horizontal: 4,
+                        vertical: 2,
+                      ),
                       child: Row(
                         children: [
                           Text(
                             isConnected ? 'SERVER CONNECTED' : 'DISCONNECTED',
                             style: TextStyle(
                               color: isConnected
-                                  ? const Color(0xFF00FF88)
-                                  : Colors.amber,
+                                  ? AppColors.neonGreen
+                                  : AppColors.shorebirdAmber,
                               fontSize: 11,
                               fontWeight: FontWeight.w700,
                               letterSpacing: 1.0,
@@ -79,7 +83,7 @@ class LobbyHeader extends StatelessWidget {
                           const Icon(
                             Icons.settings,
                             size: 13,
-                            color: Color(0xFF94A3B8),
+                            color: AppColors.slateBlue,
                           ),
                         ],
                       ),

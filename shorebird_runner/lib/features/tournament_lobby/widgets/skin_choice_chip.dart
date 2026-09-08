@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:shorebird_runner/core/constants/constants.dart';
 import 'package:shorebird_runner/features/tournament_lobby/bloc/lobby_bloc.dart';
 import 'package:shorebird_runner/game/game.dart';
 
@@ -30,7 +31,7 @@ class SkinChoiceChip extends StatelessWidget {
         decoration: BoxDecoration(
           color: isSelected
               ? color.withValues(alpha: 0.25)
-              : const Color(0xFF050F1E),
+              : AppColors.cardSurface,
           borderRadius: BorderRadius.circular(10),
           border: Border.all(
             color: isSelected ? color : Colors.white24,

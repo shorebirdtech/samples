@@ -66,13 +66,15 @@ class Patch extends Component {
     if (_rng.nextDouble() < 0.6 && _magnetParticles.length < 20) {
       final pos = worldPosition;
       final scale = worldScale;
-      _magnetParticles.add(MagneticTrailParticle(
-        pos,
-        _rng,
-        scale: scale,
-        isBooster: isHotReloadBooster,
-        dirX: diff > 0 ? -1.0 : 1.0,
-      ));
+      _magnetParticles.add(
+        MagneticTrailParticle(
+          pos,
+          _rng,
+          scale: scale,
+          isBooster: isHotReloadBooster,
+          dirX: diff > 0 ? -1.0 : 1.0,
+        ),
+      );
     }
   }
 
@@ -173,7 +175,11 @@ class Patch extends Component {
   }
 
   void _drawShorebirdPatch(
-      Canvas canvas, Offset pos, double scale, double size) {
+    Canvas canvas,
+    Offset pos,
+    double scale,
+    double size,
+  ) {
     final hoverBob = sin(_pulsePhase) * 5 * scale;
     final patchPos = Offset(pos.dx, pos.dy - 12 * scale + hoverBob);
 
@@ -190,15 +196,17 @@ class Patch extends Component {
     // Radiant Golden/Cyan Magnetic Attraction Field
     if (isBeingMagnetized) {
       canvas.drawCircle(
-          Offset.zero,
-          size * 1.05,
-          Paint()
-            ..color = const Color(0xFFFFD700).withValues(alpha: 0.20 * scale));
+        Offset.zero,
+        size * 1.05,
+        Paint()
+          ..color = const Color(0xFFFFD700).withValues(alpha: 0.20 * scale),
+      );
       canvas.drawCircle(
-          Offset.zero,
-          size * 0.75,
-          Paint()
-            ..color = const Color(0xFFFFD700).withValues(alpha: 0.45 * scale));
+        Offset.zero,
+        size * 0.75,
+        Paint()
+          ..color = const Color(0xFFFFD700).withValues(alpha: 0.45 * scale),
+      );
 
       final fluxPaint = Paint()
         ..color = const Color(0xFF00FFCC).withValues(alpha: 0.85 * scale)
@@ -218,22 +226,24 @@ class Patch extends Component {
           const Color(0xFF00E5FF).withValues(alpha: 0.0),
         ],
       ).createShader(
-          Rect.fromLTWH(-8 * scale, -90 * scale, 16 * scale, 90 * scale));
-    canvas.drawRect(
         Rect.fromLTWH(-8 * scale, -90 * scale, 16 * scale, 90 * scale),
-        beamPaint);
+      );
+    canvas.drawRect(
+      Rect.fromLTWH(-8 * scale, -90 * scale, 16 * scale, 90 * scale),
+      beamPaint,
+    );
 
     // 1. Radiant Cyan/Gold Ambient Glow (concentric circles, zero blur overhead)
     canvas.drawCircle(
-        Offset.zero,
-        size * 0.85,
-        Paint()
-          ..color = const Color(0xFF00D4FF).withValues(alpha: 0.16 * scale));
+      Offset.zero,
+      size * 0.85,
+      Paint()..color = const Color(0xFF00D4FF).withValues(alpha: 0.16 * scale),
+    );
     canvas.drawCircle(
-        Offset.zero,
-        size * 0.58,
-        Paint()
-          ..color = const Color(0xFF00D4FF).withValues(alpha: 0.38 * scale));
+      Offset.zero,
+      size * 0.58,
+      Paint()..color = const Color(0xFF00D4FF).withValues(alpha: 0.38 * scale),
+    );
 
     // Concentric Holographic Gyroscope Orbiting Rings
     final ring1Paint = Paint()
@@ -241,11 +251,13 @@ class Patch extends Component {
       ..strokeWidth = 1.6 * scale
       ..style = PaintingStyle.stroke;
     canvas.drawOval(
-        Rect.fromCenter(
-            center: Offset.zero,
-            width: size * 1.2 * absCos,
-            height: size * 1.2),
-        ring1Paint);
+      Rect.fromCenter(
+        center: Offset.zero,
+        width: size * 1.2 * absCos,
+        height: size * 1.2,
+      ),
+      ring1Paint,
+    );
 
     // 2. Futuristic Hexagonal OTA Patch Badge
     final r = size * 0.55;
@@ -291,7 +303,11 @@ class Patch extends Component {
   }
 
   void _drawHotReloadBooster(
-      Canvas canvas, Offset pos, double scale, double size) {
+    Canvas canvas,
+    Offset pos,
+    double scale,
+    double size,
+  ) {
     final hoverBob = sin(_pulsePhase) * 6 * scale;
     final patchPos = Offset(pos.dx, pos.dy - 14 * scale + hoverBob);
 
@@ -303,15 +319,15 @@ class Patch extends Component {
 
     // Radiant Gold / Crimson Energy Aura (concentric glow)
     canvas.drawCircle(
-        Offset.zero,
-        size * 0.95,
-        Paint()
-          ..color = const Color(0xFFFFD700).withValues(alpha: 0.22 * scale));
+      Offset.zero,
+      size * 0.95,
+      Paint()..color = const Color(0xFFFFD700).withValues(alpha: 0.22 * scale),
+    );
     canvas.drawCircle(
-        Offset.zero,
-        size * 0.65,
-        Paint()
-          ..color = const Color(0xFFFFD700).withValues(alpha: 0.50 * scale));
+      Offset.zero,
+      size * 0.65,
+      Paint()..color = const Color(0xFFFFD700).withValues(alpha: 0.50 * scale),
+    );
 
     // Outer rotating energy ring
     final ringPaint = Paint()
@@ -319,16 +335,21 @@ class Patch extends Component {
       ..strokeWidth = 2.0 * scale
       ..style = PaintingStyle.stroke;
     canvas.drawOval(
-        Rect.fromCenter(
-            center: Offset.zero,
-            width: size * 1.3 * absCos,
-            height: size * 1.3),
-        ringPaint);
+      Rect.fromCenter(
+        center: Offset.zero,
+        width: size * 1.3 * absCos,
+        height: size * 1.3,
+      ),
+      ringPaint,
+    );
 
     // Octagonal Core
     final r = size * 0.58;
     final coreRect = Rect.fromCenter(
-        center: Offset.zero, width: r * 1.8 * absCos, height: r * 1.8);
+      center: Offset.zero,
+      width: r * 1.8 * absCos,
+      height: r * 1.8,
+    );
     final coreRRect =
         RRect.fromRectAndRadius(coreRect, Radius.circular(r * 0.4 * absCos));
 

@@ -29,8 +29,11 @@ abstract class ILobbyRepository {
   String get defaultServerUrl;
 
   Future<bool> ensureConnected();
-  void createRoom(
-      {bool isParticipant = false, String? playerName, PlayerSkin? skin});
+  void createRoom({
+    bool isParticipant = false,
+    String? playerName,
+    PlayerSkin? skin,
+  });
   void joinRoom(String roomCode, String playerName, PlayerSkin skin);
   void joinAsParticipant(String playerName, PlayerSkin skin);
   void startCountdown();

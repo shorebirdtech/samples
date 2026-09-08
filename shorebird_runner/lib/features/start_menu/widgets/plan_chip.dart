@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:shorebird_runner/core/constants/constants.dart';
 
 class PlanChip extends StatelessWidget {
   final String emoji;
@@ -39,7 +40,7 @@ class PlanChip extends StatelessWidget {
           Text(
             quota,
             style: const TextStyle(
-              color: Color(0xFF546E7A),
+              color: AppColors.slateLight,
               fontSize: 8,
               fontWeight: FontWeight.w600,
             ),

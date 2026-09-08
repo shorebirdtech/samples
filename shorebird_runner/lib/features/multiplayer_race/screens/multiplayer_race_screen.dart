@@ -131,7 +131,7 @@ class _MultiplayerRaceScreenState extends State<MultiplayerRaceScreen> {
                         ? GameWidget(
                             game: _game!,
                             backgroundBuilder: (context) => Container(
-                              color: const Color(0xFF0A0E1A),
+                              color: AppColors.raceBgDark,
                             ),
                           )
                         : const SizedBox(),
@@ -156,7 +156,9 @@ class _MultiplayerRaceScreenState extends State<MultiplayerRaceScreen> {
                   SafeArea(
                     child: Padding(
                       padding: const EdgeInsets.symmetric(
-                          horizontal: 16, vertical: 8),
+                        horizontal: 16,
+                        vertical: 8,
+                      ),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -166,9 +168,11 @@ class _MultiplayerRaceScreenState extends State<MultiplayerRaceScreen> {
                             children: [
                               Container(
                                 padding: const EdgeInsets.symmetric(
-                                    horizontal: 12, vertical: 6),
+                                  horizontal: 12,
+                                  vertical: 6,
+                                ),
                                 decoration: BoxDecoration(
-                                  color: const Color(0xFF0A192F)
+                                  color: AppColors.panelNavy
                                       .withValues(alpha: 0.85),
                                   borderRadius: BorderRadius.circular(8),
                                   border: Border.all(
@@ -206,7 +210,9 @@ class _MultiplayerRaceScreenState extends State<MultiplayerRaceScreen> {
                                 },
                                 child: Container(
                                   padding: const EdgeInsets.symmetric(
-                                      horizontal: 10, vertical: 6),
+                                    horizontal: 10,
+                                    vertical: 6,
+                                  ),
                                   decoration: BoxDecoration(
                                     color: Colors.black.withValues(alpha: 0.6),
                                     borderRadius: BorderRadius.circular(8),
@@ -266,11 +272,13 @@ class _MultiplayerRaceScreenState extends State<MultiplayerRaceScreen> {
   }
 
   Widget _buildSpectatorScreen(
-      ILobbyRepository repo, List<RacerStanding> standings) {
+    ILobbyRepository repo,
+    List<RacerStanding> standings,
+  ) {
     final activeCount = standings.where((s) => s.isAlive).length;
 
     return Scaffold(
-      backgroundColor: const Color(0xFF030712),
+      backgroundColor: AppColors.raceBgDeep,
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
@@ -292,43 +300,33 @@ class _MultiplayerRaceScreenState extends State<MultiplayerRaceScreen> {
                             color: AppColors.cyan.withValues(alpha: 0.5),
                           ),
                         ),
-                        child: const Text('🐤', style: TextStyle(fontSize: 24)),
+                        child: const Icon(
+                          Icons.tv,
+                          color: AppColors.cyan,
+                          size: 26,
+                        ),
                       ),
                       const SizedBox(width: 14),
-                      Column(
+                      const Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text(
-                            AppStrings.appNameUpper,
+                          Text(
+                            'BOOTH TOURNAMENT DISPLAY',
                             style: TextStyle(
-                              color: AppColors.cyan,
-                              fontSize: 14,
+                              color: Colors.white,
+                              fontSize: 18,
                               fontWeight: FontWeight.w900,
                               letterSpacing: 2.0,
                             ),
                           ),
-                          const SizedBox(height: 2),
-                          Row(
-                            children: [
-                              Container(
-                                width: 8,
-                                height: 8,
-                                decoration: const BoxDecoration(
-                                  color: AppColors.crashRed,
-                                  shape: BoxShape.circle,
-                                ),
-                              ),
-                              const SizedBox(width: 6),
-                              const Text(
-                                'LIVE TOURNAMENT SPECTATOR BOARD',
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.w900,
-                                  letterSpacing: 1.0,
-                                ),
-                              ),
-                            ],
+                          Text(
+                            'LIVE MULTIPLAYER CI/CD RACE STREAM',
+                            style: TextStyle(
+                              color: AppColors.textMuted,
+                              fontSize: 11,
+                              fontWeight: FontWeight.bold,
+                              letterSpacing: 1.5,
+                            ),
                           ),
                         ],
                       ),
@@ -338,9 +336,11 @@ class _MultiplayerRaceScreenState extends State<MultiplayerRaceScreen> {
                     children: [
                       Container(
                         padding: const EdgeInsets.symmetric(
-                            horizontal: 16, vertical: 8),
+                          horizontal: 16,
+                          vertical: 8,
+                        ),
                         decoration: BoxDecoration(
-                          color: const Color(0xFF0A192F),
+                          color: AppColors.panelNavy,
                           borderRadius: BorderRadius.circular(10),
                           border: Border.all(
                             color: AppColors.neonGreen.withValues(alpha: 0.6),
@@ -378,9 +378,11 @@ class _MultiplayerRaceScreenState extends State<MultiplayerRaceScreen> {
                       const SizedBox(width: 12),
                       Container(
                         padding: const EdgeInsets.symmetric(
-                            horizontal: 14, vertical: 8),
+                          horizontal: 14,
+                          vertical: 8,
+                        ),
                         decoration: BoxDecoration(
-                          color: const Color(0xFF0A192F),
+                          color: AppColors.panelNavy,
                           borderRadius: BorderRadius.circular(10),
                           border: Border.all(
                             color: AppColors.cyan.withValues(alpha: 0.4),
@@ -448,12 +450,12 @@ class _MultiplayerRaceScreenState extends State<MultiplayerRaceScreen> {
                             rankColor = AppColors.shorebirdGold;
                             medal = '🥇 1ST';
                           } else if (s.rank == 2) {
-                            borderGlow = const Color(0xFFC0C0C0);
-                            rankColor = const Color(0xFFC0C0C0);
+                            borderGlow = AppColors.silverMedal;
+                            rankColor = AppColors.silverMedal;
                             medal = '🥈 2ND';
                           } else if (s.rank == 3) {
-                            borderGlow = const Color(0xFFCD7F32);
-                            rankColor = const Color(0xFFCD7F32);
+                            borderGlow = AppColors.bronzeMedal;
+                            rankColor = AppColors.bronzeMedal;
                             medal = '🥉 3RD';
                           }
 
@@ -467,8 +469,7 @@ class _MultiplayerRaceScreenState extends State<MultiplayerRaceScreen> {
                           return Container(
                             padding: const EdgeInsets.all(16),
                             decoration: BoxDecoration(
-                              color: const Color(0xFF0A192F)
-                                  .withValues(alpha: 0.9),
+                              color: AppColors.panelNavy.withValues(alpha: 0.9),
                               borderRadius: BorderRadius.circular(14),
                               border: Border.all(
                                 color: s.isAlive
@@ -489,8 +490,10 @@ class _MultiplayerRaceScreenState extends State<MultiplayerRaceScreen> {
                                 Column(
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
-                                    Text(skinEmoji,
-                                        style: const TextStyle(fontSize: 32)),
+                                    Text(
+                                      skinEmoji,
+                                      style: const TextStyle(fontSize: 32),
+                                    ),
                                     const SizedBox(height: 6),
                                     Text(
                                       medal,
@@ -528,7 +531,9 @@ class _MultiplayerRaceScreenState extends State<MultiplayerRaceScreen> {
                                           ),
                                           Container(
                                             padding: const EdgeInsets.symmetric(
-                                                horizontal: 8, vertical: 3),
+                                              horizontal: 8,
+                                              vertical: 3,
+                                            ),
                                             decoration: BoxDecoration(
                                               color: s.isAlive
                                                   ? AppColors.neonGreen
@@ -602,7 +607,7 @@ class _MultiplayerRaceScreenState extends State<MultiplayerRaceScreen> {
                 padding:
                     const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
                 decoration: BoxDecoration(
-                  color: const Color(0xFF0A192F).withValues(alpha: 0.5),
+                  color: AppColors.panelNavy.withValues(alpha: 0.5),
                   borderRadius: BorderRadius.circular(10),
                   border: Border.all(color: Colors.white10),
                 ),

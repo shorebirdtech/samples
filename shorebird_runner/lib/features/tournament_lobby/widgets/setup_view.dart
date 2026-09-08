@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:shorebird_runner/core/constants/constants.dart';
 import 'package:shorebird_runner/features/start_menu/start_menu.dart';
 import 'package:shorebird_runner/features/tournament_lobby/widgets/skin_choice_chip.dart';
 import 'package:shorebird_runner/game/game.dart';
@@ -30,13 +31,14 @@ class SetupView extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
-              color: const Color(0xFF0A192F).withValues(alpha: 0.9),
+              color: AppColors.panelNavy.withValues(alpha: 0.9),
               borderRadius: BorderRadius.circular(16),
               border: Border.all(
-                  color: const Color(0xFF00D4FF).withValues(alpha: 0.3)),
+                color: AppColors.cyan.withValues(alpha: 0.3),
+              ),
               boxShadow: [
                 BoxShadow(
-                  color: const Color(0xFF00D4FF).withValues(alpha: 0.08),
+                  color: AppColors.cyan.withValues(alpha: 0.08),
                   blurRadius: 20,
                   spreadRadius: 2,
                 ),
@@ -51,7 +53,7 @@ class SetupView extends StatelessWidget {
                     const Text(
                       'DEVELOPER PROFILE',
                       style: TextStyle(
-                        color: Color(0xFF00D4FF),
+                        color: AppColors.cyan,
                         fontSize: 13,
                         fontWeight: FontWeight.w900,
                         letterSpacing: 2.0,
@@ -59,12 +61,15 @@ class SetupView extends StatelessWidget {
                     ),
                     TextButton.icon(
                       onPressed: () => showGameRulesDialog(context),
-                      icon: const Icon(Icons.menu_book,
-                          size: 15, color: Color(0xFF00FF88)),
+                      icon: const Icon(
+                        Icons.menu_book,
+                        size: 15,
+                        color: AppColors.neonGreen,
+                      ),
                       label: const Text(
                         'Rules',
                         style: TextStyle(
-                          color: Color(0xFF00FF88),
+                          color: AppColors.neonGreen,
                           fontSize: 11,
                           fontWeight: FontWeight.bold,
                         ),
@@ -76,24 +81,29 @@ class SetupView extends StatelessWidget {
                 TextField(
                   controller: nameController,
                   style: const TextStyle(
-                      color: Colors.white, fontWeight: FontWeight.bold),
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                  ),
                   decoration: InputDecoration(
                     labelText: 'DEVELOPER HANDLE',
                     labelStyle:
                         const TextStyle(color: Colors.white60, fontSize: 12),
-                    prefixIcon: const Icon(Icons.sports_esports,
-                        color: Color(0xFF00D4FF)),
+                    prefixIcon: const Icon(
+                      Icons.sports_esports,
+                      color: AppColors.cyan,
+                    ),
                     filled: true,
-                    fillColor: const Color(0xFF050F1E),
+                    fillColor: AppColors.cardSurface,
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(10),
                       borderSide: BorderSide(
-                          color: Colors.white.withValues(alpha: 0.1)),
+                        color: Colors.white.withValues(alpha: 0.1),
+                      ),
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(10),
                       borderSide:
-                          const BorderSide(color: Color(0xFF00D4FF), width: 2),
+                          const BorderSide(color: AppColors.cyan, width: 2),
                     ),
                   ),
                 ),
@@ -113,21 +123,25 @@ class SetupView extends StatelessWidget {
                   runSpacing: 8,
                   children: [
                     SkinChoiceChip(
-                        skin: PlayerSkin.blueBird,
-                        label: '👨‍💻 Shorebird Dev',
-                        color: Color(0xFF00D4FF)),
+                      skin: PlayerSkin.blueBird,
+                      label: '👨‍💻 Shorebird Dev',
+                      color: AppColors.skinBlue,
+                    ),
                     SkinChoiceChip(
-                        skin: PlayerSkin.goldPhoenix,
-                        label: '🧑‍💻 Frontend Ninja',
-                        color: Color(0xFFFFB347)),
+                      skin: PlayerSkin.goldPhoenix,
+                      label: '🧑‍💻 Frontend Ninja',
+                      color: AppColors.skinAmber,
+                    ),
                     SkinChoiceChip(
-                        skin: PlayerSkin.emeraldFalcon,
-                        label: '⚡ Fullstack Hero',
-                        color: Color(0xFF00FF88)),
+                      skin: PlayerSkin.emeraldFalcon,
+                      label: '⚡ Fullstack Hero',
+                      color: AppColors.skinGreen,
+                    ),
                     SkinChoiceChip(
-                        skin: PlayerSkin.violetRaven,
-                        label: '👾 Bug Hunter',
-                        color: Color(0xFFA855F7)),
+                      skin: PlayerSkin.violetRaven,
+                      label: '👾 Bug Hunter',
+                      color: AppColors.skinPurple,
+                    ),
                   ],
                 ),
               ],
@@ -165,7 +179,8 @@ class SetupView extends StatelessWidget {
                   ? Column(children: cards)
                   : Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
-                      children: cards);
+                      children: cards,
+                    );
             },
           ),
         ],
@@ -188,10 +203,9 @@ class _CreateCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(22),
       decoration: BoxDecoration(
-        color: const Color(0xFF0A192F).withValues(alpha: 0.8),
+        color: AppColors.panelNavy.withValues(alpha: 0.8),
         borderRadius: BorderRadius.circular(16),
-        border:
-            Border.all(color: const Color(0xFF00FF88).withValues(alpha: 0.3)),
+        border: Border.all(color: AppColors.neonGreen.withValues(alpha: 0.3)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -199,7 +213,9 @@ class _CreateCard extends StatelessWidget {
           const Row(
             children: [
               _CardIcon(
-                  icon: Icons.add_circle_outline, color: Color(0xFF00FF88)),
+                icon: Icons.add_circle_outline,
+                color: AppColors.neonGreen,
+              ),
               SizedBox(width: 12),
               Expanded(
                 child: Column(
@@ -227,13 +243,14 @@ class _CreateCard extends StatelessWidget {
           ElevatedButton(
             onPressed: onCreateAsSpectator,
             style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF00D4FF),
+              backgroundColor: AppColors.cyan,
               foregroundColor: Colors.black,
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
               elevation: 8,
-              shadowColor: const Color(0xFF00D4FF).withValues(alpha: 0.4),
+              shadowColor: AppColors.cyan.withValues(alpha: 0.4),
               shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12)),
+                borderRadius: BorderRadius.circular(12),
+              ),
             ),
             child: const Row(
               children: [
@@ -272,15 +289,20 @@ class _CreateCard extends StatelessWidget {
           OutlinedButton(
             onPressed: onCreateAsRacer,
             style: OutlinedButton.styleFrom(
-              foregroundColor: const Color(0xFF00FF88),
-              side: const BorderSide(color: Color(0xFF00FF88), width: 1.5),
+              foregroundColor: AppColors.neonGreen,
+              side: const BorderSide(color: AppColors.neonGreen, width: 1.5),
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
               shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12)),
+                borderRadius: BorderRadius.circular(12),
+              ),
             ),
             child: const Row(
               children: [
-                Icon(Icons.sports_esports, color: Color(0xFF00FF88), size: 24),
+                Icon(
+                  Icons.sports_esports,
+                  color: AppColors.neonGreen,
+                  size: 24,
+                ),
                 SizedBox(width: 12),
                 Expanded(
                   child: Column(
@@ -289,7 +311,7 @@ class _CreateCard extends StatelessWidget {
                       Text(
                         'HOST & RACE ON THIS DEVICE',
                         style: TextStyle(
-                          color: Color(0xFF00FF88),
+                          color: AppColors.neonGreen,
                           fontWeight: FontWeight.w900,
                           fontSize: 12,
                           letterSpacing: 1.0,
@@ -306,8 +328,11 @@ class _CreateCard extends StatelessWidget {
                     ],
                   ),
                 ),
-                Icon(Icons.arrow_forward_ios,
-                    size: 14, color: Color(0xFF00FF88)),
+                Icon(
+                  Icons.arrow_forward_ios,
+                  size: 14,
+                  color: AppColors.neonGreen,
+                ),
               ],
             ),
           ),
@@ -331,17 +356,19 @@ class _JoinCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(22),
       decoration: BoxDecoration(
-        color: const Color(0xFF0A192F).withValues(alpha: 0.8),
+        color: AppColors.panelNavy.withValues(alpha: 0.8),
         borderRadius: BorderRadius.circular(16),
-        border:
-            Border.all(color: const Color(0xFFFFB347).withValues(alpha: 0.3)),
+        border: Border.all(color: AppColors.skinAmber.withValues(alpha: 0.3)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           const Row(
             children: [
-              _CardIcon(icon: Icons.vpn_key_outlined, color: Color(0xFFFFB347)),
+              _CardIcon(
+                icon: Icons.vpn_key_outlined,
+                color: AppColors.skinAmber,
+              ),
               SizedBox(width: 12),
               Expanded(
                 child: Column(
@@ -374,7 +401,7 @@ class _JoinCard extends StatelessWidget {
                   textCapitalization: TextCapitalization.characters,
                   textAlign: TextAlign.center,
                   style: const TextStyle(
-                    color: Color(0xFFFFB347),
+                    color: AppColors.skinAmber,
                     fontSize: 18,
                     fontWeight: FontWeight.w900,
                     letterSpacing: 4.0,
@@ -382,9 +409,11 @@ class _JoinCard extends StatelessWidget {
                   decoration: InputDecoration(
                     hintText: 'CODE',
                     hintStyle: const TextStyle(
-                        color: Colors.white24, letterSpacing: 2.0),
+                      color: Colors.white24,
+                      letterSpacing: 2.0,
+                    ),
                     filled: true,
-                    fillColor: const Color(0xFF050F1E),
+                    fillColor: AppColors.cardSurface,
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(10),
                       borderSide: BorderSide.none,
@@ -396,11 +425,12 @@ class _JoinCard extends StatelessWidget {
               ElevatedButton(
                 onPressed: onJoinRoom,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFFFFB347),
+                  backgroundColor: AppColors.skinAmber,
                   padding:
                       const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
                   shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10)),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
                 ),
                 child: const Text(
                   'JOIN',

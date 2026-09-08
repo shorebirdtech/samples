@@ -26,9 +26,9 @@ class VsScoreboard extends StatelessWidget {
       margin: const EdgeInsets.only(top: 8),
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
       decoration: BoxDecoration(
-        color: const Color(0xFF090E1A).withValues(alpha: 0.92),
+        color: AppColors.darkNavy.withValues(alpha: 0.92),
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: const Color(0xFF2A3A5C)),
+        border: Border.all(color: AppColors.borderSubtle),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.5),
@@ -82,13 +82,13 @@ class VsScoreboard extends StatelessWidget {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
             decoration: BoxDecoration(
-              color: const Color(0xFF1E293B),
+              color: AppColors.darkSlate,
               borderRadius: BorderRadius.circular(12),
             ),
             child: Text(
               leadText,
               style: const TextStyle(
-                color: Color(0xFFFFD166),
+                color: AppColors.goldLight,
                 fontSize: 11,
                 fontWeight: FontWeight.w800,
                 letterSpacing: 1,

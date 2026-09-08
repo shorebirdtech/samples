@@ -117,7 +117,7 @@ class GameOverOverlay extends StatelessWidget {
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.shorebirdGold,
-                    foregroundColor: const Color(0xFF1A1200),
+                    foregroundColor: AppColors.buttonDarkText,
                     minimumSize: const Size.fromHeight(48),
                     elevation: 6,
                     shape: RoundedRectangleBorder(

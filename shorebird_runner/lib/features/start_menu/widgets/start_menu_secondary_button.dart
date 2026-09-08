@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:shorebird_runner/core/constants/constants.dart';
 
 class StartMenuSecondaryButton extends StatelessWidget {
   final String icon;
@@ -44,7 +45,7 @@ class StartMenuSecondaryButton extends StatelessWidget {
                         BoxShadow(
                           color: color.withValues(alpha: 0.2),
                           blurRadius: 20,
-                        )
+                        ),
                       ]
                     : [],
               ),
@@ -66,7 +67,7 @@ class StartMenuSecondaryButton extends StatelessWidget {
                   Text(
                     subtitle,
                     style: TextStyle(
-                      color: const Color(0xFF607D8B).withValues(alpha: 0.9),
+                      color: AppColors.slateText.withValues(alpha: 0.9),
                       fontSize: 9,
                       fontWeight: FontWeight.w700,
                       letterSpacing: 1,

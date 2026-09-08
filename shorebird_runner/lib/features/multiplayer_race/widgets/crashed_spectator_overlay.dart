@@ -23,7 +23,7 @@ class CrashedSpectatorOverlay extends StatelessWidget {
               vertical: 22,
             ),
             decoration: BoxDecoration(
-              color: const Color(0xFF0A192F),
+              color: AppColors.panelNavy,
               borderRadius: BorderRadius.circular(16),
               border: Border.all(
                 color: AppColors.crashRed,

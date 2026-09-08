@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:shorebird_runner/core/constants/constants.dart';
 import 'package:shorebird_runner/features/start_menu/widgets/plan_chip.dart';
 
 class StagesRoadmap extends StatelessWidget {
@@ -7,26 +8,26 @@ class StagesRoadmap extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     const plans = [
-      ('🐣', 'HOBBY', '5,000', Color(0xFF00BCD4)),
-      ('⚡', 'PRO', '50K', Color(0xFF4CAF50)),
-      ('💼', 'BUSINESS', '1M', Color(0xFFFFC107)),
-      ('👑', 'ENTERPRISE', 'CUSTOM', Color(0xFF9C27B0)),
+      ('🐣', 'HOBBY', '5,000', AppColors.proCyan),
+      ('⚡', 'PRO', '50K', AppColors.businessGreen),
+      ('💼', 'BUSINESS', '1M', AppColors.shorebirdGold),
+      ('👑', 'ENTERPRISE', 'CUSTOM', AppColors.enterprisePurple),
     ];
 
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 24),
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
       decoration: BoxDecoration(
-        color: const Color(0xFF12141A),
+        color: AppColors.cardDark,
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: const Color(0xFF1E2730)),
+        border: Border.all(color: AppColors.cardDarkBorder),
       ),
       child: Column(
         children: [
           const Text(
             'PATCH QUOTAS — SHOREBIRD PLANS',
             style: TextStyle(
-              color: Color(0xFF546E7A),
+              color: AppColors.slateLight,
               fontSize: 9,
               fontWeight: FontWeight.w800,
               letterSpacing: 2,
@@ -47,7 +48,7 @@ class StagesRoadmap extends StatelessWidget {
                       child: Icon(
                         Icons.arrow_forward_ios_rounded,
                         size: 8,
-                        color: Color(0xFF37474F),
+                        color: AppColors.slateDark,
                       ),
                     ),
                 ],

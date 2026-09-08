@@ -23,14 +23,18 @@ class RaceBloc extends Bloc<RaceEvent, RaceState> {
   }
 
   void _listenToRepository() {
-    _subs.add(_lobbyRepository.standingsStream.listen((standings) {
-      add(StandingsUpdated(standings));
-    }));
-    _subs.add(_lobbyRepository.matchFinishedStream.listen((rankings) {
-      if (rankings != null) {
-        add(MatchFinishedReceived(rankings));
-      }
-    }));
+    _subs.add(
+      _lobbyRepository.standingsStream.listen((standings) {
+        add(StandingsUpdated(standings));
+      }),
+    );
+    _subs.add(
+      _lobbyRepository.matchFinishedStream.listen((rankings) {
+        if (rankings != null) {
+          add(MatchFinishedReceived(rankings));
+        }
+      }),
+    );
   }
 
   void _onUpdateRacerScore(UpdateRacerScore event, Emitter<RaceState> emit) {
@@ -47,18 +51,24 @@ class RaceBloc extends Bloc<RaceEvent, RaceState> {
   }
 
   void _onMatchFinishedReceived(
-      MatchFinishedReceived event, Emitter<RaceState> emit) {
+    MatchFinishedReceived event,
+    Emitter<RaceState> emit,
+  ) {
     emit(state.copyWith(finalRankings: event.rankings));
   }
 
   void _onPlayerCrashedEvent(
-      PlayerCrashedEvent event, Emitter<RaceState> emit) {
-    emit(state.copyWith(
-      isAlive: false,
-      hasCrashed: true,
-      finalScore: event.finalScore,
-      finalPatches: event.finalPatches,
-    ));
+    PlayerCrashedEvent event,
+    Emitter<RaceState> emit,
+  ) {
+    emit(
+      state.copyWith(
+        isAlive: false,
+        hasCrashed: true,
+        finalScore: event.finalScore,
+        finalPatches: event.finalPatches,
+      ),
+    );
   }
 
   @override

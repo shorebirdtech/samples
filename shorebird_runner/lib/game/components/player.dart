@@ -150,10 +150,13 @@ class Player extends Component {
         final pos = worldPosition;
         for (int i = 0; i < 6; i++) {
           if (_particles.length < 24) {
-            _particles.add(DashSpark(
+            _particles.add(
+              DashSpark(
                 Offset(pos.dx + (_rng.nextDouble() - 0.5) * 24, pos.dy + 34),
                 _rng,
-                _getAuraColor()));
+                _getAuraColor(),
+              ),
+            );
           }
         }
       }
@@ -168,10 +171,13 @@ class Player extends Component {
       _slideTime += dt;
       final pos = worldPosition;
       if (_particles.length < 24) {
-        _particles.add(DashSpark(
+        _particles.add(
+          DashSpark(
             Offset(pos.dx + (_rng.nextDouble() - 0.5) * 26, pos.dy + 30),
             _rng,
-            const Color(0xFFFFB300)));
+            const Color(0xFFFFB300),
+          ),
+        );
       }
       if (_slideTime >= _slideDuration) {
         _isSliding = false;
@@ -184,11 +190,16 @@ class Player extends Component {
       _invincibleTimer = max(0.0, _invincibleTimer - dt);
       final pos = worldPosition;
       if (_particles.length < 24) {
-        _particles.add(DashSpark(
-            Offset(pos.dx + (_rng.nextDouble() - 0.5) * 36,
-                pos.dy + (_rng.nextDouble() - 0.5) * 30),
+        _particles.add(
+          DashSpark(
+            Offset(
+              pos.dx + (_rng.nextDouble() - 0.5) * 36,
+              pos.dy + (_rng.nextDouble() - 0.5) * 30,
+            ),
             _rng,
-            const Color(0xFFFFD700)));
+            const Color(0xFFFFD700),
+          ),
+        );
       }
     }
 
@@ -297,7 +308,7 @@ class Player extends Component {
         (_isJumping || _isSliding) ? 0.0 : sin(_runPhase) * 0.04;
     final center = Offset(pos.dx, pos.dy - stepBounce);
     final roll = rollAngle;
-    const size = GameConfig.playerNearSize; // 54
+    final size = GameConfig.playerNearSize; // responsive near size
 
     canvas.save();
     canvas.translate(center.dx, center.dy);
@@ -326,7 +337,7 @@ class Player extends Component {
 
     // Hot Reload invincibility energy shield
     if (isInvincible) {
-      const shieldRadius = size * 0.88;
+      final shieldRadius = size * 0.88;
       final shieldPaint = Paint()
         ..shader = SweepGradient(
           colors: const [
@@ -337,7 +348,8 @@ class Player extends Component {
           ],
           transform: GradientRotation(_runPhase * 4),
         ).createShader(
-            Rect.fromCircle(center: Offset.zero, radius: shieldRadius))
+          Rect.fromCircle(center: Offset.zero, radius: shieldRadius),
+        )
         ..style = PaintingStyle.stroke
         ..strokeWidth = 3.5;
       canvas.drawCircle(const Offset(0, 2), shieldRadius, shieldPaint);
@@ -358,22 +370,37 @@ class Player extends Component {
         final nodeAngle = _runPhase * 3.5 + (i * 2 * pi / nodeCount);
         final nx = cos(nodeAngle) * (shieldRadius * 1.05);
         final ny = sin(nodeAngle) * (shieldRadius * 0.75) + 2;
-        canvas.drawCircle(Offset(nx, ny), 5.5,
-            Paint()..color = const Color(0xFF00FFCC).withValues(alpha: 0.35));
         canvas.drawCircle(
-            Offset(nx, ny), 3.0, Paint()..color = const Color(0xFF00FFCC));
+          Offset(nx, ny),
+          5.5,
+          Paint()..color = const Color(0xFF00FFCC).withValues(alpha: 0.35),
+        );
         canvas.drawCircle(
-            Offset(nx, ny), 1.5, Paint()..color = const Color(0xFFFFFFFF));
+          Offset(nx, ny),
+          3.0,
+          Paint()..color = const Color(0xFF00FFCC),
+        );
+        canvas.drawCircle(
+          Offset(nx, ny),
+          1.5,
+          Paint()..color = const Color(0xFFFFFFFF),
+        );
       }
     }
 
     // Developer neon aura (concentric circles, zero blur overhead)
     final aura = _getAuraColor();
     final auraAlpha = isInvincible ? 0.35 : 0.16;
-    canvas.drawCircle(const Offset(0, 4), size * 0.90,
-        Paint()..color = aura.withValues(alpha: auraAlpha * 0.4));
-    canvas.drawCircle(const Offset(0, 4), size * 0.65,
-        Paint()..color = aura.withValues(alpha: auraAlpha));
+    canvas.drawCircle(
+      const Offset(0, 4),
+      size * 0.90,
+      Paint()..color = aura.withValues(alpha: auraAlpha * 0.4),
+    );
+    canvas.drawCircle(
+      const Offset(0, 4),
+      size * 0.65,
+      Paint()..color = aura.withValues(alpha: auraAlpha),
+    );
 
     _drawLegs(canvas, size);
     _drawTorso(canvas, size);
@@ -439,15 +466,22 @@ class Player extends Component {
     );
   }
 
-  void _drawRunningShoe(Canvas canvas, Offset pos,
-      {required bool isLeft, required double scale}) {
+  void _drawRunningShoe(
+    Canvas canvas,
+    Offset pos, {
+    required bool isLeft,
+    required double scale,
+  }) {
     canvas.save();
     canvas.translate(pos.dx, pos.dy);
 
     final shoePaint = Paint()..color = const Color(0xFF0F172A);
     final shoeRect = RRect.fromRectAndRadius(
       Rect.fromCenter(
-          center: const Offset(0, 0), width: 14 * scale, height: 6 * scale),
+        center: const Offset(0, 0),
+        width: 14 * scale,
+        height: 6 * scale,
+      ),
       Radius.circular(2 * scale),
     );
     canvas.drawRRect(shoeRect, shoePaint);
@@ -464,10 +498,16 @@ class Player extends Component {
     );
 
     // Sole neon glow flare (concentric)
-    canvas.drawCircle(const Offset(0, 3.5), 7,
-        Paint()..color = soleColor.withValues(alpha: 0.22));
-    canvas.drawCircle(const Offset(0, 3.5), 4,
-        Paint()..color = soleColor.withValues(alpha: 0.75));
+    canvas.drawCircle(
+      const Offset(0, 3.5),
+      7,
+      Paint()..color = soleColor.withValues(alpha: 0.22),
+    );
+    canvas.drawCircle(
+      const Offset(0, 3.5),
+      4,
+      Paint()..color = soleColor.withValues(alpha: 0.75),
+    );
 
     canvas.restore();
   }
@@ -532,19 +572,37 @@ class Player extends Component {
 
     // Multi-ring concentric glow behind emblem
     canvas.drawCircle(
-        emblemCenter, r * 0.32, Paint()..color = aura.withValues(alpha: 0.18));
+      emblemCenter,
+      r * 0.32,
+      Paint()..color = aura.withValues(alpha: 0.18),
+    );
     canvas.drawCircle(
-        emblemCenter, r * 0.26, Paint()..color = aura.withValues(alpha: 0.38));
+      emblemCenter,
+      r * 0.26,
+      Paint()..color = aura.withValues(alpha: 0.38),
+    );
 
     if (skin == PlayerSkin.blueBird) {
       final birdPath = Path()
         ..moveTo(emblemCenter.dx - 4, emblemCenter.dy + 3)
-        ..cubicTo(emblemCenter.dx - 6, emblemCenter.dy, emblemCenter.dx - 2,
-            emblemCenter.dy - 4, emblemCenter.dx + 3, emblemCenter.dy - 4)
+        ..cubicTo(
+          emblemCenter.dx - 6,
+          emblemCenter.dy,
+          emblemCenter.dx - 2,
+          emblemCenter.dy - 4,
+          emblemCenter.dx + 3,
+          emblemCenter.dy - 4,
+        )
         ..lineTo(emblemCenter.dx + 6, emblemCenter.dy - 2)
         ..lineTo(emblemCenter.dx + 2, emblemCenter.dy)
-        ..cubicTo(emblemCenter.dx + 4, emblemCenter.dy + 4, emblemCenter.dx,
-            emblemCenter.dy + 4, emblemCenter.dx - 4, emblemCenter.dy + 3);
+        ..cubicTo(
+          emblemCenter.dx + 4,
+          emblemCenter.dy + 4,
+          emblemCenter.dx,
+          emblemCenter.dy + 4,
+          emblemCenter.dx - 4,
+          emblemCenter.dy + 3,
+        );
       final birdPaint = Paint()
         ..color = const Color(0xFF00FFCC)
         ..style = PaintingStyle.fill;
@@ -556,18 +614,33 @@ class Player extends Component {
         ..strokeWidth = 1.8
         ..strokeCap = StrokeCap.round;
 
-      canvas.drawLine(Offset(emblemCenter.dx - 5, emblemCenter.dy - 3),
-          Offset(emblemCenter.dx - 8, emblemCenter.dy), codePaint);
-      canvas.drawLine(Offset(emblemCenter.dx - 8, emblemCenter.dy),
-          Offset(emblemCenter.dx - 5, emblemCenter.dy + 3), codePaint);
+      canvas.drawLine(
+        Offset(emblemCenter.dx - 5, emblemCenter.dy - 3),
+        Offset(emblemCenter.dx - 8, emblemCenter.dy),
+        codePaint,
+      );
+      canvas.drawLine(
+        Offset(emblemCenter.dx - 8, emblemCenter.dy),
+        Offset(emblemCenter.dx - 5, emblemCenter.dy + 3),
+        codePaint,
+      );
 
-      canvas.drawLine(Offset(emblemCenter.dx - 1, emblemCenter.dy + 4),
-          Offset(emblemCenter.dx + 1, emblemCenter.dy - 4), codePaint);
+      canvas.drawLine(
+        Offset(emblemCenter.dx - 1, emblemCenter.dy + 4),
+        Offset(emblemCenter.dx + 1, emblemCenter.dy - 4),
+        codePaint,
+      );
 
-      canvas.drawLine(Offset(emblemCenter.dx + 5, emblemCenter.dy - 3),
-          Offset(emblemCenter.dx + 8, emblemCenter.dy), codePaint);
-      canvas.drawLine(Offset(emblemCenter.dx + 8, emblemCenter.dy),
-          Offset(emblemCenter.dx + 5, emblemCenter.dy + 3), codePaint);
+      canvas.drawLine(
+        Offset(emblemCenter.dx + 5, emblemCenter.dy - 3),
+        Offset(emblemCenter.dx + 8, emblemCenter.dy),
+        codePaint,
+      );
+      canvas.drawLine(
+        Offset(emblemCenter.dx + 8, emblemCenter.dy),
+        Offset(emblemCenter.dx + 5, emblemCenter.dy + 3),
+        codePaint,
+      );
     }
   }
 
@@ -667,7 +740,10 @@ class Player extends Component {
     canvas.drawRRect(leftCupRect, cupGlow);
 
     _drawCupEqualizer(
-        canvas, Offset(-headRadius - 2.5, headCenter.dy + 1), aura);
+      canvas,
+      Offset(-headRadius - 2.5, headCenter.dy + 1),
+      aura,
+    );
 
     final rightCupRect = RRect.fromRectAndRadius(
       Rect.fromCenter(
@@ -687,10 +763,16 @@ class Player extends Component {
       ..strokeWidth = 1.0;
     final h1 = (sin(_runPhase * 3) * 3).abs() + 2;
     final h2 = (cos(_runPhase * 2.5) * 4).abs() + 2;
-    canvas.drawLine(Offset(center.dx - 1.5, center.dy - h1),
-        Offset(center.dx - 1.5, center.dy + h1), eqPaint);
-    canvas.drawLine(Offset(center.dx + 1.5, center.dy - h2),
-        Offset(center.dx + 1.5, center.dy + h2), eqPaint);
+    canvas.drawLine(
+      Offset(center.dx - 1.5, center.dy - h1),
+      Offset(center.dx - 1.5, center.dy + h1),
+      eqPaint,
+    );
+    canvas.drawLine(
+      Offset(center.dx + 1.5, center.dy - h2),
+      Offset(center.dx + 1.5, center.dy + h2),
+      eqPaint,
+    );
   }
 
   void _drawArmsAndLaptop(Canvas canvas, double size) {

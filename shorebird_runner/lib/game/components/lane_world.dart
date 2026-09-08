@@ -98,6 +98,8 @@ class LaneWorld extends Component {
     _initStaticGeometry();
   }
 
+  double _bldScale = 0.45;
+
   void _initStaticGeometry() {
     _mountainPath.reset();
     _skylineBuildingsPath.reset();
@@ -106,29 +108,47 @@ class LaneWorld extends Component {
 
     final cy = GameConfig.horizonY;
     final w = GameConfig.designWidth;
+    final isDesktop = w > GameConfig.designHeight;
+    _bldScale = (cy / 260.0).clamp(0.26, 0.55);
+    final mtnHeight = cy * (isDesktop ? 0.30 : 0.45);
 
     // Mountain Ridge
     _mountainPath
       ..moveTo(0, cy)
-      ..lineTo(0, cy - 45)
-      ..quadraticBezierTo(w * 0.15, cy - 85, w * 0.30, cy - 50)
-      ..quadraticBezierTo(w * 0.45, cy - 95, w * 0.60, cy - 40)
-      ..quadraticBezierTo(w * 0.80, cy - 80, w, cy - 55)
+      ..lineTo(0, cy - mtnHeight * 0.5)
+      ..quadraticBezierTo(
+        w * 0.15,
+        cy - mtnHeight * 0.9,
+        w * 0.30,
+        cy - mtnHeight * 0.55,
+      )
+      ..quadraticBezierTo(
+        w * 0.45,
+        cy - mtnHeight,
+        w * 0.60,
+        cy - mtnHeight * 0.45,
+      )
+      ..quadraticBezierTo(
+        w * 0.80,
+        cy - mtnHeight * 0.85,
+        w,
+        cy - mtnHeight * 0.6,
+      )
       ..lineTo(w, cy)
       ..close();
 
     // Pre-bake Skyscraper Building blocks and window batches
     final buildings = [
-      (8.0, 55.0, 90.0, 0),
-      (68.0, 48.0, 120.0, 1),
-      (122.0, 62.0, 75.0, 2),
-      (190.0, 76.0, 135.0, 3),
-      (272.0, 52.0, 100.0, 4),
-      (w - 330.0, 54.0, 110.0, 5),
-      (w - 270.0, 72.0, 145.0, 6),
-      (w - 192.0, 60.0, 88.0, 7),
-      (w - 126.0, 66.0, 115.0, 8),
-      (w - 54.0, 50.0, 80.0, 9),
+      (w * 0.02, 52.0, 90.0 * _bldScale, 0),
+      (w * 0.08, 48.0, 120.0 * _bldScale, 1),
+      (w * 0.15, 58.0, 75.0 * _bldScale, 2),
+      (w * 0.22, 68.0, 135.0 * _bldScale, 3),
+      (w * 0.30, 52.0, 100.0 * _bldScale, 4),
+      (w * 0.68, 54.0, 110.0 * _bldScale, 5),
+      (w * 0.75, 70.0, 145.0 * _bldScale, 6),
+      (w * 0.83, 58.0, 88.0 * _bldScale, 7),
+      (w * 0.90, 64.0, 115.0 * _bldScale, 8),
+      (w * 0.96, 48.0, 80.0 * _bldScale, 9),
     ];
 
     for (final b in buildings) {
@@ -141,13 +161,13 @@ class LaneWorld extends Component {
 
       // Batch windows into 2 unified paths
       final winCols = (bw / 10).floor();
-      final winRows = (bh / 12).floor();
+      final winRows = (bh / 10).floor();
       for (int r = 1; r < winRows; r++) {
         for (int c = 1; c < winCols; c++) {
           final hash = (seed * 37 + r * 19 + c * 7) % 100;
           if (hash > 45) {
             final winRect =
-                Rect.fromLTWH(bx + c * 10 - 2, cy - bh + r * 12, 4, 6);
+                Rect.fromLTWH(bx + c * 10 - 2, cy - bh + r * 10, 4, 5);
             if (hash % 2 == 0) {
               _amberWindowsPath.addRect(winRect);
             } else {
@@ -237,13 +257,15 @@ class LaneWorld extends Component {
 
   void _drawCinematicCityscape(Canvas canvas) {
     final cy = GameConfig.horizonY;
+    final w = GameConfig.designWidth;
+    final isDesktop = w > GameConfig.designHeight;
 
     // 1. Distant Mountain Ridge Silhouettes against Twilight Sky
     _mountainPaint.shader = const LinearGradient(
       begin: Alignment.topCenter,
       end: Alignment.bottomCenter,
       colors: [Color(0xFF0F0826), Color(0xFF060312)],
-    ).createShader(Rect.fromLTWH(0, cy - 110, GameConfig.designWidth, 110));
+    ).createShader(Rect.fromLTWH(0, 0, w, cy));
     canvas.drawPath(_mountainPath, _mountainPaint);
 
     // 2. Deep Atmospheric Horizon Fog Haze
@@ -256,28 +278,39 @@ class LaneWorld extends Component {
         const Color(0xFF030712),
       ],
       stops: const [0.0, 0.65, 1.0],
-    ).createShader(Rect.fromLTWH(0, cy - 130, GameConfig.designWidth, 130));
+    ).createShader(Rect.fromLTWH(0, cy * 0.2, w, cy * 0.8));
     canvas.drawRect(
-      Rect.fromLTWH(0, cy - 130, GameConfig.designWidth, 130),
+      Rect.fromLTWH(0, cy * 0.2, w, cy * 0.8),
       _hazePaint,
     );
 
     // 3. Sweeping Hollywood / Los Santos Searchlight Beams
-    _drawSearchlight(canvas, GameConfig.designWidth * 0.22, cy,
-        _searchlightAngle, const Color(0xFF00E5FF));
-    _drawSearchlight(canvas, GameConfig.designWidth * 0.78, cy,
-        -_searchlightAngle * 0.9 + 1.2, const Color(0xFFFFB300));
+    _drawSearchlight(
+      canvas,
+      w * 0.22,
+      cy,
+      _searchlightAngle,
+      const Color(0xFF00E5FF),
+    );
+    _drawSearchlight(
+      canvas,
+      w * 0.78,
+      cy,
+      -_searchlightAngle * 0.9 + 1.2,
+      const Color(0xFFFFB300),
+    );
 
-    // 4. Distant Giant Spire Towers
-    _drawDistantTower(canvas, GameConfig.designWidth * 0.38, cy, 38, 160);
-    _drawDistantTower(canvas, GameConfig.designWidth * 0.62, cy, 42, 175);
+    // 4. Distant Giant Spire Towers (scaled relative to sky height)
+    final towerHeight = cy * (isDesktop ? 0.48 : 0.65);
+    _drawDistantTower(canvas, w * 0.36, cy, 32, towerHeight);
+    _drawDistantTower(canvas, w * 0.64, cy, 36, towerHeight * 1.1);
 
     // 5. Pre-baked Skyscraper Silhouettes & Lit Window Paths (Zero loop allocations!)
     _bldFillPaint.shader = const LinearGradient(
       begin: Alignment.topCenter,
       end: Alignment.bottomCenter,
       colors: [Color(0xFF0D1826), Color(0xFF040810)],
-    ).createShader(Rect.fromLTWH(0, cy - 150, GameConfig.designWidth, 150));
+    ).createShader(Rect.fromLTWH(0, 0, w, cy));
     canvas.drawPath(_skylineBuildingsPath, _bldFillPaint);
 
     canvas.drawPath(_amberWindowsPath, _amberWinPaint);
@@ -295,8 +328,12 @@ class LaneWorld extends Component {
           const Color(0x00000000),
         ],
         stops: const [0.0, 0.45, 1.0],
-      ).createShader(Rect.fromCircle(
-          center: Offset(GameConfig.vanishingX, cy), radius: 110));
+      ).createShader(
+        Rect.fromCircle(
+          center: Offset(GameConfig.vanishingX, cy),
+          radius: 110,
+        ),
+      );
     canvas.drawCircle(Offset(GameConfig.vanishingX, cy), 110, bloomPaint);
 
     // 7. Glowing Horizon Laser Neon Line
@@ -329,55 +366,99 @@ class LaneWorld extends Component {
 
     // Billboards
     _renderCachedBillboard(
-        canvas, 68, cy - 120, 48, 'SHOREBIRD', const Color(0xFFFFC107));
+      canvas,
+      w * 0.08,
+      cy - 120.0 * _bldScale,
+      48,
+      'SHOREBIRD',
+      const Color(0xFFFFC107),
+    );
     _renderCachedBillboard(
-        canvas, w - 270, cy - 145, 72, 'CODEPUSH', const Color(0xFFFFB300));
+      canvas,
+      w * 0.75,
+      cy - 145.0 * _bldScale,
+      70,
+      'CODEPUSH',
+      const Color(0xFFFFB300),
+    );
     _renderCachedBillboard(
-        canvas, w - 126, cy - 115, 66, 'FLUTTER', const Color(0xFF00FFCC));
+      canvas,
+      w * 0.90,
+      cy - 115.0 * _bldScale,
+      64,
+      'FLUTTER',
+      const Color(0xFF00FFCC),
+    );
 
     // Blinking radio antennas
-    _drawAntenna(canvas, 68 + 24, cy - 120, 0);
-    _drawAntenna(canvas, 190 + 38, cy - 135, 1);
-    _drawAntenna(canvas, w - 270 + 36, cy - 145, 2);
+    _drawAntenna(canvas, w * 0.08 + 24, cy - 120.0 * _bldScale, 0);
+    _drawAntenna(canvas, w * 0.22 + 34, cy - 135.0 * _bldScale, 1);
+    _drawAntenna(canvas, w * 0.75 + 35, cy - 145.0 * _bldScale, 2);
   }
 
-  void _renderCachedBillboard(Canvas canvas, double x, double topY, double w,
-      String text, Color borderColor) {
+  void _renderCachedBillboard(
+    Canvas canvas,
+    double x,
+    double topY,
+    double w,
+    String text,
+    Color borderColor,
+  ) {
     final bbY = topY - 14;
     final bbRect = Rect.fromLTWH(x - 2, bbY, w + 4, 12);
 
-    canvas.drawRRect(RRect.fromRectAndRadius(bbRect, const Radius.circular(2)),
-        Paint()..color = const Color(0xFF050B14));
+    canvas.drawRRect(
+      RRect.fromRectAndRadius(bbRect, const Radius.circular(2)),
+      Paint()..color = const Color(0xFF050B14),
+    );
 
     canvas.drawRRect(
-        RRect.fromRectAndRadius(bbRect, const Radius.circular(2)),
-        Paint()
-          ..color = borderColor.withValues(alpha: 0.85)
-          ..style = PaintingStyle.stroke
-          ..strokeWidth = 1.2);
+      RRect.fromRectAndRadius(bbRect, const Radius.circular(2)),
+      Paint()
+        ..color = borderColor.withValues(alpha: 0.85)
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 1.2,
+    );
 
     final tp = _cachedBillboards[text];
     if (tp != null) {
       tp.paint(
-          canvas, Offset(x + (w - tp.width) / 2, bbY + (12 - tp.height) / 2));
+        canvas,
+        Offset(x + (w - tp.width) / 2, bbY + (12 - tp.height) / 2),
+      );
     }
   }
 
   void _drawAntenna(Canvas canvas, double x, double baseY, int seed) {
-    canvas.drawLine(Offset(x, baseY), Offset(x, baseY - 24), _antPaint);
+    final antH = 16.0 * (_bldScale / 0.45).clamp(0.6, 1.2);
+    canvas.drawLine(Offset(x, baseY), Offset(x, baseY - antH), _antPaint);
     final beaconFlash = sin(_searchlightAngle * 4 + seed) > 0.0;
     if (beaconFlash) {
       canvas.drawCircle(
-          Offset(x, baseY - 24), 4.5, Paint()..color = const Color(0x66FF2A4B));
+        Offset(x, baseY - antH),
+        3.5,
+        Paint()..color = const Color(0x66FF2A4B),
+      );
       canvas.drawCircle(
-          Offset(x, baseY - 24), 2.0, Paint()..color = const Color(0xFFFF2A4B));
+        Offset(x, baseY - antH),
+        1.8,
+        Paint()..color = const Color(0xFFFF2A4B),
+      );
       canvas.drawCircle(
-          Offset(x, baseY - 24), 1.0, Paint()..color = const Color(0xFFFFFFFF));
+        Offset(x, baseY - antH),
+        1.0,
+        Paint()..color = const Color(0xFFFFFFFF),
+      );
     }
   }
 
   void _drawDistantTower(
-      Canvas canvas, double x, double baseY, double w, double h) {
+    Canvas canvas,
+    double x,
+    double baseY,
+    double w,
+    double h,
+  ) {
     final rect = Rect.fromLTWH(x - w * 0.5, baseY - h, w, h);
     final paint = Paint()
       ..shader = const LinearGradient(
@@ -387,13 +468,24 @@ class LaneWorld extends Component {
       ).createShader(rect);
     canvas.drawRect(rect, paint);
     canvas.drawLine(
-        Offset(x, baseY - h), Offset(x, baseY - h - 35), _spirePaint);
-    canvas.drawCircle(Offset(x, baseY - h - 35), 2.5,
-        Paint()..color = const Color(0xFFFF2A4B));
+      Offset(x, baseY - h),
+      Offset(x, baseY - h - 35),
+      _spirePaint,
+    );
+    canvas.drawCircle(
+      Offset(x, baseY - h - 35),
+      2.5,
+      Paint()..color = const Color(0xFFFF2A4B),
+    );
   }
 
   void _drawSearchlight(
-      Canvas canvas, double x, double y, double angle, Color color) {
+    Canvas canvas,
+    double x,
+    double y,
+    double angle,
+    Color color,
+  ) {
     canvas.save();
     canvas.translate(x, y);
     final beamPath = Path()
@@ -583,7 +675,9 @@ class LaneWorld extends Component {
     required bool isLeft,
   }) {
     final top = Offset(
-        base.dx + (isLeft ? -width * 0.8 : width * 0.8), base.dy - height);
+      base.dx + (isLeft ? -width * 0.8 : width * 0.8),
+      base.dy - height,
+    );
 
     _postPaint
       ..shader = LinearGradient(
@@ -599,12 +693,21 @@ class LaneWorld extends Component {
 
     // Multi-ring concentric beacon glow (replaces expensive blur pass)
     final beaconColor = _curAccentColor.withValues(alpha: alpha);
-    canvas.drawCircle(top, width * 1.2,
-        Paint()..color = beaconColor.withValues(alpha: alpha * 0.25));
-    canvas.drawCircle(top, width * 0.7,
-        Paint()..color = beaconColor.withValues(alpha: alpha * 0.7));
-    canvas.drawCircle(top, width * 0.35,
-        Paint()..color = const Color(0xFFFFFFFF).withValues(alpha: alpha));
+    canvas.drawCircle(
+      top,
+      width * 1.2,
+      Paint()..color = beaconColor.withValues(alpha: alpha * 0.25),
+    );
+    canvas.drawCircle(
+      top,
+      width * 0.7,
+      Paint()..color = beaconColor.withValues(alpha: alpha * 0.7),
+    );
+    canvas.drawCircle(
+      top,
+      width * 0.35,
+      Paint()..color = const Color(0xFFFFFFFF).withValues(alpha: alpha),
+    );
   }
 
   void _drawSubwayRails(Canvas canvas) {
@@ -685,7 +788,10 @@ class LaneWorld extends Component {
     final boardH = 24.0 * t;
 
     final boardRect = Rect.fromCenter(
-        center: Offset(midX, boardY), width: boardW, height: boardH);
+      center: Offset(midX, boardY),
+      width: boardW,
+      height: boardH,
+    );
 
     _boardBgPaint.shader = LinearGradient(
       begin: Alignment.topCenter,
@@ -695,28 +801,44 @@ class LaneWorld extends Component {
         const Color(0xFF020617).withValues(alpha: alpha * 0.95),
       ],
     ).createShader(boardRect);
-    canvas.drawRRect(RRect.fromRectAndRadius(boardRect, Radius.circular(4 * t)),
-        _boardBgPaint);
+    canvas.drawRRect(
+      RRect.fromRectAndRadius(boardRect, Radius.circular(4 * t)),
+      _boardBgPaint,
+    );
 
     _boardBorderPaint
       ..color = _curAccentColor.withValues(alpha: alpha * 0.9)
       ..strokeWidth = 1.6 * t;
-    canvas.drawRRect(RRect.fromRectAndRadius(boardRect, Radius.circular(4 * t)),
-        _boardBorderPaint);
+    canvas.drawRRect(
+      RRect.fromRectAndRadius(boardRect, Radius.circular(4 * t)),
+      _boardBorderPaint,
+    );
 
     // Brackets
     final bracketLen = 6.0 * t;
     _bracketPaint
       ..color = const Color(0xFFFFFFFF).withValues(alpha: alpha)
       ..strokeWidth = 2.0 * t;
-    canvas.drawLine(Offset(boardRect.left, boardRect.top + bracketLen),
-        Offset(boardRect.left, boardRect.top), _bracketPaint);
-    canvas.drawLine(Offset(boardRect.left, boardRect.top),
-        Offset(boardRect.left + bracketLen, boardRect.top), _bracketPaint);
-    canvas.drawLine(Offset(boardRect.right - bracketLen, boardRect.top),
-        Offset(boardRect.right, boardRect.top), _bracketPaint);
-    canvas.drawLine(Offset(boardRect.right, boardRect.top),
-        Offset(boardRect.right, boardRect.top + bracketLen), _bracketPaint);
+    canvas.drawLine(
+      Offset(boardRect.left, boardRect.top + bracketLen),
+      Offset(boardRect.left, boardRect.top),
+      _bracketPaint,
+    );
+    canvas.drawLine(
+      Offset(boardRect.left, boardRect.top),
+      Offset(boardRect.left + bracketLen, boardRect.top),
+      _bracketPaint,
+    );
+    canvas.drawLine(
+      Offset(boardRect.right - bracketLen, boardRect.top),
+      Offset(boardRect.right, boardRect.top),
+      _bracketPaint,
+    );
+    canvas.drawLine(
+      Offset(boardRect.right, boardRect.top),
+      Offset(boardRect.right, boardRect.top + bracketLen),
+      _bracketPaint,
+    );
 
     // Render Cached Plan Text
     final level = GameConfig.levelFor(totalPatches);

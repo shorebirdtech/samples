@@ -13,9 +13,9 @@ class MultiplayerControlsBar extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 6),
       decoration: BoxDecoration(
-        color: const Color(0xFF090E1A).withValues(alpha: 0.9),
+        color: AppColors.darkNavy.withValues(alpha: 0.9),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: const Color(0xFF1E2D4A)),
+        border: Border.all(color: AppColors.borderNavy),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
