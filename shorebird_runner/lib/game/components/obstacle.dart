@@ -492,7 +492,8 @@ class Obstacle extends Component {
       width: barW,
       height: barH * 0.55,
     );
-    final railRRect = RRect.fromRectAndRadius(railRect, Radius.circular(4 * scale));
+    final railRRect =
+        RRect.fromRectAndRadius(railRect, Radius.circular(4 * scale));
 
     canvas.drawRRect(railRRect, Paint()..color = const Color(0xFFFFB300));
 
@@ -527,8 +528,7 @@ class Obstacle extends Component {
           beaconPos,
           10 * scale,
           Paint()
-            ..color =
-                const Color(0xFFFFD54F).withValues(alpha: 0.25 * scale),
+            ..color = const Color(0xFFFFD54F).withValues(alpha: 0.25 * scale),
         );
       }
 
@@ -565,7 +565,8 @@ class Obstacle extends Component {
       ..strokeWidth = 6.0 * scale
       ..strokeCap = StrokeCap.round
       ..style = PaintingStyle.stroke;
-    canvas.drawLine(Offset(leftPostX, groundY), Offset(leftPostX, topY), postPaint);
+    canvas.drawLine(
+        Offset(leftPostX, groundY), Offset(leftPostX, topY), postPaint);
     canvas.drawLine(
         Offset(rightPostX, groundY), Offset(rightPostX, topY), postPaint);
 
@@ -597,8 +598,7 @@ class Obstacle extends Component {
 
     // "UNDER REVIEW" pre-cached text banner
     canvas.save();
-    canvas.translate(
-        pos.dx - (_reviewGatePainter.width * scale * 0.9) / 2,
+    canvas.translate(pos.dx - (_reviewGatePainter.width * scale * 0.9) / 2,
         topY + 8 * scale - (_reviewGatePainter.height * scale * 0.9) / 2);
     canvas.scale(scale * 0.9, scale * 0.9);
     _reviewGatePainter.paint(canvas, Offset.zero);
@@ -616,8 +616,8 @@ class Obstacle extends Component {
         Offset(leftPostX, ly),
         Offset(rightPostX, ly),
         Paint()
-          ..color =
-              const Color(0xFFFF1744).withValues(alpha: 0.25 * laserPulse * scale)
+          ..color = const Color(0xFFFF1744)
+              .withValues(alpha: 0.25 * laserPulse * scale)
           ..strokeWidth = 8.0 * scale
           ..strokeCap = StrokeCap.round
           ..style = PaintingStyle.stroke,
@@ -627,8 +627,7 @@ class Obstacle extends Component {
         Offset(leftPostX, ly),
         Offset(rightPostX, ly),
         Paint()
-          ..color =
-              const Color(0xFFFF5252).withValues(alpha: 0.95 * scale)
+          ..color = const Color(0xFFFF5252).withValues(alpha: 0.95 * scale)
           ..strokeWidth = 3.0 * scale
           ..strokeCap = StrokeCap.round
           ..style = PaintingStyle.stroke,

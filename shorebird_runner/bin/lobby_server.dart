@@ -242,10 +242,44 @@ class LobbyManager {
       case 'leave_room':
         _handleDisconnect(socket);
         break;
+      case 'rematch':
+        _handleRematch(socket, message);
+        break;
       default:
         socket.add(
             jsonEncode({'type': 'error', 'message': 'Unknown action: $type'}));
     }
+  }
+
+  void _handleRematch(WebSocket socket, Map<String, dynamic> message) {
+    final code = socketToRoomCode[socket];
+    final pid = socketToPlayerId[socket];
+    if (code == null || !rooms.containsKey(code)) return;
+
+    final room = rooms[code]!;
+    if (room.hostId != pid) {
+      socket.add(jsonEncode({
+        'type': 'error',
+        'message': 'Only the room owner can initiate a rematch',
+      }));
+      return;
+    }
+
+    room.countdownTimer?.cancel();
+    room.state = RoomState.waiting;
+    for (final p in room.players.values) {
+      p.isAlive = true;
+      p.score = 0;
+      p.patches = 0;
+      p.level = 1;
+    }
+
+    print(
+        '🔄 Room $code: Host initiated rematch. Returning all players to lobby.');
+    room.broadcast({
+      'type': 'room_rematch',
+      'room': room.toJson(),
+    });
   }
 
   void _createRoom(WebSocket socket, Map<String, dynamic> message) {

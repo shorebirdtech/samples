@@ -90,6 +90,8 @@ class LobbyService extends ChangeNotifier {
 
   WebSocketChannel? _channel;
   StreamSubscription? _sub;
+  final _rematchStreamController = StreamController<void>.broadcast();
+  Stream<void> get onRematchTriggered => _rematchStreamController.stream;
 
   bool _isConnected = false;
   bool get isConnected => _isConnected;
@@ -310,6 +312,11 @@ class LobbyService extends ChangeNotifier {
     notifyListeners();
   }
 
+  void requestRematch() {
+    if (!isHost) return;
+    _send({'type': 'rematch'});
+  }
+
   void _send(Map<String, dynamic> msg) {
     if (_channel != null && _isConnected) {
       _channel!.sink.add(jsonEncode(msg));
@@ -379,6 +386,15 @@ class LobbyService extends ChangeNotifier {
           notifyListeners();
           break;
 
+        case 'room_rematch':
+          _isRacing = false;
+          _countdown = 0;
+          _finalRankings = null;
+          _parseRoom(json['room'] as Map<String, dynamic>?);
+          notifyListeners();
+          _rematchStreamController.add(null);
+          break;
+
         case 'error':
           _errorMessage = json['message'] as String?;
           notifyListeners();
@@ -402,6 +418,7 @@ class LobbyService extends ChangeNotifier {
   void dispose() {
     _sub?.cancel();
     _channel?.sink.close();
+    _rematchStreamController.close();
     super.dispose();
   }
 }

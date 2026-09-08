@@ -81,11 +81,15 @@ class ShorebirdRunnerGame extends FlameGame
 
   @override
   Future<void> onLoad() async {
+    camera.viewfinder.position = Vector2(
+      GameConfig.designWidth / 2,
+      GameConfig.designHeight / 2,
+    );
+    camera.viewfinder.anchor = Anchor.center;
     camera.viewfinder.visibleGameSize = Vector2(
       GameConfig.designWidth,
       GameConfig.designHeight,
     );
-    camera.viewfinder.anchor = Anchor.topLeft;
 
     highScore = await HighScoreService.load();
 
@@ -308,7 +312,8 @@ class ShorebirdRunnerGame extends FlameGame
         score += 150;
         _hud.score = score;
         AudioService.playStomp();
-        _addFloatingText('🦘 LEAP! +150', o.worldPosition, const Color(0xFF00E5FF),
+        _addFloatingText(
+            '🦘 LEAP! +150', o.worldPosition, const Color(0xFF00E5FF),
             size: 17);
       }
       return false;
@@ -321,7 +326,8 @@ class ShorebirdRunnerGame extends FlameGame
         score += 150;
         _hud.score = score;
         AudioService.playSlide();
-        _addFloatingText('⚡ SLIDE! +150', o.worldPosition, const Color(0xFFFFD700),
+        _addFloatingText(
+            '⚡ SLIDE! +150', o.worldPosition, const Color(0xFFFFD700),
             size: 17);
       }
       return false;
@@ -343,8 +349,8 @@ class ShorebirdRunnerGame extends FlameGame
     AudioService.playStomp();
     _screenShake = 0.8;
 
-    _addFloatingText('💥 SQUASHED! +300', o.worldPosition,
-        const Color(0xFF00FF88),
+    _addFloatingText(
+        '💥 SQUASHED! +300', o.worldPosition, const Color(0xFF00FF88),
         size: 18);
   }
 
@@ -366,7 +372,8 @@ class ShorebirdRunnerGame extends FlameGame
     score += GameConfig.patchPoints;
 
     if (p.isHotReloadBooster) {
-      _player.triggerHotReload(6.0); // 6 seconds of invincible Hot Reload power!
+      _player
+          .triggerHotReload(6.0); // 6 seconds of invincible Hot Reload power!
       _hud.triggerComboFlash();
       _screenShake = 0.5;
       _addFloatingText('🔥 HOT RELOAD! +500', pos, const Color(0xFFFF9100),
@@ -548,29 +555,27 @@ class ShorebirdRunnerGame extends FlameGame
     }
   }
 
-  // ── Tap Zones (Mobile Accessibility) ─────────────────────────────────────
+  void moveToLane(int lane) => _player.moveToLane(lane);
+  void moveLeft() => _player.moveLeft();
+  void moveRight() => _player.moveRight();
+  void jump() => _player.jump();
+  void slide() => _player.slide();
+  int get currentLane => _player.currentLane;
+
+  // ── Tap on Lane (Direct Lane Steering) ──────────────────────────────────
 
   @override
   void onTapDown(TapDownEvent event) {
     if (_isOver) return;
     final tapX = event.canvasPosition.x;
-    final tapY = event.canvasPosition.y;
 
-    // Top 28% triggers Jump
-    if (tapY < size.y * 0.28) {
-      _player.jump();
-      return;
-    }
-    // Bottom 25% triggers Slide
-    if (tapY > size.y * 0.75) {
-      _player.slide();
-      return;
-    }
-    // Left/Right half lane steers
-    if (tapX < size.x / 2) {
-      _player.moveLeft();
+    // Directly click on the desired lane to move player there
+    if (tapX < size.x * 0.36) {
+      _player.moveToLane(0);
+    } else if (tapX > size.x * 0.64) {
+      _player.moveToLane(2);
     } else {
-      _player.moveRight();
+      _player.moveToLane(1);
     }
   }
 }

@@ -187,10 +187,16 @@ class Patch extends Component {
 
     // Radiant Golden/Cyan Magnetic Attraction Field
     if (isBeingMagnetized) {
-      canvas.drawCircle(Offset.zero, size * 1.05,
-          Paint()..color = const Color(0xFFFFD700).withValues(alpha: 0.20 * scale));
-      canvas.drawCircle(Offset.zero, size * 0.75,
-          Paint()..color = const Color(0xFFFFD700).withValues(alpha: 0.45 * scale));
+      canvas.drawCircle(
+          Offset.zero,
+          size * 1.05,
+          Paint()
+            ..color = const Color(0xFFFFD700).withValues(alpha: 0.20 * scale));
+      canvas.drawCircle(
+          Offset.zero,
+          size * 0.75,
+          Paint()
+            ..color = const Color(0xFFFFD700).withValues(alpha: 0.45 * scale));
 
       final fluxPaint = Paint()
         ..color = const Color(0xFF00FFCC).withValues(alpha: 0.85 * scale)
@@ -209,14 +215,23 @@ class Patch extends Component {
           const Color(0xFF00E5FF).withValues(alpha: 0.30 * scale),
           const Color(0xFF00E5FF).withValues(alpha: 0.0),
         ],
-      ).createShader(Rect.fromLTWH(-8 * scale, -90 * scale, 16 * scale, 90 * scale));
-    canvas.drawRect(Rect.fromLTWH(-8 * scale, -90 * scale, 16 * scale, 90 * scale), beamPaint);
+      ).createShader(
+          Rect.fromLTWH(-8 * scale, -90 * scale, 16 * scale, 90 * scale));
+    canvas.drawRect(
+        Rect.fromLTWH(-8 * scale, -90 * scale, 16 * scale, 90 * scale),
+        beamPaint);
 
     // 1. Radiant Cyan/Gold Ambient Glow (concentric circles, zero blur overhead)
-    canvas.drawCircle(Offset.zero, size * 0.85,
-        Paint()..color = const Color(0xFF00D4FF).withValues(alpha: 0.16 * scale));
-    canvas.drawCircle(Offset.zero, size * 0.58,
-        Paint()..color = const Color(0xFF00D4FF).withValues(alpha: 0.38 * scale));
+    canvas.drawCircle(
+        Offset.zero,
+        size * 0.85,
+        Paint()
+          ..color = const Color(0xFF00D4FF).withValues(alpha: 0.16 * scale));
+    canvas.drawCircle(
+        Offset.zero,
+        size * 0.58,
+        Paint()
+          ..color = const Color(0xFF00D4FF).withValues(alpha: 0.38 * scale));
 
     // Concentric Holographic Gyroscope Orbiting Rings
     final ring1Paint = Paint()
@@ -225,7 +240,9 @@ class Patch extends Component {
       ..style = PaintingStyle.stroke;
     canvas.drawOval(
         Rect.fromCenter(
-            center: Offset.zero, width: size * 1.2 * absCos, height: size * 1.2),
+            center: Offset.zero,
+            width: size * 1.2 * absCos,
+            height: size * 1.2),
         ring1Paint);
 
     // 2. Futuristic Hexagonal OTA Patch Badge
@@ -283,10 +300,16 @@ class Patch extends Component {
     final absCos = cosSpin.abs().clamp(0.2, 1.0);
 
     // Radiant Gold / Crimson Energy Aura (concentric glow)
-    canvas.drawCircle(Offset.zero, size * 0.95,
-        Paint()..color = const Color(0xFFFFD700).withValues(alpha: 0.22 * scale));
-    canvas.drawCircle(Offset.zero, size * 0.65,
-        Paint()..color = const Color(0xFFFFD700).withValues(alpha: 0.50 * scale));
+    canvas.drawCircle(
+        Offset.zero,
+        size * 0.95,
+        Paint()
+          ..color = const Color(0xFFFFD700).withValues(alpha: 0.22 * scale));
+    canvas.drawCircle(
+        Offset.zero,
+        size * 0.65,
+        Paint()
+          ..color = const Color(0xFFFFD700).withValues(alpha: 0.50 * scale));
 
     // Outer rotating energy ring
     final ringPaint = Paint()
@@ -295,7 +318,9 @@ class Patch extends Component {
       ..style = PaintingStyle.stroke;
     canvas.drawOval(
         Rect.fromCenter(
-            center: Offset.zero, width: size * 1.3 * absCos, height: size * 1.3),
+            center: Offset.zero,
+            width: size * 1.3 * absCos,
+            height: size * 1.3),
         ringPaint);
 
     // Octagonal Core

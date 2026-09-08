@@ -264,7 +264,8 @@ class LaneWorld extends Component {
       begin: Alignment.topCenter,
       end: Alignment.bottomCenter,
       colors: [Color(0xFF0D1826), Color(0xFF040810)],
-    ).createShader(const Rect.fromLTWH(0, cy - 150, GameConfig.designWidth, 150));
+    ).createShader(
+        const Rect.fromLTWH(0, cy - 150, GameConfig.designWidth, 150));
     canvas.drawPath(_skylineBuildingsPath, _bldFillPaint);
 
     canvas.drawPath(_amberWindowsPath, _amberWinPaint);
@@ -315,9 +316,12 @@ class LaneWorld extends Component {
     const w = GameConfig.designWidth;
 
     // Billboards
-    _renderCachedBillboard(canvas, 68, cy - 120, 48, 'SHOREBIRD', const Color(0xFFFFC107));
-    _renderCachedBillboard(canvas, w - 270, cy - 145, 72, 'CODEPUSH', const Color(0xFFFFB300));
-    _renderCachedBillboard(canvas, w - 126, cy - 115, 66, 'FLUTTER', const Color(0xFF00FFCC));
+    _renderCachedBillboard(
+        canvas, 68, cy - 120, 48, 'SHOREBIRD', const Color(0xFFFFC107));
+    _renderCachedBillboard(
+        canvas, w - 270, cy - 145, 72, 'CODEPUSH', const Color(0xFFFFB300));
+    _renderCachedBillboard(
+        canvas, w - 126, cy - 115, 66, 'FLUTTER', const Color(0xFF00FFCC));
 
     // Blinking radio antennas
     _drawAntenna(canvas, 68 + 24, cy - 120, 0);
@@ -330,8 +334,7 @@ class LaneWorld extends Component {
     final bbY = topY - 14;
     final bbRect = Rect.fromLTWH(x - 2, bbY, w + 4, 12);
 
-    canvas.drawRRect(
-        RRect.fromRectAndRadius(bbRect, const Radius.circular(2)),
+    canvas.drawRRect(RRect.fromRectAndRadius(bbRect, const Radius.circular(2)),
         Paint()..color = const Color(0xFF050B14));
 
     canvas.drawRRect(
@@ -343,7 +346,8 @@ class LaneWorld extends Component {
 
     final tp = _cachedBillboards[text];
     if (tp != null) {
-      tp.paint(canvas, Offset(x + (w - tp.width) / 2, bbY + (12 - tp.height) / 2));
+      tp.paint(
+          canvas, Offset(x + (w - tp.width) / 2, bbY + (12 - tp.height) / 2));
     }
   }
 
@@ -351,12 +355,12 @@ class LaneWorld extends Component {
     canvas.drawLine(Offset(x, baseY), Offset(x, baseY - 24), _antPaint);
     final beaconFlash = sin(_searchlightAngle * 4 + seed) > 0.0;
     if (beaconFlash) {
-      canvas.drawCircle(Offset(x, baseY - 24), 4.5,
-          Paint()..color = const Color(0x66FF2A4B));
-      canvas.drawCircle(Offset(x, baseY - 24), 2.0,
-          Paint()..color = const Color(0xFFFF2A4B));
-      canvas.drawCircle(Offset(x, baseY - 24), 1.0,
-          Paint()..color = const Color(0xFFFFFFFF));
+      canvas.drawCircle(
+          Offset(x, baseY - 24), 4.5, Paint()..color = const Color(0x66FF2A4B));
+      canvas.drawCircle(
+          Offset(x, baseY - 24), 2.0, Paint()..color = const Color(0xFFFF2A4B));
+      canvas.drawCircle(
+          Offset(x, baseY - 24), 1.0, Paint()..color = const Color(0xFFFFFFFF));
     }
   }
 
@@ -370,7 +374,8 @@ class LaneWorld extends Component {
         colors: [Color(0xFF09061A), Color(0xFF04020C)],
       ).createShader(rect);
     canvas.drawRect(rect, paint);
-    canvas.drawLine(Offset(x, baseY - h), Offset(x, baseY - h - 35), _spirePaint);
+    canvas.drawLine(
+        Offset(x, baseY - h), Offset(x, baseY - h - 35), _spirePaint);
     canvas.drawCircle(Offset(x, baseY - h - 35), 2.5,
         Paint()..color = const Color(0xFFFF2A4B));
   }
@@ -471,7 +476,8 @@ class LaneWorld extends Component {
       canvas.drawPath(path, _tilePaint);
 
       _seamPaint
-        ..color = _curAccentColor.withValues(alpha: (tNear * 0.35).clamp(0.0, 0.4))
+        ..color =
+            _curAccentColor.withValues(alpha: (tNear * 0.35).clamp(0.0, 0.4))
         ..strokeWidth = (1.0 + tNear * 1.5);
       canvas.drawLine(pNearL, pNearR, _seamPaint);
 
@@ -487,7 +493,8 @@ class LaneWorld extends Component {
           ..lineTo(chevronCenter.dx + chW, chevronCenter.dy + chH);
 
         _chevronPaint
-          ..color = _curAccentColor.withValues(alpha: (tNear * 0.45).clamp(0.0, 0.45))
+          ..color =
+              _curAccentColor.withValues(alpha: (tNear * 0.45).clamp(0.0, 0.45))
           ..strokeWidth = (1.2 + tNear * 2.0);
 
         canvas.drawPath(chevronPath, _chevronPaint);
@@ -665,8 +672,8 @@ class LaneWorld extends Component {
     final boardW = (pRightTop.dx - pLeftTop.dx) * 0.82;
     final boardH = 24.0 * t;
 
-    final boardRect =
-        Rect.fromCenter(center: Offset(midX, boardY), width: boardW, height: boardH);
+    final boardRect = Rect.fromCenter(
+        center: Offset(midX, boardY), width: boardW, height: boardH);
 
     _boardBgPaint.shader = LinearGradient(
       begin: Alignment.topCenter,
@@ -676,14 +683,14 @@ class LaneWorld extends Component {
         const Color(0xFF020617).withValues(alpha: alpha * 0.95),
       ],
     ).createShader(boardRect);
-    canvas.drawRRect(
-        RRect.fromRectAndRadius(boardRect, Radius.circular(4 * t)), _boardBgPaint);
+    canvas.drawRRect(RRect.fromRectAndRadius(boardRect, Radius.circular(4 * t)),
+        _boardBgPaint);
 
     _boardBorderPaint
       ..color = _curAccentColor.withValues(alpha: alpha * 0.9)
       ..strokeWidth = 1.6 * t;
-    canvas.drawRRect(
-        RRect.fromRectAndRadius(boardRect, Radius.circular(4 * t)), _boardBorderPaint);
+    canvas.drawRRect(RRect.fromRectAndRadius(boardRect, Radius.circular(4 * t)),
+        _boardBorderPaint);
 
     // Brackets
     final bracketLen = 6.0 * t;

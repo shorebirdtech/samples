@@ -1,6 +1,8 @@
+import 'dart:async';
 import 'package:flame/game.dart';
 import 'package:flutter/material.dart';
 import 'package:shorebird_runner/game/shorebird_runner_game.dart';
+import 'package:shorebird_runner/game/utils/audio_service.dart';
 import 'package:shorebird_runner/game/utils/game_config.dart';
 import 'package:shorebird_runner/screens/lobby_screen.dart';
 import 'package:shorebird_runner/screens/multiplayer_race_screen.dart';
@@ -25,7 +27,7 @@ class PatchRushApp extends StatelessWidget {
         brightness: Brightness.dark,
         scaffoldBackgroundColor: const Color(0xFF0C0D10),
         colorScheme: const ColorScheme.dark(
-          primary: Color(0xFFFFC107),   // Shorebird Gold
+          primary: Color(0xFFFFC107), // Shorebird Gold
           secondary: Color(0xFF00BCD4), // Pro Cyan
           surface: Color(0xFF111520),
           onPrimary: Color(0xFF1A1200),
@@ -53,6 +55,7 @@ class _GameShellState extends State<GameShell> {
   AppMode _mode = AppMode.menu;
   ShorebirdRunnerGame? _soloGame;
   List<RacerStanding> _lastPodiumRankings = [];
+  StreamSubscription<void>? _rematchSub;
 
   @override
   void initState() {
@@ -61,6 +64,19 @@ class _GameShellState extends State<GameShell> {
     if (Uri.base.queryParameters.containsKey('room')) {
       _mode = AppMode.lobby;
     }
+
+    _rematchSub = LobbyService.instance.onRematchTriggered.listen((_) {
+      if (!mounted) return;
+      if (_mode == AppMode.podium || _mode == AppMode.race) {
+        setState(() => _mode = AppMode.lobby);
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _rematchSub?.cancel();
+    super.dispose();
   }
 
   void _startSolo() {
@@ -79,6 +95,112 @@ class _GameShellState extends State<GameShell> {
       _soloGame = null;
     });
     Future.microtask(() => _startSolo());
+  }
+
+  Widget _buildMobileControlBar({
+    required VoidCallback onLeft,
+    required VoidCallback onMid,
+    required VoidCallback onRight,
+    required VoidCallback onJump,
+    required VoidCallback onSlide,
+  }) {
+    return Container(
+      color: const Color(0xFF070B12),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+      child: SafeArea(
+        top: false,
+        child: Row(
+          children: [
+            Expanded(
+              child: _buildTouchButton(
+                label: 'LEFT',
+                icon: Icons.arrow_left,
+                color: const Color(0xFF00D4FF),
+                onTap: onLeft,
+              ),
+            ),
+            const SizedBox(width: 6),
+            Expanded(
+              child: _buildTouchButton(
+                label: 'MID',
+                icon: Icons.adjust,
+                color: const Color(0xFFFFC107),
+                onTap: onMid,
+              ),
+            ),
+            const SizedBox(width: 6),
+            Expanded(
+              child: _buildTouchButton(
+                label: 'RIGHT',
+                icon: Icons.arrow_right,
+                color: const Color(0xFF00D4FF),
+                onTap: onRight,
+              ),
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: _buildTouchButton(
+                label: 'JUMP',
+                icon: Icons.keyboard_double_arrow_up,
+                color: const Color(0xFF00FF88),
+                onTap: onJump,
+              ),
+            ),
+            const SizedBox(width: 6),
+            Expanded(
+              child: _buildTouchButton(
+                label: 'SLIDE',
+                icon: Icons.keyboard_double_arrow_down,
+                color: const Color(0xFFFF9100),
+                onTap: onSlide,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTouchButton({
+    required String label,
+    required IconData icon,
+    required Color color,
+    required VoidCallback onTap,
+  }) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: () {
+          AudioService.playSelect();
+          onTap();
+        },
+        borderRadius: BorderRadius.circular(8),
+        child: Container(
+          padding: const EdgeInsets.symmetric(vertical: 10),
+          decoration: BoxDecoration(
+            color: color.withValues(alpha: 0.14),
+            borderRadius: BorderRadius.circular(8),
+            border: Border.all(color: color.withValues(alpha: 0.45)),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(icon, color: color, size: 18),
+              const SizedBox(height: 2),
+              Text(
+                label,
+                style: TextStyle(
+                  color: color,
+                  fontWeight: FontWeight.w900,
+                  fontSize: 10,
+                  letterSpacing: 1.0,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 
   @override
@@ -112,10 +234,10 @@ class _GameShellState extends State<GameShell> {
 
       case AppMode.podium:
         return TournamentPodiumScreen(
+          isHost: LobbyService.instance.isHost,
           rankings: _lastPodiumRankings,
           onRematch: () {
-            LobbyService.instance.resetMatch();
-            setState(() => _mode = AppMode.lobby);
+            LobbyService.instance.requestRematch();
           },
           onReturnToLobby: () {
             LobbyService.instance.leaveRoom();
@@ -126,49 +248,144 @@ class _GameShellState extends State<GameShell> {
       case AppMode.solo:
         return Scaffold(
           backgroundColor: const Color(0xFF0C0D10),
-          body: Center(
-            child: AspectRatio(
-              aspectRatio: 800 / 600,
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(8),
-                child: Container(
-                  decoration: BoxDecoration(
-                    border: Border.all(
-                      color: const Color(0xFFFFC107).withValues(alpha: 0.20),
-                      width: 1.5,
-                    ),
-                    boxShadow: [
-                      BoxShadow(
-                        color: const Color(0xFFFFC107).withValues(alpha: 0.08),
-                        blurRadius: 48,
-                        spreadRadius: 4,
+          body: SafeArea(
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                final isMobile =
+                    constraints.maxWidth < 800 || constraints.maxHeight < 600;
+                final isPortrait = constraints.maxHeight > constraints.maxWidth;
+
+                Widget gameContent = Stack(
+                  children: [
+                    Positioned.fill(
+                      child: GestureDetector(
+                        behavior: HitTestBehavior.translucent,
+                        onTapDown: (details) {
+                          if (_soloGame == null || _soloGame!.isOver) return;
+                          final RenderBox? box =
+                              context.findRenderObject() as RenderBox?;
+                          final width = box?.size.width ?? constraints.maxWidth;
+                          final x = details.localPosition.dx;
+                          if (x < width * 0.36) {
+                            _soloGame!.moveToLane(0);
+                          } else if (x > width * 0.64) {
+                            _soloGame!.moveToLane(2);
+                          } else {
+                            _soloGame!.moveToLane(1);
+                          }
+                        },
+                        child: GameWidget(
+                          game: _soloGame!,
+                          overlayBuilderMap: {
+                            'game_over': (context, game) {
+                              final g = game as ShorebirdRunnerGame;
+                              return _GameOverOverlay(
+                                score: g.score,
+                                highScore: g.highScore,
+                                totalPatches: g.totalPatches,
+                                level: g.currentLevel,
+                                onRestart: _restartSolo,
+                                onMenu: () => setState(() {
+                                  _soloGame = null;
+                                  _mode = AppMode.menu;
+                                }),
+                              );
+                            },
+                          },
+                          backgroundBuilder: (context) => Container(
+                            color: const Color(0xFF0C0D10),
+                          ),
+                        ),
                       ),
+                    ),
+                    Positioned(
+                      top: 10,
+                      left: 10,
+                      child: Material(
+                        color: Colors.transparent,
+                        child: InkWell(
+                          onTap: () {
+                            AudioService.playSelect();
+                            setState(() {
+                              _soloGame = null;
+                              _mode = AppMode.menu;
+                            });
+                          },
+                          borderRadius: BorderRadius.circular(8),
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 10, vertical: 6),
+                            decoration: BoxDecoration(
+                              color: Colors.black.withValues(alpha: 0.65),
+                              borderRadius: BorderRadius.circular(8),
+                              border: Border.all(color: Colors.white24),
+                            ),
+                            child: const Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(Icons.arrow_back,
+                                    color: Colors.white70, size: 14),
+                                SizedBox(width: 4),
+                                Text(
+                                  'MENU',
+                                  style: TextStyle(
+                                    color: Colors.white70,
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                );
+
+                if (isMobile) {
+                  return Column(
+                    children: [
+                      Expanded(child: gameContent),
+                      if (isPortrait)
+                        _buildMobileControlBar(
+                          onLeft: () => _soloGame?.moveLeft(),
+                          onMid: () => _soloGame?.moveToLane(1),
+                          onRight: () => _soloGame?.moveRight(),
+                          onJump: () => _soloGame?.jump(),
+                          onSlide: () => _soloGame?.slide(),
+                        ),
                     ],
-                  ),
-                  child: GameWidget(
-                    game: _soloGame!,
-                    overlayBuilderMap: {
-                      'game_over': (context, game) {
-                        final g = game as ShorebirdRunnerGame;
-                        return _GameOverOverlay(
-                          score: g.score,
-                          highScore: g.highScore,
-                          totalPatches: g.totalPatches,
-                          level: g.currentLevel,
-                          onRestart: _restartSolo,
-                          onMenu: () => setState(() {
-                            _soloGame = null;
-                            _mode = AppMode.menu;
-                          }),
-                        );
-                      },
-                    },
-                    backgroundBuilder: (context) => Container(
-                      color: const Color(0xFF0C0D10),
+                  );
+                }
+
+                return Center(
+                  child: AspectRatio(
+                    aspectRatio: 800 / 600,
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(8),
+                      child: Container(
+                        decoration: BoxDecoration(
+                          border: Border.all(
+                            color:
+                                const Color(0xFFFFC107).withValues(alpha: 0.20),
+                            width: 1.5,
+                          ),
+                          boxShadow: [
+                            BoxShadow(
+                              color: const Color(0xFFFFC107)
+                                  .withValues(alpha: 0.08),
+                              blurRadius: 48,
+                              spreadRadius: 4,
+                            ),
+                          ],
+                        ),
+                        child: gameContent,
+                      ),
                     ),
                   ),
-                ),
-              ),
+                );
+              },
             ),
           ),
         );
