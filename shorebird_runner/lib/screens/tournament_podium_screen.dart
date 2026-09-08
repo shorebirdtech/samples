@@ -8,12 +8,14 @@ class TournamentPodiumScreen extends StatelessWidget {
   final List<RacerStanding> rankings;
   final VoidCallback onRematch;
   final VoidCallback onReturnToLobby;
+  final bool isHost;
 
   const TournamentPodiumScreen({
     super.key,
     required this.rankings,
     required this.onRematch,
     required this.onReturnToLobby,
+    this.isHost = false,
   });
 
   @override
@@ -187,59 +189,124 @@ class TournamentPodiumScreen extends StatelessWidget {
                       const SizedBox(height: 28),
 
                       // Action buttons
-                      Row(
-                        children: [
-                          Expanded(
-                            child: OutlinedButton.icon(
+                      if (isHost)
+                        Row(
+                          children: [
+                            Expanded(
+                              child: OutlinedButton.icon(
+                                onPressed: () {
+                                  AudioService.playSelect();
+                                  onReturnToLobby();
+                                },
+                                icon: const Icon(Icons.meeting_room,
+                                    color: Colors.white70),
+                                label: const Text('LEAVE ROOM',
+                                    style: TextStyle(letterSpacing: 1.5)),
+                                style: OutlinedButton.styleFrom(
+                                  foregroundColor: Colors.white,
+                                  side: const BorderSide(color: Colors.white24),
+                                  padding:
+                                      const EdgeInsets.symmetric(vertical: 16),
+                                  shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(12)),
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 16),
+                            Expanded(
+                              child: ElevatedButton.icon(
+                                onPressed: () {
+                                  AudioService.playSelect();
+                                  onRematch();
+                                },
+                                icon: const Icon(Icons.refresh,
+                                    color: Colors.black),
+                                label: const Text(
+                                  'REMATCH RACE',
+                                  style: TextStyle(
+                                    color: Colors.black,
+                                    fontWeight: FontWeight.w900,
+                                    letterSpacing: 1.5,
+                                  ),
+                                ),
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: const Color(0xFF00FF88),
+                                  padding:
+                                      const EdgeInsets.symmetric(vertical: 16),
+                                  elevation: 8,
+                                  shadowColor: const Color(0xFF00FF88)
+                                      .withValues(alpha: 0.5),
+                                  shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(12)),
+                                ),
+                              ),
+                            ),
+                          ],
+                        )
+                      else
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 18, vertical: 14),
+                              decoration: BoxDecoration(
+                                color: const Color(0xFF0A192F)
+                                    .withValues(alpha: 0.9),
+                                borderRadius: BorderRadius.circular(12),
+                                border: Border.all(
+                                    color: const Color(0xFF00D4FF)
+                                        .withValues(alpha: 0.4)),
+                              ),
+                              child: const Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  SizedBox(
+                                    width: 16,
+                                    height: 16,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                      color: Color(0xFF00D4FF),
+                                    ),
+                                  ),
+                                  SizedBox(width: 12),
+                                  Text(
+                                    'WAITING FOR ROOM OWNER TO REMATCH...',
+                                    style: TextStyle(
+                                      color: Color(0xFF00D4FF),
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 12,
+                                      letterSpacing: 1.2,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            const SizedBox(height: 14),
+                            OutlinedButton.icon(
                               onPressed: () {
                                 AudioService.playSelect();
                                 onReturnToLobby();
                               },
-                              icon: const Icon(Icons.meeting_room,
-                                  color: Colors.white70),
-                              label: const Text('BACK TO LOBBY',
-                                  style: TextStyle(letterSpacing: 1.5)),
+                              icon: const Icon(Icons.exit_to_app,
+                                  color: Color(0xFFFF2A4B)),
+                              label: const Text('LEAVE ROOM',
+                                  style: TextStyle(
+                                    letterSpacing: 1.5,
+                                    color: Color(0xFFFF2A4B),
+                                    fontWeight: FontWeight.bold,
+                                  )),
                               style: OutlinedButton.styleFrom(
-                                foregroundColor: Colors.white,
-                                side: const BorderSide(color: Colors.white24),
+                                side:
+                                    const BorderSide(color: Color(0xFFFF2A4B)),
                                 padding:
                                     const EdgeInsets.symmetric(vertical: 16),
                                 shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(12)),
                               ),
                             ),
-                          ),
-                          const SizedBox(width: 16),
-                          Expanded(
-                            child: ElevatedButton.icon(
-                              onPressed: () {
-                                AudioService.playSelect();
-                                onRematch();
-                              },
-                              icon: const Icon(Icons.refresh,
-                                  color: Colors.black),
-                              label: const Text(
-                                'REMATCH RACE',
-                                style: TextStyle(
-                                  color: Colors.black,
-                                  fontWeight: FontWeight.w900,
-                                  letterSpacing: 1.5,
-                                ),
-                              ),
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: const Color(0xFF00FF88),
-                                padding:
-                                    const EdgeInsets.symmetric(vertical: 16),
-                                elevation: 8,
-                                shadowColor: const Color(0xFF00FF88)
-                                    .withValues(alpha: 0.5),
-                                shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(12)),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
+                          ],
+                        ),
                     ],
                   ),
                 ),

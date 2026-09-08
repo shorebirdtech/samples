@@ -1,9 +1,5 @@
-// ignore_for_file: avoid_web_libraries_in_flutter
-import 'package:flutter/foundation.dart';
-import 'dart:js_interop';
-
-@JS('playArcadeSound')
-external void _playArcadeSound(JSString type);
+import 'audio_service_stub.dart'
+    if (dart.library.js_interop) 'audio_service_web.dart';
 
 /// Cross-platform arcade sound service.
 /// Uses Web Audio synthesis on web and fails silently on other platforms.
@@ -23,11 +19,6 @@ class AudioService {
   static void playCrash() => _play('crash');
 
   static void _play(String soundType) {
-    if (!kIsWeb) return;
-    try {
-      _playArcadeSound(soundType.toJS);
-    } catch (_) {
-      // Graceful fallback if Web Audio is blocked or not available
-    }
+    playArcadeSoundImpl(soundType);
   }
 }

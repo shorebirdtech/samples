@@ -115,8 +115,8 @@ class Starfield extends Component {
     ).createShader(Rect.fromCircle(
         center: Offset(GameConfig.designWidth - 200 + sin2, h * 0.4),
         radius: 200));
-    canvas.drawCircle(
-        Offset(GameConfig.designWidth - 200 + sin2, h * 0.4), 200, _purpleNebulaPaint);
+    canvas.drawCircle(Offset(GameConfig.designWidth - 200 + sin2, h * 0.4), 200,
+        _purpleNebulaPaint);
   }
 }
 
@@ -158,8 +158,12 @@ class _Star {
       x: rng.nextDouble() * GameConfig.designWidth,
       y: rng.nextDouble() * (GameConfig.horizonY - 10),
       speed: 8 + rng.nextDouble() * 24,
-      size: isSpecial ? 1.8 + rng.nextDouble() * 1.4 : 0.6 + rng.nextDouble() * 1.1,
-      alpha: isSpecial ? 0.8 + rng.nextDouble() * 0.2 : 0.25 + rng.nextDouble() * 0.6,
+      size: isSpecial
+          ? 1.8 + rng.nextDouble() * 1.4
+          : 0.6 + rng.nextDouble() * 1.1,
+      alpha: isSpecial
+          ? 0.8 + rng.nextDouble() * 0.2
+          : 0.25 + rng.nextDouble() * 0.6,
       twinkleSpeed: 1.2 + rng.nextDouble() * 3.5,
       twinklePhase: rng.nextDouble() * pi * 2,
       hasCrossGlint: isSpecial,
@@ -181,8 +185,10 @@ class _Star {
     if (hasCrossGlint && currentAlpha > 0.65) {
       final spikeLen = size * 2.8 * currentAlpha;
       _sharedSpikePaint.color = tint.withValues(alpha: currentAlpha * 0.5);
-      canvas.drawLine(Offset(x - spikeLen, y), Offset(x + spikeLen, y), _sharedSpikePaint);
-      canvas.drawLine(Offset(x, y - spikeLen), Offset(x, y + spikeLen), _sharedSpikePaint);
+      canvas.drawLine(
+          Offset(x - spikeLen, y), Offset(x + spikeLen, y), _sharedSpikePaint);
+      canvas.drawLine(
+          Offset(x, y - spikeLen), Offset(x, y + spikeLen), _sharedSpikePaint);
     }
   }
 }
@@ -215,7 +221,8 @@ class _ShootingStar {
   bool get isDead => life <= 0;
 
   void update(double dt) {
-    current = Offset(current.dx + velocity.dx * dt, current.dy + velocity.dy * dt);
+    current =
+        Offset(current.dx + velocity.dx * dt, current.dy + velocity.dy * dt);
     life = (life - dt * 1.8).clamp(0.0, 1.0);
   }
 

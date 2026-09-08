@@ -90,260 +90,406 @@ class _MultiplayerRaceScreenState extends State<MultiplayerRaceScreen> {
 
     return Scaffold(
       backgroundColor: const Color(0xFF050A14),
-      body: Stack(
-        children: [
-          // 3D Game Canvas
-          Center(
-            child: AspectRatio(
-              aspectRatio: 800 / 600,
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(8),
-                child: Container(
-                  decoration: BoxDecoration(
-                    border: Border.all(
-                      color: const Color(0xFF00D4FF).withValues(alpha: 0.3),
-                      width: 1.5,
+      body: LayoutBuilder(
+        builder: (context, constraints) {
+          final isMobile =
+              constraints.maxWidth < 800 || constraints.maxHeight < 600;
+          final isPortrait = constraints.maxHeight > constraints.maxWidth;
+
+          Widget gameCanvas = GestureDetector(
+            behavior: HitTestBehavior.translucent,
+            onTapDown: (details) {
+              if (_game == null || _game!.isOver) return;
+              final width = constraints.maxWidth;
+              final x = details.localPosition.dx;
+              if (x < width * 0.36) {
+                _game!.moveToLane(0);
+              } else if (x > width * 0.64) {
+                _game!.moveToLane(2);
+              } else {
+                _game!.moveToLane(1);
+              }
+            },
+            child: GameWidget(
+              game: _game!,
+              backgroundBuilder: (context) => Container(
+                color: const Color(0xFF0A0E1A),
+              ),
+            ),
+          );
+
+          Widget renderedCanvas;
+          if (isMobile) {
+            renderedCanvas = Positioned.fill(child: gameCanvas);
+          } else {
+            renderedCanvas = Center(
+              child: AspectRatio(
+                aspectRatio: 800 / 600,
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(8),
+                  child: Container(
+                    decoration: BoxDecoration(
+                      border: Border.all(
+                        color: const Color(0xFF00D4FF).withValues(alpha: 0.3),
+                        width: 1.5,
+                      ),
                     ),
-                  ),
-                  child: GameWidget(
-                    game: _game!,
-                    backgroundBuilder: (context) => Container(
-                      color: const Color(0xFF0A0E1A),
-                    ),
+                    child: gameCanvas,
                   ),
                 ),
               ),
-            ),
-          ),
+            );
+          }
 
-          // Top Header Overlay: Room Code & Status
-          SafeArea(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Room Badge & Leave Button
-                  Row(
+          return Stack(
+            children: [
+              // 3D Game Canvas
+              renderedCanvas,
+
+              // Top Header Overlay: Room Code & Status
+              SafeArea(
+                child: Padding(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 12, vertical: 6),
-                        decoration: BoxDecoration(
-                          color:
-                              const Color(0xFF0A192F).withValues(alpha: 0.85),
-                          borderRadius: BorderRadius.circular(8),
-                          border: Border.all(
-                              color: const Color(0xFF00D4FF)
-                                  .withValues(alpha: 0.5)),
-                        ),
-                        child: Row(
-                          children: [
-                            const Text('🌐 ROOM: ',
-                                style: TextStyle(
-                                    color: Colors.white60,
-                                    fontSize: 11,
-                                    fontWeight: FontWeight.bold)),
-                            Text(
-                              _lobby.currentRoomCode ?? '----',
-                              style: const TextStyle(
-                                color: Color(0xFF00D4FF),
-                                fontWeight: FontWeight.w900,
-                                fontSize: 13,
-                                letterSpacing: 2.0,
-                              ),
+                      // Room Badge & Leave Button
+                      Row(
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 12, vertical: 6),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFF0A192F)
+                                  .withValues(alpha: 0.85),
+                              borderRadius: BorderRadius.circular(8),
+                              border: Border.all(
+                                  color: const Color(0xFF00D4FF)
+                                      .withValues(alpha: 0.5)),
                             ),
-                          ],
-                        ),
+                            child: Row(
+                              children: [
+                                const Text('🌐 ROOM: ',
+                                    style: TextStyle(
+                                        color: Colors.white60,
+                                        fontSize: 11,
+                                        fontWeight: FontWeight.bold)),
+                                Text(
+                                  _lobby.currentRoomCode ?? '----',
+                                  style: const TextStyle(
+                                    color: Color(0xFF00D4FF),
+                                    fontWeight: FontWeight.w900,
+                                    fontSize: 13,
+                                    letterSpacing: 2.0,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          InkWell(
+                            onTap: () {
+                              AudioService.playSelect();
+                              widget.onLeaveRace();
+                            },
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 10, vertical: 6),
+                              decoration: BoxDecoration(
+                                color: Colors.black.withValues(alpha: 0.6),
+                                borderRadius: BorderRadius.circular(8),
+                                border: Border.all(color: Colors.white24),
+                              ),
+                              child: const Text('QUIT',
+                                  style: TextStyle(
+                                      color: Colors.white70,
+                                      fontSize: 11,
+                                      fontWeight: FontWeight.bold)),
+                            ),
+                          ),
+                        ],
                       ),
-                      const SizedBox(width: 8),
-                      InkWell(
-                        onTap: () {
-                          AudioService.playSelect();
-                          widget.onLeaveRace();
-                        },
+
+                      // Real-time Standings Mini Board
+                      ConstrainedBox(
+                        constraints: const BoxConstraints(maxWidth: 220),
                         child: Container(
                           padding: const EdgeInsets.symmetric(
-                              horizontal: 10, vertical: 6),
+                              horizontal: 12, vertical: 8),
                           decoration: BoxDecoration(
-                            color: Colors.black.withValues(alpha: 0.6),
-                            borderRadius: BorderRadius.circular(8),
-                            border: Border.all(color: Colors.white24),
+                            color:
+                                const Color(0xFF0A192F).withValues(alpha: 0.88),
+                            borderRadius: BorderRadius.circular(10),
+                            border: Border.all(
+                                color: const Color(0xFFFFB347)
+                                    .withValues(alpha: 0.4)),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withValues(alpha: 0.5),
+                                blurRadius: 10,
+                              ),
+                            ],
                           ),
-                          child: const Text('QUIT',
-                              style: TextStyle(
-                                  color: Colors.white70,
-                                  fontSize: 11,
-                                  fontWeight: FontWeight.bold)),
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              const Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text(
+                                    'LIVE RACE',
+                                    style: TextStyle(
+                                      color: Color(0xFFFFB347),
+                                      fontSize: 10,
+                                      fontWeight: FontWeight.w900,
+                                      letterSpacing: 1.5,
+                                    ),
+                                  ),
+                                  Icon(Icons.bolt,
+                                      color: Color(0xFFFFB347), size: 12),
+                                ],
+                              ),
+                              const SizedBox(height: 6),
+                              ...standings.take(4).map((s) {
+                                final isMe = s.id == _lobby.myPlayerId;
+                                String medal = '#${s.rank}';
+                                if (s.rank == 1) medal = '🥇';
+                                if (s.rank == 2) medal = '🥈';
+                                if (s.rank == 3) medal = '🥉';
+
+                                return Padding(
+                                  padding:
+                                      const EdgeInsets.symmetric(vertical: 2),
+                                  child: Row(
+                                    children: [
+                                      Text(medal,
+                                          style: const TextStyle(fontSize: 10)),
+                                      const SizedBox(width: 4),
+                                      Expanded(
+                                        child: Text(
+                                          s.name + (isMe ? ' (YOU)' : ''),
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                          style: TextStyle(
+                                            color: isMe
+                                                ? const Color(0xFF00D4FF)
+                                                : Colors.white,
+                                            fontWeight: isMe
+                                                ? FontWeight.w900
+                                                : FontWeight.w600,
+                                            fontSize: 11,
+                                          ),
+                                        ),
+                                      ),
+                                      const SizedBox(width: 6),
+                                      Text(
+                                        s.isAlive ? '${s.score}' : '💥',
+                                        style: TextStyle(
+                                          color: s.isAlive
+                                              ? const Color(0xFF00FF88)
+                                              : const Color(0xFFFF2A4B),
+                                          fontWeight: FontWeight.w900,
+                                          fontSize: 11,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                );
+                              }),
+                            ],
+                          ),
                         ),
                       ),
                     ],
                   ),
-
-                  // Real-time Standings Mini Board
-                  ConstrainedBox(
-                    constraints: const BoxConstraints(maxWidth: 220),
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 12, vertical: 8),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFF0A192F).withValues(alpha: 0.88),
-                        borderRadius: BorderRadius.circular(10),
-                        border: Border.all(
-                            color:
-                                const Color(0xFFFFB347).withValues(alpha: 0.4)),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withValues(alpha: 0.5),
-                            blurRadius: 10,
-                          ),
-                        ],
-                      ),
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          const Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text(
-                                'LIVE RACE',
-                                style: TextStyle(
-                                  color: Color(0xFFFFB347),
-                                  fontSize: 10,
-                                  fontWeight: FontWeight.w900,
-                                  letterSpacing: 1.5,
-                                ),
-                              ),
-                              Icon(Icons.bolt,
-                                  color: Color(0xFFFFB347), size: 12),
-                            ],
-                          ),
-                          const SizedBox(height: 6),
-                          ...standings.take(4).map((s) {
-                            final isMe = s.id == _lobby.myPlayerId;
-                            String medal = '#${s.rank}';
-                            if (s.rank == 1) medal = '🥇';
-                            if (s.rank == 2) medal = '🥈';
-                            if (s.rank == 3) medal = '🥉';
-
-                            return Padding(
-                              padding: const EdgeInsets.symmetric(vertical: 2),
-                              child: Row(
-                                children: [
-                                  Text(medal,
-                                      style: const TextStyle(fontSize: 10)),
-                                  const SizedBox(width: 4),
-                                  Expanded(
-                                    child: Text(
-                                      s.name + (isMe ? ' (YOU)' : ''),
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
-                                      style: TextStyle(
-                                        color: isMe
-                                            ? const Color(0xFF00D4FF)
-                                            : Colors.white,
-                                        fontWeight: isMe
-                                            ? FontWeight.w900
-                                            : FontWeight.w600,
-                                        fontSize: 11,
-                                      ),
-                                    ),
-                                  ),
-                                  const SizedBox(width: 6),
-                                  Text(
-                                    s.isAlive ? '${s.score}' : '💥',
-                                    style: TextStyle(
-                                      color: s.isAlive
-                                          ? const Color(0xFF00FF88)
-                                          : const Color(0xFFFF2A4B),
-                                      fontWeight: FontWeight.w900,
-                                      fontSize: 11,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            );
-                          }),
-                        ],
-                      ),
-                    ),
-                  ),
-                ],
+                ),
               ),
-            ),
-          ),
 
-          // Spectating / Crashed Overlay
-          if (_hasCrashed)
-            Positioned.fill(
-              child: Container(
-                color: Colors.black.withValues(alpha: 0.75),
-                child: Center(
+              // Bottom Mobile Controls (in portrait on mobile)
+              if (isMobile && isPortrait && !_hasCrashed)
+                Positioned(
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  child: _buildMobileControlBar(),
+                ),
+
+              // Spectating / Crashed Overlay
+              if (_hasCrashed)
+                Positioned.fill(
                   child: Container(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 28, vertical: 22),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFF0A192F),
-                      borderRadius: BorderRadius.circular(16),
-                      border: Border.all(
-                          color: const Color(0xFFFF2A4B), width: 1.5),
-                      boxShadow: [
-                        BoxShadow(
-                          color: const Color(0xFFFF2A4B).withValues(alpha: 0.3),
-                          blurRadius: 25,
-                        ),
-                      ],
-                    ),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        const Text(
-                          '💥 RUN CRASHED',
-                          style: TextStyle(
-                            color: Color(0xFFFF2A4B),
-                            fontSize: 24,
-                            fontWeight: FontWeight.w900,
-                            letterSpacing: 2.0,
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          'Final Score: $_finalScore • Patches: $_finalPatches',
-                          style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 14,
-                              fontWeight: FontWeight.bold),
-                        ),
-                        const SizedBox(height: 16),
-                        const Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            SizedBox(
-                              width: 14,
-                              height: 14,
-                              child: CircularProgressIndicator(
-                                strokeWidth: 2,
-                                valueColor: AlwaysStoppedAnimation<Color>(
-                                    Color(0xFF00D4FF)),
-                              ),
-                            ),
-                            SizedBox(width: 10),
-                            Text(
-                              'Awaiting race completion...',
-                              style: TextStyle(
-                                  color: Color(0xFF00D4FF), fontSize: 12),
+                    color: Colors.black.withValues(alpha: 0.75),
+                    child: Center(
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 28, vertical: 22),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF0A192F),
+                          borderRadius: BorderRadius.circular(16),
+                          border: Border.all(
+                              color: const Color(0xFFFF2A4B), width: 1.5),
+                          boxShadow: [
+                            BoxShadow(
+                              color: const Color(0xFFFF2A4B)
+                                  .withValues(alpha: 0.3),
+                              blurRadius: 25,
                             ),
                           ],
                         ),
-                      ],
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const Text(
+                              '💥 RUN CRASHED',
+                              style: TextStyle(
+                                color: Color(0xFFFF2A4B),
+                                fontSize: 24,
+                                fontWeight: FontWeight.w900,
+                                letterSpacing: 2.0,
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            Text(
+                              'Final Score: $_finalScore • Patches: $_finalPatches',
+                              style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.bold),
+                            ),
+                            const SizedBox(height: 16),
+                            const Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                SizedBox(
+                                  width: 14,
+                                  height: 14,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                    valueColor: AlwaysStoppedAnimation<Color>(
+                                        Color(0xFF00D4FF)),
+                                  ),
+                                ),
+                                SizedBox(width: 10),
+                                Text(
+                                  'Awaiting race completion...',
+                                  style: TextStyle(
+                                      color: Color(0xFF00D4FF), fontSize: 12),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
                     ),
                   ),
                 ),
+            ],
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _buildMobileControlBar() {
+    return Container(
+      color: const Color(0xFF070B12).withValues(alpha: 0.88),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+      child: SafeArea(
+        top: false,
+        child: Row(
+          children: [
+            Expanded(
+              child: _buildTouchButton(
+                label: 'LEFT',
+                icon: Icons.arrow_left,
+                color: const Color(0xFF00D4FF),
+                onTap: () => _game?.moveLeft(),
               ),
             ),
-        ],
+            const SizedBox(width: 6),
+            Expanded(
+              child: _buildTouchButton(
+                label: 'MID',
+                icon: Icons.adjust,
+                color: const Color(0xFFFFC107),
+                onTap: () => _game?.moveToLane(1),
+              ),
+            ),
+            const SizedBox(width: 6),
+            Expanded(
+              child: _buildTouchButton(
+                label: 'RIGHT',
+                icon: Icons.arrow_right,
+                color: const Color(0xFF00D4FF),
+                onTap: () => _game?.moveRight(),
+              ),
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: _buildTouchButton(
+                label: 'JUMP',
+                icon: Icons.keyboard_double_arrow_up,
+                color: const Color(0xFF00FF88),
+                onTap: () => _game?.jump(),
+              ),
+            ),
+            const SizedBox(width: 6),
+            Expanded(
+              child: _buildTouchButton(
+                label: 'SLIDE',
+                icon: Icons.keyboard_double_arrow_down,
+                color: const Color(0xFFFF9100),
+                onTap: () => _game?.slide(),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTouchButton({
+    required String label,
+    required IconData icon,
+    required Color color,
+    required VoidCallback onTap,
+  }) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: () {
+          AudioService.playSelect();
+          onTap();
+        },
+        borderRadius: BorderRadius.circular(8),
+        child: Container(
+          padding: const EdgeInsets.symmetric(vertical: 8),
+          decoration: BoxDecoration(
+            color: color.withValues(alpha: 0.14),
+            borderRadius: BorderRadius.circular(8),
+            border: Border.all(color: color.withValues(alpha: 0.45)),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(icon, color: color, size: 18),
+              const SizedBox(height: 2),
+              Text(
+                label,
+                style: TextStyle(
+                  color: color,
+                  fontWeight: FontWeight.w900,
+                  fontSize: 10,
+                  letterSpacing: 1.0,
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }

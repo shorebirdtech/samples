@@ -142,6 +142,16 @@ class Player extends Component {
     }
   }
 
+  void moveToLane(int desiredLane) {
+    final target = desiredLane.clamp(0, GameConfig.laneCount - 1);
+    if (target == _targetLane) return;
+    currentLane = _targetLane;
+    _targetLane = target;
+    _laneProgress = 0.0;
+    _moveDirection = target > currentLane ? 1 : -1;
+    AudioService.playSwitch();
+  }
+
   void jump() {
     if (!_isJumping && !_isSliding) {
       _isJumping = true;
@@ -265,7 +275,8 @@ class Player extends Component {
       if (stride.abs() > 0.85 && _particles.length < 24) {
         final footX = pos.dx + (stride > 0 ? 12.0 : -12.0);
         final sparkColor = _getAuraColor();
-        _particles.add(_DashSpark(Offset(footX, pos.dy + 32), _rng, sparkColor));
+        _particles
+            .add(_DashSpark(Offset(footX, pos.dy + 32), _rng, sparkColor));
       }
     }
 
@@ -324,7 +335,8 @@ class Player extends Component {
         width: 52 * shadowScale,
         height: 18 * shadowScale,
       ),
-      Paint()..color = const Color(0xFF000000).withValues(alpha: shadowAlpha * 0.25),
+      Paint()
+        ..color = const Color(0xFF000000).withValues(alpha: shadowAlpha * 0.25),
     );
     canvas.drawOval(
       Rect.fromCenter(
@@ -332,7 +344,8 @@ class Player extends Component {
         width: 38 * shadowScale,
         height: 13 * shadowScale,
       ),
-      Paint()..color = const Color(0xFF000000).withValues(alpha: shadowAlpha * 0.55),
+      Paint()
+        ..color = const Color(0xFF000000).withValues(alpha: shadowAlpha * 0.55),
     );
     canvas.drawOval(
       Rect.fromCenter(
@@ -340,7 +353,8 @@ class Player extends Component {
         width: 22 * shadowScale,
         height: 7 * shadowScale,
       ),
-      Paint()..color = const Color(0xFF000000).withValues(alpha: shadowAlpha * 0.85),
+      Paint()
+        ..color = const Color(0xFF000000).withValues(alpha: shadowAlpha * 0.85),
     );
   }
 
@@ -397,7 +411,8 @@ class Player extends Component {
             Color(0xFFFFD700),
           ],
           transform: GradientRotation(_runPhase * 4),
-        ).createShader(Rect.fromCircle(center: Offset.zero, radius: shieldRadius))
+        ).createShader(
+            Rect.fromCircle(center: Offset.zero, radius: shieldRadius))
         ..style = PaintingStyle.stroke
         ..strokeWidth = 3.5;
       canvas.drawCircle(const Offset(0, 2), shieldRadius, shieldPaint);
@@ -420,10 +435,10 @@ class Player extends Component {
         final ny = sin(nodeAngle) * (shieldRadius * 0.75) + 2;
         canvas.drawCircle(Offset(nx, ny), 5.5,
             Paint()..color = const Color(0xFF00FFCC).withValues(alpha: 0.35));
-        canvas.drawCircle(Offset(nx, ny), 3.0,
-            Paint()..color = const Color(0xFF00FFCC));
-        canvas.drawCircle(Offset(nx, ny), 1.5,
-            Paint()..color = const Color(0xFFFFFFFF));
+        canvas.drawCircle(
+            Offset(nx, ny), 3.0, Paint()..color = const Color(0xFF00FFCC));
+        canvas.drawCircle(
+            Offset(nx, ny), 1.5, Paint()..color = const Color(0xFFFFFFFF));
       }
     }
 
@@ -506,7 +521,8 @@ class Player extends Component {
 
     final shoePaint = Paint()..color = const Color(0xFF0F172A);
     final shoeRect = RRect.fromRectAndRadius(
-      Rect.fromCenter(center: const Offset(0, 0), width: 14 * scale, height: 6 * scale),
+      Rect.fromCenter(
+          center: const Offset(0, 0), width: 14 * scale, height: 6 * scale),
       Radius.circular(2 * scale),
     );
     canvas.drawRRect(shoeRect, shoePaint);
@@ -590,10 +606,10 @@ class Player extends Component {
     canvas.drawCircle(emblemCenter, r * 0.24, borderPaint);
 
     // Multi-ring concentric glow behind emblem
-    canvas.drawCircle(emblemCenter, r * 0.32,
-        Paint()..color = aura.withValues(alpha: 0.18));
-    canvas.drawCircle(emblemCenter, r * 0.26,
-        Paint()..color = aura.withValues(alpha: 0.38));
+    canvas.drawCircle(
+        emblemCenter, r * 0.32, Paint()..color = aura.withValues(alpha: 0.18));
+    canvas.drawCircle(
+        emblemCenter, r * 0.26, Paint()..color = aura.withValues(alpha: 0.38));
 
     if (skin == PlayerSkin.blueBird) {
       final birdPath = Path()
@@ -725,7 +741,8 @@ class Player extends Component {
       ..strokeWidth = 1.8;
     canvas.drawRRect(leftCupRect, cupGlow);
 
-    _drawCupEqualizer(canvas, Offset(-headRadius - 2.5, headCenter.dy + 1), aura);
+    _drawCupEqualizer(
+        canvas, Offset(-headRadius - 2.5, headCenter.dy + 1), aura);
 
     final rightCupRect = RRect.fromRectAndRadius(
       Rect.fromCenter(
@@ -760,8 +777,7 @@ class Player extends Component {
       ..color = colors.first
       ..style = PaintingStyle.fill;
 
-    final skinPaint = Paint()
-      ..color = const Color(0xFFFBBF24);
+    final skinPaint = Paint()..color = const Color(0xFFFBBF24);
 
     final leftArmSwing = -stride * r * 0.22;
     final leftShoulder = Offset(-r * 0.50, -r * 0.28);

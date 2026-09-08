@@ -238,12 +238,12 @@ class GameConfig {
   static const int timePoints = 2;
 
   // ── Shorebird Brand Colors ────────────────────────────────────────────────
-  static const int colorBg = 0xFF0C0D10;        // Deep black-navy
-  static const int colorGold = 0xFFFFC107;       // Shorebird primary gold
-  static const int colorAmber = 0xFFFF8F00;      // Shorebird amber
-  static const int colorCyan = 0xFF00BCD4;       // Pro tier electric cyan
-  static const int colorGreen = 0xFF4CAF50;      // Business tier green
-  static const int colorPurple = 0xFF9C27B0;     // Enterprise violet
-  static const int colorCoral = 0xFFFF5252;      // Error/danger red
+  static const int colorBg = 0xFF0C0D10; // Deep black-navy
+  static const int colorGold = 0xFFFFC107; // Shorebird primary gold
+  static const int colorAmber = 0xFFFF8F00; // Shorebird amber
+  static const int colorCyan = 0xFF00BCD4; // Pro tier electric cyan
+  static const int colorGreen = 0xFF4CAF50; // Business tier green
+  static const int colorPurple = 0xFF9C27B0; // Enterprise violet
+  static const int colorCoral = 0xFFFF5252; // Error/danger red
   static const int colorGrid = 0xFF111520;
 }
