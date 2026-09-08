@@ -1,21 +1,27 @@
 # ----------------------------------------------------------------------
-# Shorebird Patch Rush — Lobby & Tournament WebSocket Server Dockerfile
-# Deployable to Railway, Render, Fly.io, or any container host
+# Shorebird Patch Rush — All-in-One Cloud Dockerfile (Render, Railway, Fly.io)
+# Builds Flutter Web Release + Dart WebSocket Server into a single image
 # ----------------------------------------------------------------------
 
-FROM dart:stable AS build
+# Stage 1: Build Flutter Web & Dart Server
+FROM ghcr.io/cirruslabs/flutter:stable AS build
 
 WORKDIR /app
 
 # Cache dependencies
 COPY pubspec.* ./
-RUN dart pub get
+RUN flutter pub get
 
-# Build native binary
+# Copy source code
 COPY . .
+
+# 1. Compile Flutter Web release
+RUN flutter build web --release
+
+# 2. Compile native Dart Lobby & Tournament server
 RUN dart compile exe bin/lobby_server.dart -o bin/server
 
-# Minimal runtime image
+# Stage 2: Minimal Runtime Image
 FROM debian:bookworm-slim
 
 RUN apt-get update && apt-get install -y ca-certificates && rm -rf /var/lib/apt/lists/*
