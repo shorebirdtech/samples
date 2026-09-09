@@ -1,65 +1,73 @@
+import 'dart:math';
+
 import 'package:flame/components.dart';
 import 'package:flutter/painting.dart';
 
-/// Zero-allocation, cached floating text indicator.
+/// Zero-allocation, GPU-friendly floating text indicator.
 /// Extends Component so it naturally scales with the camera viewfinder in world space.
+/// Uses direct alpha text styling and pop scaling instead of expensive canvas.saveLayer.
 class FloatingText extends Component {
   Offset pos;
   double life = 1.0;
-  final TextPainter textPainter;
+  final String _text;
+  final Color _color;
+  final double _size;
+  final TextPainter _textPainter = TextPainter(
+    textDirection: TextDirection.ltr,
+  );
 
-  FloatingText(String text, this.pos, Color color, double size)
-      : textPainter = TextPainter(
-          text: TextSpan(
-            text: text,
-            style: TextStyle(
-              color: color,
-              fontSize: size,
-              fontWeight: FontWeight.w900,
-              letterSpacing: 1.4,
-              shadows: const [
-                Shadow(
-                  color: Color(0xDD000000),
-                  blurRadius: 4,
-                  offset: Offset(1, 1),
-                ),
-              ],
-            ),
+  FloatingText(this._text, this.pos, this._color, this._size) {
+    _updateTextPainter();
+  }
+
+  void _updateTextPainter() {
+    final currentAlpha = life.clamp(0.0, 1.0);
+    _textPainter.text = TextSpan(
+      text: _text,
+      style: TextStyle(
+        color: _color.withValues(alpha: currentAlpha),
+        fontSize: _size,
+        fontWeight: FontWeight.w900,
+        letterSpacing: 1.4,
+        shadows: [
+          Shadow(
+            color:
+                const Color(0xDD000000).withValues(alpha: currentAlpha * 0.7),
+            blurRadius: 4,
+            offset: const Offset(1, 1),
           ),
-          textDirection: TextDirection.ltr,
-        )..layout();
+        ],
+      ),
+    );
+    _textPainter.layout();
+  }
 
   bool get isDone => life <= 0;
 
   @override
   void update(double dt) {
     super.update(dt);
-    pos = Offset(pos.dx, pos.dy - dt * 45);
-    life = (life - dt * 1.5).clamp(0.0, 1.0);
+    pos = Offset(pos.dx, pos.dy - dt * 50);
+    life = (life - dt * 1.6).clamp(0.0, 1.0);
     if (life <= 0) {
       removeFromParent();
+    } else {
+      _updateTextPainter();
     }
   }
 
   @override
   void render(Canvas canvas) {
     if (life <= 0) return;
-    final paintOffset = Offset(pos.dx - textPainter.width / 2, pos.dy);
-    if (life >= 0.9) {
-      textPainter.paint(canvas, paintOffset);
-    } else {
-      // Fade out cleanly without layout recalculation
-      canvas.saveLayer(
-        Rect.fromLTWH(
-          paintOffset.dx - 8,
-          paintOffset.dy - 4,
-          textPainter.width + 16,
-          textPainter.height + 8,
-        ),
-        Paint()..color = const Color(0xFFFFFFFF).withValues(alpha: life),
-      );
-      textPainter.paint(canvas, paintOffset);
-      canvas.restore();
-    }
+    canvas.save();
+    canvas.translate(pos.dx, pos.dy);
+    // Punchy pop-in scale curve
+    final popScale = (0.95 + sin(life * pi * 0.5) * 0.25).clamp(0.8, 1.25);
+    canvas.scale(popScale, popScale);
+    _textPainter.paint(
+      canvas,
+      Offset(-_textPainter.width / 2, -_textPainter.height / 2),
+    );
+    canvas.restore();
   }
 }

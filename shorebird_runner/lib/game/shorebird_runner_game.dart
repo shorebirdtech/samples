@@ -49,9 +49,15 @@ class ShorebirdRunnerGame extends FlameGame
   late final Player _player;
   late final Hud _hud;
   late final LaneWorld _laneWorld;
+  late final SpeedWarpFx _speedWarp;
   final List<Obstacle> _obstacles = [];
   final List<Patch> _patches = [];
   final _rng = Random();
+
+  // Reusable vignette paints
+  final Paint _crashFlashPaint = Paint();
+  final Paint _crashVignettePaint = Paint();
+  Rect? _lastVignetteRect;
 
   // Screen shake & crash flash
   double _screenShake = 0;
@@ -79,6 +85,9 @@ class ShorebirdRunnerGame extends FlameGame
     _laneWorld = LaneWorld();
     await world.add(_laneWorld);
 
+    _speedWarp = SpeedWarpFx();
+    await world.add(_speedWarp);
+
     _player = Player(currentLane: 1, skin: skin);
     await world.add(_player);
 
@@ -91,6 +100,7 @@ class ShorebirdRunnerGame extends FlameGame
   void onGameResize(Vector2 size) {
     super.onGameResize(size);
     GameConfig.updateDimensions(size.x, size.y);
+    _lastVignetteRect = null;
   }
 
   @override
@@ -105,6 +115,8 @@ class ShorebirdRunnerGame extends FlameGame
     _hud.elapsed = _elapsed;
     _hud.totalPatches = totalPatches;
     _laneWorld.totalPatches = totalPatches;
+    _speedWarp.isHotReload = _player.isInvincible;
+    _speedWarp.speedMultiplier = currentLevel.speedMultiplier;
 
     // Survival points
     _timePointTimer += safeDt;
@@ -139,19 +151,21 @@ class ShorebirdRunnerGame extends FlameGame
 
     // Hot Reload Magnetic Pull on Collectibles
     if (_player.isInvincible) {
-      for (final p in _patches) {
+      for (int i = 0; i < _patches.length; i++) {
+        final p = _patches[i];
         if (!p.isCollected && p.depth > 0.10) {
           p.attractTowards(_player.currentLane, safeDt);
         }
       }
     }
 
-    // Update obstacles
-    for (final o in List.of(_obstacles)) {
+    // Zero-allocation backwards loop for obstacles
+    for (int i = _obstacles.length - 1; i >= 0; i--) {
+      final o = _obstacles[i];
       o.totalPatches = totalPatches;
       if (o.isPastPlayer) {
         _clearedObstacles.remove(o);
-        _obstacles.remove(o);
+        _obstacles.removeAt(i);
         world.remove(o);
         continue;
       }
@@ -161,11 +175,12 @@ class ShorebirdRunnerGame extends FlameGame
       }
     }
 
-    // Update patches
-    for (final p in List.of(_patches)) {
+    // Zero-allocation backwards loop for patches
+    for (int i = _patches.length - 1; i >= 0; i--) {
+      final p = _patches[i];
       p.totalPatches = totalPatches;
       if (p.isDone || p.isPastPlayer) {
-        _patches.remove(p);
+        _patches.removeAt(i);
         world.remove(p);
         continue;
       }
@@ -175,6 +190,9 @@ class ShorebirdRunnerGame extends FlameGame
         _onPatchCollected(p);
       }
     }
+
+    // Dynamic Camera Banking (leans smoothly into turns)
+    camera.viewfinder.angle = -_player.rollAngle * 0.14;
 
     // Screen shake
     if (_screenShake > 0) {
@@ -196,26 +214,27 @@ class ShorebirdRunnerGame extends FlameGame
   void render(Canvas canvas) {
     super.render(canvas);
 
-    // Fullscreen Red Danger Flash & Vignette (covers entire canvas seamlessly)
+    // Fullscreen Red Danger Flash & Vignette (zero per-frame allocations)
     if (_crashFlash > 0) {
       final fullRect = Rect.fromLTWH(0, 0, size.x, size.y);
-      canvas.drawRect(
-        fullRect,
-        Paint()
-          ..color =
-              const Color(0xFFFF2A4B).withValues(alpha: _crashFlash * 0.45),
-      );
-      // Soft radial edge vignette
-      final vignettePaint = Paint()
-        ..shader = RadialGradient(
+      _crashFlashPaint.color =
+          const Color(0xFFFF2A4B).withValues(alpha: _crashFlash * 0.45);
+      canvas.drawRect(fullRect, _crashFlashPaint);
+
+      if (_lastVignetteRect != fullRect) {
+        _lastVignetteRect = fullRect;
+        _crashVignettePaint.shader = const RadialGradient(
           center: Alignment.center,
           radius: 0.85,
           colors: [
-            const Color(0x00000000),
-            const Color(0xFFFF1744).withValues(alpha: _crashFlash * 0.75),
+            Color(0x00000000),
+            Color(0xFFFF1744),
           ],
         ).createShader(fullRect);
-      canvas.drawRect(fullRect, vignettePaint);
+      }
+      _crashVignettePaint.color =
+          const Color(0xFFFFFFFF).withValues(alpha: _crashFlash * 0.75);
+      canvas.drawRect(fullRect, _crashVignettePaint);
     }
   }
 
@@ -559,9 +578,21 @@ class ShorebirdRunnerGame extends FlameGame
     }
   }
 
-  void moveToLane(int lane) => _player.moveToLane(lane);
-  void moveLeft() => _player.moveLeft();
-  void moveRight() => _player.moveRight();
+  void moveToLane(int lane) {
+    _player.moveToLane(lane);
+    _laneWorld.triggerLanePulse(lane);
+  }
+
+  void moveLeft() {
+    _player.moveLeft();
+    _laneWorld.triggerLanePulse(_player.currentLane);
+  }
+
+  void moveRight() {
+    _player.moveRight();
+    _laneWorld.triggerLanePulse(_player.currentLane);
+  }
+
   void jump() => _player.jump();
   void slide() => _player.slide();
   int get currentLane => _player.currentLane;
@@ -575,11 +606,11 @@ class ShorebirdRunnerGame extends FlameGame
 
     // Directly click on the desired lane to move player there
     if (tapX < size.x * 0.36) {
-      _player.moveToLane(0);
+      moveToLane(0);
     } else if (tapX > size.x * 0.64) {
-      _player.moveToLane(2);
+      moveToLane(2);
     } else {
-      _player.moveToLane(1);
+      moveToLane(1);
     }
   }
 }

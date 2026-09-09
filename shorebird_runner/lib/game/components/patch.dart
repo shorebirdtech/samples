@@ -160,17 +160,97 @@ class Patch extends Component {
     }
   }
 
+  static final Paint _shadowOuterPaint = Paint()
+    ..color = const Color(0x28000000);
+  static final Paint _shadowInnerPaint = Paint()
+    ..color = const Color(0x66000000);
+  static final Paint _magGlowOuterPaint = Paint();
+  static final Paint _magGlowInnerPaint = Paint();
+  static final Paint _fluxPaint = Paint()..style = PaintingStyle.stroke;
+  static final Paint _ambientGlowOuterPaint = Paint();
+  static final Paint _ambientGlowInnerPaint = Paint();
+  static final Paint _gyroRingPaint = Paint()..style = PaintingStyle.stroke;
+  static final Paint _badgeBorderPaint = Paint()..style = PaintingStyle.stroke;
+  static final Paint _boosterRingPaint = Paint()..style = PaintingStyle.stroke;
+  static final Paint _boltPaint = Paint()
+    ..color = const Color(0xFFFFFFFF)
+    ..style = PaintingStyle.fill;
+  static final Paint _boltBorderPaint = Paint()..style = PaintingStyle.stroke;
+
+  static const Rect _unitRect = Rect.fromLTWH(-50, -50, 100, 100);
+  static final RRect _unitRRect =
+      RRect.fromRectAndRadius(_unitRect, const Radius.circular(19));
+
+  static final Paint _frontBadgePaint = Paint()
+    ..shader = const LinearGradient(
+      begin: Alignment.topLeft,
+      end: Alignment.bottomRight,
+      colors: [
+        Color(0xFF00F0FF),
+        Color(0xFF0088FF),
+        Color(0xFF0D1B3A),
+      ],
+      stops: [0.0, 0.5, 1.0],
+    ).createShader(_unitRect)
+    ..style = PaintingStyle.fill;
+
+  static final Paint _backBadgePaint = Paint()
+    ..shader = const LinearGradient(
+      begin: Alignment.topLeft,
+      end: Alignment.bottomRight,
+      colors: [
+        Color(0xFF0088FF),
+        Color(0xFF0055BB),
+        Color(0xFF060D1E),
+      ],
+      stops: [0.0, 0.5, 1.0],
+    ).createShader(_unitRect)
+    ..style = PaintingStyle.fill;
+
+  static final Paint _boosterCorePaint = Paint()
+    ..shader = const LinearGradient(
+      colors: [
+        Color(0xFFFFEE00),
+        Color(0xFFFF8800),
+        Color(0xFFFF0055),
+      ],
+      begin: Alignment.topLeft,
+      end: Alignment.bottomRight,
+    ).createShader(_unitRect)
+    ..style = PaintingStyle.fill;
+
+  static const Rect _beamRect = Rect.fromLTWH(-8, -90, 16, 90);
+  static final Paint _beamPaint = Paint()
+    ..shader = const LinearGradient(
+      begin: Alignment.bottomCenter,
+      end: Alignment.topCenter,
+      colors: [
+        Color(0x4D00E5FF),
+        Color(0x0000E5FF),
+      ],
+    ).createShader(_beamRect);
+
+  static final Path _reusableBoltPath = Path();
+
   void _drawShadow(Canvas canvas, Offset pos, double scale) {
     final shadowCenter = Offset(pos.dx, pos.dy + 8 * scale);
     final sw = GameConfig.patchNearSize * 0.95 * scale;
     final sh = 12 * scale;
     canvas.drawOval(
-      Rect.fromCenter(center: shadowCenter, width: sw * 1.3, height: sh * 1.3),
-      Paint()..color = const Color(0x28000000),
+      Rect.fromCenter(
+        center: shadowCenter,
+        width: sw * 1.3,
+        height: sh * 1.3,
+      ),
+      _shadowOuterPaint,
     );
     canvas.drawOval(
-      Rect.fromCenter(center: shadowCenter, width: sw, height: sh),
-      Paint()..color = const Color(0x66000000),
+      Rect.fromCenter(
+        center: shadowCenter,
+        width: sw,
+        height: sh,
+      ),
+      _shadowInnerPaint,
     );
   }
 
@@ -195,68 +275,64 @@ class Patch extends Component {
 
     // Radiant Golden/Cyan Magnetic Attraction Field
     if (isBeingMagnetized) {
+      _magGlowOuterPaint.color =
+          const Color(0xFFFFD700).withValues(alpha: 0.20 * scale);
       canvas.drawCircle(
         Offset.zero,
         size * 1.05,
-        Paint()
-          ..color = const Color(0xFFFFD700).withValues(alpha: 0.20 * scale),
+        _magGlowOuterPaint,
       );
+      _magGlowInnerPaint.color =
+          const Color(0xFFFFD700).withValues(alpha: 0.45 * scale);
       canvas.drawCircle(
         Offset.zero,
         size * 0.75,
-        Paint()
-          ..color = const Color(0xFFFFD700).withValues(alpha: 0.45 * scale),
+        _magGlowInnerPaint,
       );
 
-      final fluxPaint = Paint()
+      _fluxPaint
         ..color = const Color(0xFF00FFCC).withValues(alpha: 0.85 * scale)
-        ..strokeWidth = 1.8 * scale
-        ..style = PaintingStyle.stroke;
+        ..strokeWidth = 1.8 * scale;
       final fluxRadius = size * (0.85 + sin(_pulsePhase * 3) * 0.12);
-      canvas.drawCircle(Offset.zero, fluxRadius, fluxPaint);
+      canvas.drawCircle(Offset.zero, fluxRadius, _fluxPaint);
     }
 
-    // Vertical holographic light beam shooting into sky
-    final beamPaint = Paint()
-      ..shader = LinearGradient(
-        begin: Alignment.bottomCenter,
-        end: Alignment.topCenter,
-        colors: [
-          const Color(0xFF00E5FF).withValues(alpha: 0.30 * scale),
-          const Color(0xFF00E5FF).withValues(alpha: 0.0),
-        ],
-      ).createShader(
-        Rect.fromLTWH(-8 * scale, -90 * scale, 16 * scale, 90 * scale),
-      );
+    // Vertical holographic light beam shooting into sky (scaled via canvas)
+    canvas.save();
+    canvas.scale(scale, scale);
     canvas.drawRect(
-      Rect.fromLTWH(-8 * scale, -90 * scale, 16 * scale, 90 * scale),
-      beamPaint,
+      _beamRect,
+      _beamPaint,
     );
+    canvas.restore();
 
-    // 1. Radiant Cyan/Gold Ambient Glow (concentric circles, zero blur overhead)
+    // 1. Radiant Cyan/Gold Ambient Glow
+    _ambientGlowOuterPaint.color =
+        const Color(0xFF00D4FF).withValues(alpha: 0.16 * scale);
     canvas.drawCircle(
       Offset.zero,
       size * 0.85,
-      Paint()..color = const Color(0xFF00D4FF).withValues(alpha: 0.16 * scale),
+      _ambientGlowOuterPaint,
     );
+    _ambientGlowInnerPaint.color =
+        const Color(0xFF00D4FF).withValues(alpha: 0.38 * scale);
     canvas.drawCircle(
       Offset.zero,
       size * 0.58,
-      Paint()..color = const Color(0xFF00D4FF).withValues(alpha: 0.38 * scale),
+      _ambientGlowInnerPaint,
     );
 
     // Concentric Holographic Gyroscope Orbiting Rings
-    final ring1Paint = Paint()
+    _gyroRingPaint
       ..color = const Color(0xFF00FFCC).withValues(alpha: 0.75 * scale)
-      ..strokeWidth = 1.6 * scale
-      ..style = PaintingStyle.stroke;
+      ..strokeWidth = 1.6 * scale;
     canvas.drawOval(
       Rect.fromCenter(
         center: Offset.zero,
         width: size * 1.2 * absCos,
         height: size * 1.2,
       ),
-      ring1Paint,
+      _gyroRingPaint,
     );
 
     // 2. Futuristic Hexagonal OTA Patch Badge
@@ -264,30 +340,22 @@ class Patch extends Component {
     final badgeW = r * 1.8 * absCos;
     final badgeH = r * 1.8;
 
-    final patchRect =
-        Rect.fromCenter(center: Offset.zero, width: badgeW, height: badgeH);
-    final rrect =
-        RRect.fromRectAndRadius(patchRect, Radius.circular(r * 0.38 * absCos));
-
-    // Badge Gradient (Shorebird Cyan into Deep Indigo)
-    final bgPaint = Paint()
-      ..shader = LinearGradient(
-        begin: Alignment.topLeft,
-        end: Alignment.bottomRight,
-        colors: isFront
-            ? const [Color(0xFF00F0FF), Color(0xFF0088FF), Color(0xFF0D1B3A)]
-            : const [Color(0xFF0088FF), Color(0xFF0055BB), Color(0xFF060D1E)],
-        stops: const [0.0, 0.5, 1.0],
-      ).createShader(patchRect)
-      ..style = PaintingStyle.fill;
-    canvas.drawRRect(rrect, bgPaint);
+    canvas.save();
+    canvas.scale(badgeW / 100, badgeH / 100);
+    canvas.drawRRect(
+      _unitRRect,
+      isFront ? _frontBadgePaint : _backBadgePaint,
+    );
 
     // Outer Crisp Neon Rim
-    final borderPaint = Paint()
+    _badgeBorderPaint
       ..color = const Color(0xFFFFD700)
-      ..strokeWidth = 2.2 * scale * absCos
-      ..style = PaintingStyle.stroke;
-    canvas.drawRRect(rrect, borderPaint);
+      ..strokeWidth = (2.2 * scale * absCos) * (100 / badgeH);
+    canvas.drawRRect(
+      _unitRRect,
+      _badgeBorderPaint,
+    );
+    canvas.restore();
 
     // 🐤 Shorebird Baby Chick Symbol in center (cached TextPainter)
     canvas.save();
@@ -318,54 +386,52 @@ class Patch extends Component {
     final absCos = cosSpin.abs().clamp(0.2, 1.0);
 
     // Radiant Gold / Crimson Energy Aura (concentric glow)
+    _magGlowOuterPaint.color =
+        const Color(0xFFFFD700).withValues(alpha: 0.22 * scale);
     canvas.drawCircle(
       Offset.zero,
       size * 0.95,
-      Paint()..color = const Color(0xFFFFD700).withValues(alpha: 0.22 * scale),
+      _magGlowOuterPaint,
     );
+    _magGlowInnerPaint.color =
+        const Color(0xFFFFD700).withValues(alpha: 0.50 * scale);
     canvas.drawCircle(
       Offset.zero,
       size * 0.65,
-      Paint()..color = const Color(0xFFFFD700).withValues(alpha: 0.50 * scale),
+      _magGlowInnerPaint,
     );
 
     // Outer rotating energy ring
-    final ringPaint = Paint()
+    _boosterRingPaint
       ..color = const Color(0xFF00FFCC).withValues(alpha: 0.7 * scale)
-      ..strokeWidth = 2.0 * scale
-      ..style = PaintingStyle.stroke;
+      ..strokeWidth = 2.0 * scale;
     canvas.drawOval(
       Rect.fromCenter(
         center: Offset.zero,
         width: size * 1.3 * absCos,
         height: size * 1.3,
       ),
-      ringPaint,
+      _boosterRingPaint,
     );
 
     // Octagonal Core
     final r = size * 0.58;
-    final coreRect = Rect.fromCenter(
-      center: Offset.zero,
-      width: r * 1.8 * absCos,
-      height: r * 1.8,
+    final coreW = r * 1.8 * absCos;
+    final coreH = r * 1.8;
+
+    canvas.save();
+    canvas.scale(coreW / 100, coreH / 100);
+    canvas.drawRRect(
+      _unitRRect,
+      _boosterCorePaint,
     );
-    final coreRRect =
-        RRect.fromRectAndRadius(coreRect, Radius.circular(r * 0.4 * absCos));
+    canvas.restore();
 
-    final corePaint = Paint()
-      ..shader = const LinearGradient(
-        colors: [Color(0xFFFFEE00), Color(0xFFFF8800), Color(0xFFFF0055)],
-        begin: Alignment.topLeft,
-        end: Alignment.bottomRight,
-      ).createShader(coreRect)
-      ..style = PaintingStyle.fill;
-    canvas.drawRRect(coreRRect, corePaint);
-
-    // ⚡ Lightning Bolt Emblem
+    // ⚡ Lightning Bolt Emblem (reusable path)
     canvas.save();
     canvas.scale(absCos, 1.0);
-    final boltPath = Path()
+    _reusableBoltPath
+      ..reset()
       ..moveTo(2 * scale, -r * 0.65)
       ..lineTo(-r * 0.45, 0)
       ..lineTo(-1 * scale, 0)
@@ -374,16 +440,12 @@ class Patch extends Component {
       ..lineTo(1 * scale, -1 * scale)
       ..close();
 
-    final boltPaint = Paint()
-      ..color = const Color(0xFFFFFFFF)
-      ..style = PaintingStyle.fill;
-    canvas.drawPath(boltPath, boltPaint);
+    canvas.drawPath(_reusableBoltPath, _boltPaint);
 
-    final boltBorder = Paint()
+    _boltBorderPaint
       ..color = const Color(0xFFFF0055)
-      ..strokeWidth = 1.5 * scale
-      ..style = PaintingStyle.stroke;
-    canvas.drawPath(boltPath, boltBorder);
+      ..strokeWidth = 1.5 * scale;
+    canvas.drawPath(_reusableBoltPath, _boltBorderPaint);
     canvas.restore();
 
     canvas.restore();
@@ -399,22 +461,5 @@ class Patch extends Component {
     for (final mp in _magnetParticles) {
       mp.render(canvas);
     }
-
-    // Reusable paint instances with ZERO allocations in hot loop
-    final glowPaint = Paint()
-      ..color = const Color(0xFFFFD700).withValues(alpha: 0.85)
-      ..strokeWidth = 2.2
-      ..style = PaintingStyle.stroke;
-    final corePaint = Paint()
-      ..color = const Color(0xFFFFFFFF)
-      ..strokeWidth = 1.0
-      ..style = PaintingStyle.stroke;
-
-    canvas.drawLine(const Offset(-14, 0), const Offset(14, 0), glowPaint);
-    canvas.drawLine(const Offset(-14, 0), const Offset(14, 0), corePaint);
-    canvas.drawLine(const Offset(0, -14), const Offset(0, 14), glowPaint);
-    canvas.drawLine(const Offset(0, -14), const Offset(0, 14), corePaint);
-
-    canvas.restore();
   }
 }
