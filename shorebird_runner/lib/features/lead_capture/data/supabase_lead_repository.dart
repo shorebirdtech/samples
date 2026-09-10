@@ -73,11 +73,11 @@ class SupabaseLeadRepository implements ILeadRepository {
             },
             body: jsonEncode(lead.toJson()),
           )
-          .timeout(const Duration(seconds: 5));
+          .timeout(const Duration(seconds: 10));
 
       if (response.statusCode >= 200 && response.statusCode < 300) {
         debugPrint(
-          '[SupabaseLeadRepository] Lead recorded successfully on Supabase: ${lead.email}',
+          '[SupabaseLeadRepository] Lead recorded successfully on Supabase (${response.statusCode}): ${lead.email}',
         );
       } else {
         debugPrint(
