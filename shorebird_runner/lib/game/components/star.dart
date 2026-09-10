@@ -16,6 +16,8 @@ class Star {
   static final Paint _sharedStarPaint = Paint()..style = PaintingStyle.fill;
   static final Paint _sharedSpikePaint = Paint()..strokeWidth = 0.9;
 
+  final Offset pos;
+
   Star({
     required this.x,
     required this.y,
@@ -26,7 +28,8 @@ class Star {
     required this.hasCrossGlint,
     required this.tint,
     required double twinklePhase,
-  }) : _twinklePhase = twinklePhase;
+  })  : pos = Offset(x, y),
+        _twinklePhase = twinklePhase;
 
   factory Star.random(Random rng) {
     final isSpecial = rng.nextDouble() < 0.12;
@@ -62,19 +65,19 @@ class Star {
         (alpha * (0.55 + 0.45 * sin(_twinklePhase))).clamp(0.0, 1.0);
     _sharedStarPaint.color = tint.withValues(alpha: currentAlpha);
 
-    canvas.drawCircle(Offset(x, y), size, _sharedStarPaint);
+    canvas.drawCircle(pos, size, _sharedStarPaint);
 
     if (hasCrossGlint && currentAlpha > 0.65) {
       final spikeLen = size * 2.8 * currentAlpha;
       _sharedSpikePaint.color = tint.withValues(alpha: currentAlpha * 0.5);
       canvas.drawLine(
-        Offset(x - spikeLen, y),
-        Offset(x + spikeLen, y),
+        Offset(pos.dx - spikeLen, pos.dy),
+        Offset(pos.dx + spikeLen, pos.dy),
         _sharedSpikePaint,
       );
       canvas.drawLine(
-        Offset(x, y - spikeLen),
-        Offset(x, y + spikeLen),
+        Offset(pos.dx, pos.dy - spikeLen),
+        Offset(pos.dx, pos.dy + spikeLen),
         _sharedSpikePaint,
       );
     }

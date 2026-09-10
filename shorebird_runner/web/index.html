@@ -24,6 +24,11 @@
   <title>Patch Rush — by Shorebird</title>
   <link rel="manifest" href="manifest.json">
 
+  <!-- Font preconnect & Noto Color Emoji for complete cross-platform emoji rendering -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Color+Emoji&display=swap" rel="stylesheet">
+
   <style>
     * {
       margin: 0;
@@ -37,6 +42,7 @@
       height: 100%;
       background: #0A0E1A;
       overflow: hidden;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Noto Color Emoji', sans-serif;
     }
 
     /* Custom loading screen */
@@ -102,7 +108,7 @@
     const bar = document.getElementById('loading-bar');
     const interval = setInterval(() => {
       progress = Math.min(progress + Math.random() * 15, 90);
-      bar.style.width = progress + '%';
+      if (bar) bar.style.width = progress + '%';
     }, 200);
 
     // flutter-first-frame is the real Flutter web event fired after the
@@ -110,12 +116,18 @@
     // loading screen.
     window.addEventListener('flutter-first-frame', function () {
       clearInterval(interval);
-      bar.style.width = '100%';
+      if (bar) bar.style.width = '100%';
       setTimeout(() => {
         const loading = document.getElementById('loading');
-        loading.style.opacity = '0';
-        loading.style.transition = 'opacity 0.5s ease';
-        setTimeout(() => loading.remove(), 500);
+        if (loading) {
+          loading.style.opacity = '0';
+          loading.style.transition = 'opacity 0.5s ease';
+          setTimeout(() => {
+            if (loading && loading.parentNode) {
+              loading.remove();
+            }
+          }, 500);
+        }
       }, 300);
     });
     // Web Audio arcade sound synthesizer

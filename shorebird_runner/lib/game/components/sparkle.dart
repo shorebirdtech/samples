@@ -30,16 +30,15 @@ class Sparkle {
     life = (life - dt * 2.8).clamp(0.0, 1.0);
   }
 
+  static final Paint _outerPaint = Paint()..style = PaintingStyle.fill;
+  static final Paint _innerPaint = Paint()..style = PaintingStyle.fill;
+
   void render(Canvas canvas) {
     if (life <= 0) return;
-    final outerPaint = Paint()
-      ..color = color.withValues(alpha: life * 0.35)
-      ..style = PaintingStyle.fill;
-    canvas.drawCircle(pos, radius * life * 1.8, outerPaint);
+    _outerPaint.color = color.withValues(alpha: life * 0.35);
+    canvas.drawCircle(pos, radius * life * 1.8, _outerPaint);
 
-    final innerPaint = Paint()
-      ..color = color.withValues(alpha: life * 0.90)
-      ..style = PaintingStyle.fill;
-    canvas.drawCircle(pos, radius * life, innerPaint);
+    _innerPaint.color = color.withValues(alpha: life * 0.90);
+    canvas.drawCircle(pos, radius * life, _innerPaint);
   }
 }

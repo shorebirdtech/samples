@@ -43,16 +43,18 @@ class ShootingStar {
       current.dy - dir.dy * length * life,
     );
 
-    _paint.shader = LinearGradient(
-      colors: [
-        const Color(0xFFFFFFFF).withValues(alpha: life),
-        const Color(0xFF00D4FF).withValues(alpha: life * 0.6),
-        const Color(0x00000000),
-      ],
-    ).createShader(Rect.fromPoints(current, tail));
-
+    // Cyan outer glow streak
+    _paint
+      ..color = const Color(0xFF00D4FF).withValues(alpha: life * 0.6)
+      ..strokeWidth = 2.4;
     canvas.drawLine(current, tail, _paint);
-    _headPaint.color = const Color(0xFFFFFFFF).withValues(alpha: life);
+
+    // White core streak
+    _headPaint
+      ..color = const Color(0xFFFFFFFF).withValues(alpha: life)
+      ..strokeWidth = 1.2
+      ..strokeCap = StrokeCap.round;
+    canvas.drawLine(current, tail, _headPaint);
     canvas.drawCircle(current, 2.2 * life, _headPaint);
   }
 }

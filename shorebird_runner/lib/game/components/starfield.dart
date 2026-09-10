@@ -45,6 +45,29 @@ class Starfield extends Component {
         ],
         stops: [0.0, 0.35, 0.65, 0.88, 1.0],
       ).createShader(Rect.fromLTWH(0, 0, w, h));
+
+    // Pre-cache nebula radial shaders centered at Offset.zero so render requires 0 allocations
+    _cyanNebulaPaint.shader = RadialGradient(
+      colors: [
+        const Color(0xFF00D4FF).withValues(alpha: 0.12),
+        const Color(0xFF0055AA).withValues(alpha: 0.05),
+        const Color(0x00000000),
+      ],
+      radius: 0.85,
+    ).createShader(
+      Rect.fromCircle(center: Offset.zero, radius: 180),
+    );
+
+    _purpleNebulaPaint.shader = RadialGradient(
+      colors: [
+        const Color(0xFF9333EA).withValues(alpha: 0.14),
+        const Color(0xFFEC4899).withValues(alpha: 0.04),
+        const Color(0x00000000),
+      ],
+      radius: 0.85,
+    ).createShader(
+      Rect.fromCircle(center: Offset.zero, radius: 200),
+    );
   }
 
   void _repopulateStars() {
@@ -77,9 +100,13 @@ class Starfield extends Component {
       }
     }
 
-    for (final ss in List.of(_shootingStars)) {
+    // Zero-allocation backwards loop for shooting stars
+    for (int i = _shootingStars.length - 1; i >= 0; i--) {
+      final ss = _shootingStars[i];
       ss.update(dt);
-      if (ss.isDead) _shootingStars.remove(ss);
+      if (ss.isDead) {
+        _shootingStars.removeAt(i);
+      }
     }
   }
 
@@ -109,37 +136,16 @@ class Starfield extends Component {
     final sin1 = sin(_nebulaPhase) * 20;
     final sin2 = cos(_nebulaPhase * 0.8) * 25;
 
-    // Cyan cosmic dust cloud (left)
-    _cyanNebulaPaint.shader = RadialGradient(
-      colors: [
-        const Color(0xFF00D4FF).withValues(alpha: 0.12),
-        const Color(0xFF0055AA).withValues(alpha: 0.05),
-        const Color(0x00000000),
-      ],
-      radius: 0.85,
-    ).createShader(
-      Rect.fromCircle(
-        center: Offset(w * 0.25 + sin1, h * 0.45),
-        radius: 180,
-      ),
-    );
-    canvas.drawCircle(Offset(w * 0.25 + sin1, h * 0.45), 180, _cyanNebulaPaint);
+    // Cyan cosmic dust cloud (left) - translated with zero allocations
+    canvas.save();
+    canvas.translate(w * 0.25 + sin1, h * 0.45);
+    canvas.drawCircle(Offset.zero, 180, _cyanNebulaPaint);
+    canvas.restore();
 
-    // Violet/Magenta cosmic dust cloud (right)
-    _purpleNebulaPaint.shader = RadialGradient(
-      colors: [
-        const Color(0xFF9333EA).withValues(alpha: 0.14),
-        const Color(0xFFEC4899).withValues(alpha: 0.04),
-        const Color(0x00000000),
-      ],
-      radius: 0.85,
-    ).createShader(
-      Rect.fromCircle(center: Offset(w * 0.75 + sin2, h * 0.4), radius: 200),
-    );
-    canvas.drawCircle(
-      Offset(w * 0.75 + sin2, h * 0.4),
-      200,
-      _purpleNebulaPaint,
-    );
+    // Violet/Magenta cosmic dust cloud (right) - translated with zero allocations
+    canvas.save();
+    canvas.translate(w * 0.75 + sin2, h * 0.4);
+    canvas.drawCircle(Offset.zero, 200, _purpleNebulaPaint);
+    canvas.restore();
   }
 }

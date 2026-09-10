@@ -181,9 +181,11 @@ class GameConfig {
   }
 
   // ── Dynamic parameters ─────────────────────────────────────────────────────
-  static double scrollSpeed(int patches) {
+  static double scrollSpeed(int patches, {bool isInvincible = false}) {
     const base = 0.65;
-    return base * levelFor(patches).speedMultiplier;
+    final speedMultiplier = levelFor(patches).speedMultiplier;
+    final invincibleBoost = isInvincible ? 1.65 : 1.0;
+    return base * speedMultiplier * invincibleBoost;
   }
 
   static double obstacleInterval(int patches) {

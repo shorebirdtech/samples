@@ -43,6 +43,94 @@ class Player extends Component {
   bool get isSliding => _isSliding;
   bool get isInvincible => _invincibleTimer > 0;
 
+  // Reusable geometry paths for zero-allocation rendering
+  final Path _leftLegPath = Path();
+  final Path _rightLegPath = Path();
+  final Path _hoodCollarPath = Path();
+  final Path _leftArmPath = Path();
+  final Path _rightArmPath = Path();
+  final Path _birdPath = Path();
+
+  // Cyber ghosting echo trail
+  final List<Offset> _ghostPositions = [];
+
+  // Reusable pooled paints
+  static final Paint _shadowOuter = Paint();
+  static final Paint _shadowMid = Paint();
+  static final Paint _shadowCore = Paint();
+  static final Paint _shockwavePaint = Paint()..style = PaintingStyle.stroke;
+  static final Paint _ghostPaint = Paint()..style = PaintingStyle.fill;
+  static final Paint _shieldPaint = Paint()
+    ..style = PaintingStyle.stroke
+    ..strokeWidth = 3.5;
+  static final Paint _shieldAura = Paint()
+    ..style = PaintingStyle.stroke
+    ..strokeWidth = 4.0;
+  static final Paint _shieldNodeGlow = Paint();
+  static final Paint _shieldNodeMid = Paint();
+  static final Paint _shieldNodeCore = Paint()..color = const Color(0xFFFFFFFF);
+  static final Paint _auraOuter = Paint();
+  static final Paint _auraInner = Paint();
+  static final Paint _legPaint = Paint()..style = PaintingStyle.fill;
+  static final Paint _seamPaint = Paint()
+    ..style = PaintingStyle.stroke
+    ..strokeWidth = 1.2;
+  static final Paint _shoePaint = Paint()..color = const Color(0xFF0F172A);
+  static final Paint _solePaint = Paint()..style = PaintingStyle.stroke;
+  static final Paint _soleGlowOuter = Paint();
+  static final Paint _soleGlowInner = Paint();
+  static final Paint _hoodiePaint = Paint()..style = PaintingStyle.fill;
+  static final Paint _hoodCollarPaint = Paint()..style = PaintingStyle.fill;
+  static final Paint _emblemBg = Paint()
+    ..color = const Color(0xFF030712).withValues(alpha: 0.85)
+    ..style = PaintingStyle.fill;
+  static final Paint _emblemBorder = Paint()
+    ..style = PaintingStyle.stroke
+    ..strokeWidth = 1.6;
+  static final Paint _emblemGlowOuter = Paint();
+  static final Paint _emblemGlowInner = Paint();
+  static final Paint _birdPaint = Paint()
+    ..color = const Color(0xFF00FFCC)
+    ..style = PaintingStyle.fill;
+  static final Paint _codeLinePaint = Paint()
+    ..style = PaintingStyle.stroke
+    ..strokeWidth = 1.8
+    ..strokeCap = StrokeCap.round;
+  static final Paint _hairPaint = Paint()
+    ..color = const Color(0xFF1C1917)
+    ..style = PaintingStyle.fill;
+  static final Paint _hairHighlight = Paint()
+    ..color = const Color(0xFF44403C)
+    ..style = PaintingStyle.stroke
+    ..strokeWidth = 2;
+  static final Paint _bandPaint = Paint()
+    ..color = const Color(0xFF0F172A)
+    ..style = PaintingStyle.stroke
+    ..strokeWidth = 3.8
+    ..strokeCap = StrokeCap.round;
+  static final Paint _bandTrimPaint = Paint()
+    ..style = PaintingStyle.stroke
+    ..strokeWidth = 1.5;
+  static final Paint _cupPaint = Paint()..color = const Color(0xFF0F172A);
+  static final Paint _cupGlow = Paint()
+    ..style = PaintingStyle.stroke
+    ..strokeWidth = 1.8;
+  static final Paint _eqPaint = Paint()..strokeWidth = 1.0;
+  static final Paint _sleevePaint = Paint()..style = PaintingStyle.fill;
+  static final Paint _skinPaint = Paint()..color = const Color(0xFFFBBF24);
+  static final Paint _lidPaint = Paint()..color = const Color(0xFF1E293B);
+  static final Paint _stickerPaint = Paint()
+    ..color = const Color(0xFF00D4FF)
+    ..style = PaintingStyle.fill;
+  static final Paint _screenEdge = Paint()
+    ..color = const Color(0xFF00FF88)
+    ..style = PaintingStyle.stroke
+    ..strokeWidth = 1.5;
+  static final Paint _screenGlowOuter = Paint()
+    ..color = const Color(0xFF00FF88).withValues(alpha: 0.22);
+  static final Paint _screenGlowInner = Paint()
+    ..color = const Color(0xFF00FF88).withValues(alpha: 0.65);
+
   Player({
     this.currentLane = 1,
     this.skin = PlayerSkin.blueBird,
@@ -109,18 +197,19 @@ class Player extends Component {
     return -sin(t * pi) * 78.0;
   }
 
-  Offset get worldPosition {
-    final baseOffset = () {
-      if (_laneProgress >= 1.0) {
-        return PerspectiveHelper.lanePosition(_targetLane, 1.0);
-      }
-      final from = PerspectiveHelper.lanePosition(currentLane, 1.0);
-      final to = PerspectiveHelper.lanePosition(_targetLane, 1.0);
-      final t = Curves.easeInOutCubic.transform(_laneProgress.clamp(0, 1));
-      return Offset(from.dx + (to.dx - from.dx) * t, from.dy);
-    }();
+  Offset get groundPosition {
+    if (_laneProgress >= 1.0) {
+      return PerspectiveHelper.lanePosition(_targetLane, 1.0);
+    }
+    final from = PerspectiveHelper.lanePosition(currentLane, 1.0);
+    final to = PerspectiveHelper.lanePosition(_targetLane, 1.0);
+    final t = Curves.easeInOutCubic.transform(_laneProgress.clamp(0, 1));
+    return Offset(from.dx + (to.dx - from.dx) * t, from.dy);
+  }
 
-    return Offset(baseOffset.dx, baseOffset.dy + jumpOffsetY);
+  Offset get worldPosition {
+    final gp = groundPosition;
+    return Offset(gp.dx, gp.dy + jumpOffsetY);
   }
 
   double get rollAngle {
@@ -205,6 +294,14 @@ class Player extends Component {
 
     _runPhase += dt * 14.0;
 
+    // Cyber ghosting echo trail tracking (only during Hot Reload overdrive)
+    if (isInvincible) {
+      _ghostPositions.insert(0, worldPosition);
+      if (_ghostPositions.length > 3) _ghostPositions.removeLast();
+    } else if (_ghostPositions.isNotEmpty) {
+      _ghostPositions.removeLast();
+    }
+
     // Spawn footstep cyber sparks on ground
     if (!_isJumping && !_isSliding) {
       final pos = worldPosition;
@@ -216,10 +313,13 @@ class Player extends Component {
       }
     }
 
-    for (final p in _particles) {
+    for (int i = _particles.length - 1; i >= 0; i--) {
+      final p = _particles[i];
       p.update(dt);
+      if (p.life <= 0) {
+        _particles.removeAt(i);
+      }
     }
-    _particles.removeWhere((p) => p.life <= 0);
   }
 
   Color _getAuraColor() {
@@ -243,16 +343,7 @@ class Player extends Component {
   }
 
   void _drawShadow(Canvas canvas) {
-    final groundPos = () {
-      if (_laneProgress >= 1.0) {
-        return PerspectiveHelper.lanePosition(_targetLane, 1.0);
-      }
-      final from = PerspectiveHelper.lanePosition(currentLane, 1.0);
-      final to = PerspectiveHelper.lanePosition(_targetLane, 1.0);
-      final t = Curves.easeInOutCubic.transform(_laneProgress.clamp(0, 1));
-      return Offset(from.dx + (to.dx - from.dx) * t, from.dy);
-    }();
-
+    final groundPos = groundPosition;
     final shadowY = groundPos.dy + 34;
     final stepBounce = sin(_runPhase * 2).abs() * 3.0;
 
@@ -265,33 +356,52 @@ class Player extends Component {
 
     // Multi-ring concentric soft shadow (hardware accelerated, zero blur pass)
     final shadowCenter = Offset(groundPos.dx, shadowY);
+    _shadowOuter.color =
+        const Color(0xFF000000).withValues(alpha: shadowAlpha * 0.25);
     canvas.drawOval(
       Rect.fromCenter(
         center: shadowCenter,
         width: 52 * shadowScale,
         height: 18 * shadowScale,
       ),
-      Paint()
-        ..color = const Color(0xFF000000).withValues(alpha: shadowAlpha * 0.25),
+      _shadowOuter,
     );
+    _shadowMid.color =
+        const Color(0xFF000000).withValues(alpha: shadowAlpha * 0.55);
     canvas.drawOval(
       Rect.fromCenter(
         center: shadowCenter,
         width: 38 * shadowScale,
         height: 13 * shadowScale,
       ),
-      Paint()
-        ..color = const Color(0xFF000000).withValues(alpha: shadowAlpha * 0.55),
+      _shadowMid,
     );
+    _shadowCore.color =
+        const Color(0xFF000000).withValues(alpha: shadowAlpha * 0.85);
     canvas.drawOval(
       Rect.fromCenter(
         center: shadowCenter,
         width: 22 * shadowScale,
         height: 7 * shadowScale,
       ),
-      Paint()
-        ..color = const Color(0xFF000000).withValues(alpha: shadowAlpha * 0.85),
+      _shadowCore,
     );
+
+    // Jump Landing Impact Shockwave ring on the tarmac
+    if (_landingSquish > 0) {
+      final ringRadius = 52.0 * (1.0 + (1.0 - _landingSquish) * 0.85);
+      _shockwavePaint
+        ..color = _getAuraColor().withValues(alpha: _landingSquish * 0.65)
+        ..strokeWidth = 2.4 * _landingSquish;
+      canvas.drawOval(
+        Rect.fromCenter(
+          center: shadowCenter,
+          width: ringRadius * 1.6,
+          height: ringRadius * 0.5,
+        ),
+        _shockwavePaint,
+      );
+    }
   }
 
   void _drawParticles(Canvas canvas) {
@@ -309,6 +419,20 @@ class Player extends Component {
     final center = Offset(pos.dx, pos.dy - stepBounce);
     final roll = rollAngle;
     final size = GameConfig.playerNearSize; // responsive near size
+
+    // Cyber Ghosting Echo Trail during lane changes or Hot Reload
+    if (_ghostPositions.isNotEmpty) {
+      final ghostColor = _getAuraColor();
+      for (int i = 0; i < _ghostPositions.length; i++) {
+        final ghostAlpha = (0.24 - i * 0.08).clamp(0.04, 0.25);
+        _ghostPaint.color = ghostColor.withValues(alpha: ghostAlpha);
+        final gp = _ghostPositions[i];
+        canvas.save();
+        canvas.translate(gp.dx, gp.dy - stepBounce);
+        canvas.drawCircle(Offset.zero, size * 0.40, _ghostPaint);
+        canvas.restore();
+      }
+    }
 
     canvas.save();
     canvas.translate(center.dx, center.dy);
@@ -338,31 +462,22 @@ class Player extends Component {
     // Hot Reload invincibility energy shield
     if (isInvincible) {
       final shieldRadius = size * 0.88;
-      final shieldPaint = Paint()
-        ..shader = SweepGradient(
-          colors: const [
-            Color(0xFFFFD700),
-            Color(0xFF00FFCC),
-            Color(0xFFFF007F),
-            Color(0xFFFFD700),
-          ],
-          transform: GradientRotation(_runPhase * 4),
-        ).createShader(
-          Rect.fromCircle(center: Offset.zero, radius: shieldRadius),
-        )
-        ..style = PaintingStyle.stroke
-        ..strokeWidth = 3.5;
-      canvas.drawCircle(const Offset(0, 2), shieldRadius, shieldPaint);
+      _shieldPaint.shader = SweepGradient(
+        colors: const [
+          Color(0xFFFFD700),
+          Color(0xFF00FFCC),
+          Color(0xFFFF007F),
+          Color(0xFFFFD700),
+        ],
+        transform: GradientRotation(_runPhase * 4),
+      ).createShader(
+        Rect.fromCircle(center: Offset.zero, radius: shieldRadius),
+      );
+      canvas.drawCircle(const Offset(0, 2), shieldRadius, _shieldPaint);
 
       // Outer aura ring
-      canvas.drawCircle(
-        const Offset(0, 2),
-        shieldRadius + 4,
-        Paint()
-          ..color = const Color(0xFFFFD700).withValues(alpha: 0.25)
-          ..style = PaintingStyle.stroke
-          ..strokeWidth = 4.0,
-      );
+      _shieldAura.color = const Color(0xFFFFD700).withValues(alpha: 0.25);
+      canvas.drawCircle(const Offset(0, 2), shieldRadius + 4, _shieldAura);
 
       // Orbiting Hexagonal Shield Nodes
       const nodeCount = 5;
@@ -370,37 +485,23 @@ class Player extends Component {
         final nodeAngle = _runPhase * 3.5 + (i * 2 * pi / nodeCount);
         final nx = cos(nodeAngle) * (shieldRadius * 1.05);
         final ny = sin(nodeAngle) * (shieldRadius * 0.75) + 2;
-        canvas.drawCircle(
-          Offset(nx, ny),
-          5.5,
-          Paint()..color = const Color(0xFF00FFCC).withValues(alpha: 0.35),
-        );
-        canvas.drawCircle(
-          Offset(nx, ny),
-          3.0,
-          Paint()..color = const Color(0xFF00FFCC),
-        );
-        canvas.drawCircle(
-          Offset(nx, ny),
-          1.5,
-          Paint()..color = const Color(0xFFFFFFFF),
-        );
+        final nodePos = Offset(nx, ny);
+
+        _shieldNodeGlow.color = const Color(0xFF00FFCC).withValues(alpha: 0.35);
+        canvas.drawCircle(nodePos, 5.5, _shieldNodeGlow);
+        _shieldNodeMid.color = const Color(0xFF00FFCC);
+        canvas.drawCircle(nodePos, 3.0, _shieldNodeMid);
+        canvas.drawCircle(nodePos, 1.5, _shieldNodeCore);
       }
     }
 
     // Developer neon aura (concentric circles, zero blur overhead)
     final aura = _getAuraColor();
     final auraAlpha = isInvincible ? 0.35 : 0.16;
-    canvas.drawCircle(
-      const Offset(0, 4),
-      size * 0.90,
-      Paint()..color = aura.withValues(alpha: auraAlpha * 0.4),
-    );
-    canvas.drawCircle(
-      const Offset(0, 4),
-      size * 0.65,
-      Paint()..color = aura.withValues(alpha: auraAlpha),
-    );
+    _auraOuter.color = aura.withValues(alpha: auraAlpha * 0.4);
+    canvas.drawCircle(const Offset(0, 4), size * 0.90, _auraOuter);
+    _auraInner.color = aura.withValues(alpha: auraAlpha);
+    canvas.drawCircle(const Offset(0, 4), size * 0.65, _auraInner);
 
     _drawLegs(canvas, size);
     _drawTorso(canvas, size);
@@ -421,7 +522,8 @@ class Player extends Component {
     final leftFootSwing = stride * legLength;
     final rightFootSwing = -stride * legLength;
 
-    final leftLegPath = Path()
+    _leftLegPath
+      ..reset()
       ..moveTo(-r * 0.22, hipY)
       ..lineTo(-r * 0.26, hipY + legLength * 0.55 + leftFootSwing * 0.2)
       ..lineTo(-r * 0.24, hipY + legLength + leftFootSwing)
@@ -430,7 +532,8 @@ class Player extends Component {
       ..lineTo(-r * 0.10, hipY)
       ..close();
 
-    final rightLegPath = Path()
+    _rightLegPath
+      ..reset()
       ..moveTo(r * 0.10, hipY)
       ..lineTo(r * 0.14, hipY + legLength * 0.55 + rightFootSwing * 0.2)
       ..lineTo(r * 0.12, hipY + legLength + rightFootSwing)
@@ -439,18 +542,13 @@ class Player extends Component {
       ..lineTo(r * 0.22, hipY)
       ..close();
 
-    final legPaint = Paint()
-      ..color = colors[1]
-      ..style = PaintingStyle.fill;
-    canvas.drawPath(leftLegPath, legPaint);
-    canvas.drawPath(rightLegPath, legPaint);
+    _legPaint.color = colors[1];
+    canvas.drawPath(_leftLegPath, _legPaint);
+    canvas.drawPath(_rightLegPath, _legPaint);
 
-    final seamPaint = Paint()
-      ..color = colors[2]
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 1.2;
-    canvas.drawPath(leftLegPath, seamPaint);
-    canvas.drawPath(rightLegPath, seamPaint);
+    _seamPaint.color = colors[2];
+    canvas.drawPath(_leftLegPath, _seamPaint);
+    canvas.drawPath(_rightLegPath, _seamPaint);
 
     _drawRunningShoe(
       canvas,
@@ -475,7 +573,6 @@ class Player extends Component {
     canvas.save();
     canvas.translate(pos.dx, pos.dy);
 
-    final shoePaint = Paint()..color = const Color(0xFF0F172A);
     final shoeRect = RRect.fromRectAndRadius(
       Rect.fromCenter(
         center: const Offset(0, 0),
@@ -484,30 +581,23 @@ class Player extends Component {
       ),
       Radius.circular(2 * scale),
     );
-    canvas.drawRRect(shoeRect, shoePaint);
+    canvas.drawRRect(shoeRect, _shoePaint);
 
     final soleColor = _getAuraColor();
-    final solePaint = Paint()
+    _solePaint
       ..color = soleColor
-      ..style = PaintingStyle.stroke
       ..strokeWidth = 2.0 * scale;
     canvas.drawLine(
       Offset(-6 * scale, 2.5 * scale),
       Offset(6 * scale, 2.5 * scale),
-      solePaint,
+      _solePaint,
     );
 
     // Sole neon glow flare (concentric)
-    canvas.drawCircle(
-      const Offset(0, 3.5),
-      7,
-      Paint()..color = soleColor.withValues(alpha: 0.22),
-    );
-    canvas.drawCircle(
-      const Offset(0, 3.5),
-      4,
-      Paint()..color = soleColor.withValues(alpha: 0.75),
-    );
+    _soleGlowOuter.color = soleColor.withValues(alpha: 0.22);
+    canvas.drawCircle(const Offset(0, 3.5), 7, _soleGlowOuter);
+    _soleGlowInner.color = soleColor.withValues(alpha: 0.75);
+    canvas.drawCircle(const Offset(0, 3.5), 4, _soleGlowInner);
 
     canvas.restore();
   }
@@ -532,25 +622,22 @@ class Player extends Component {
     final hoodieRRect =
         RRect.fromRectAndRadius(hoodieRect, Radius.circular(r * 0.22));
 
-    final hoodiePaint = Paint()
-      ..shader = LinearGradient(
-        begin: Alignment.topCenter,
-        end: Alignment.bottomCenter,
-        colors: [colors[0], colors[1], colors[2]],
-        stops: const [0.0, 0.5, 1.0],
-      ).createShader(hoodieRect)
-      ..style = PaintingStyle.fill;
-    canvas.drawRRect(hoodieRRect, hoodiePaint);
+    _hoodiePaint.shader = LinearGradient(
+      begin: Alignment.topCenter,
+      end: Alignment.bottomCenter,
+      colors: [colors[0], colors[1], colors[2]],
+      stops: const [0.0, 0.5, 1.0],
+    ).createShader(hoodieRect);
+    canvas.drawRRect(hoodieRRect, _hoodiePaint);
 
-    final hoodCollarPath = Path()
+    _hoodCollarPath
+      ..reset()
       ..moveTo(-r * 0.32, -r * 0.40)
       ..quadraticBezierTo(0, -r * 0.22, r * 0.32, -r * 0.40)
       ..quadraticBezierTo(0, -r * 0.30, -r * 0.32, -r * 0.40)
       ..close();
-    final hoodCollarPaint = Paint()
-      ..color = colors[2]
-      ..style = PaintingStyle.fill;
-    canvas.drawPath(hoodCollarPath, hoodCollarPaint);
+    _hoodCollarPaint.color = colors[2];
+    canvas.drawPath(_hoodCollarPath, _hoodCollarPaint);
 
     _drawDeveloperEmblem(canvas, r);
   }
@@ -559,31 +646,20 @@ class Player extends Component {
     final emblemCenter = Offset(0, -r * 0.04);
     final aura = _getAuraColor();
 
-    final badgePaint = Paint()
-      ..color = const Color(0xFF030712).withValues(alpha: 0.85)
-      ..style = PaintingStyle.fill;
-    canvas.drawCircle(emblemCenter, r * 0.24, badgePaint);
+    canvas.drawCircle(emblemCenter, r * 0.24, _emblemBg);
 
-    final borderPaint = Paint()
-      ..color = aura
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 1.6;
-    canvas.drawCircle(emblemCenter, r * 0.24, borderPaint);
+    _emblemBorder.color = aura;
+    canvas.drawCircle(emblemCenter, r * 0.24, _emblemBorder);
 
     // Multi-ring concentric glow behind emblem
-    canvas.drawCircle(
-      emblemCenter,
-      r * 0.32,
-      Paint()..color = aura.withValues(alpha: 0.18),
-    );
-    canvas.drawCircle(
-      emblemCenter,
-      r * 0.26,
-      Paint()..color = aura.withValues(alpha: 0.38),
-    );
+    _emblemGlowOuter.color = aura.withValues(alpha: 0.18);
+    canvas.drawCircle(emblemCenter, r * 0.32, _emblemGlowOuter);
+    _emblemGlowInner.color = aura.withValues(alpha: 0.38);
+    canvas.drawCircle(emblemCenter, r * 0.26, _emblemGlowInner);
 
     if (skin == PlayerSkin.blueBird) {
-      final birdPath = Path()
+      _birdPath
+        ..reset()
         ..moveTo(emblemCenter.dx - 4, emblemCenter.dy + 3)
         ..cubicTo(
           emblemCenter.dx - 6,
@@ -603,43 +679,33 @@ class Player extends Component {
           emblemCenter.dx - 4,
           emblemCenter.dy + 3,
         );
-      final birdPaint = Paint()
-        ..color = const Color(0xFF00FFCC)
-        ..style = PaintingStyle.fill;
-      canvas.drawPath(birdPath, birdPaint);
+      canvas.drawPath(_birdPath, _birdPaint);
     } else {
-      final codePaint = Paint()
-        ..color = aura
-        ..style = PaintingStyle.stroke
-        ..strokeWidth = 1.8
-        ..strokeCap = StrokeCap.round;
-
+      _codeLinePaint.color = aura;
       canvas.drawLine(
         Offset(emblemCenter.dx - 5, emblemCenter.dy - 3),
         Offset(emblemCenter.dx - 8, emblemCenter.dy),
-        codePaint,
+        _codeLinePaint,
       );
       canvas.drawLine(
         Offset(emblemCenter.dx - 8, emblemCenter.dy),
         Offset(emblemCenter.dx - 5, emblemCenter.dy + 3),
-        codePaint,
+        _codeLinePaint,
       );
-
       canvas.drawLine(
         Offset(emblemCenter.dx - 1, emblemCenter.dy + 4),
         Offset(emblemCenter.dx + 1, emblemCenter.dy - 4),
-        codePaint,
+        _codeLinePaint,
       );
-
       canvas.drawLine(
         Offset(emblemCenter.dx + 5, emblemCenter.dy - 3),
         Offset(emblemCenter.dx + 8, emblemCenter.dy),
-        codePaint,
+        _codeLinePaint,
       );
       canvas.drawLine(
         Offset(emblemCenter.dx + 8, emblemCenter.dy),
         Offset(emblemCenter.dx + 5, emblemCenter.dy + 3),
-        codePaint,
+        _codeLinePaint,
       );
     }
   }
@@ -678,48 +744,33 @@ class Player extends Component {
     final headCenter = Offset(0, -r * 0.58);
     final headRadius = r * 0.28;
 
-    final hairPaint = Paint()
-      ..color = const Color(0xFF1C1917)
-      ..style = PaintingStyle.fill;
-    canvas.drawCircle(headCenter, headRadius, hairPaint);
+    canvas.drawCircle(headCenter, headRadius, _hairPaint);
 
-    final hairHighlight = Paint()
-      ..color = const Color(0xFF44403C)
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 2;
     canvas.drawArc(
       Rect.fromCircle(center: headCenter, radius: headRadius - 1.5),
       pi * 1.1,
       pi * 0.8,
       false,
-      hairHighlight,
+      _hairHighlight,
     );
 
     final aura = _getAuraColor();
 
-    final bandPaint = Paint()
-      ..color = const Color(0xFF0F172A)
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 3.8
-      ..strokeCap = StrokeCap.round;
     canvas.drawArc(
       Rect.fromCircle(center: headCenter, radius: headRadius + 2.0),
       pi * 1.12,
       pi * 0.76,
       false,
-      bandPaint,
+      _bandPaint,
     );
 
-    final bandTrimPaint = Paint()
-      ..color = aura
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 1.5;
+    _bandTrimPaint.color = aura;
     canvas.drawArc(
       Rect.fromCircle(center: headCenter, radius: headRadius + 2.0),
       pi * 1.18,
       pi * 0.64,
       false,
-      bandTrimPaint,
+      _bandTrimPaint,
     );
 
     final leftCupRect = RRect.fromRectAndRadius(
@@ -730,14 +781,10 @@ class Player extends Component {
       ),
       const Radius.circular(3),
     );
-    final cupPaint = Paint()..color = const Color(0xFF0F172A);
-    canvas.drawRRect(leftCupRect, cupPaint);
+    canvas.drawRRect(leftCupRect, _cupPaint);
 
-    final cupGlow = Paint()
-      ..color = aura
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 1.8;
-    canvas.drawRRect(leftCupRect, cupGlow);
+    _cupGlow.color = aura;
+    canvas.drawRRect(leftCupRect, _cupGlow);
 
     _drawCupEqualizer(
       canvas,
@@ -753,25 +800,23 @@ class Player extends Component {
       ),
       const Radius.circular(3),
     );
-    canvas.drawRRect(rightCupRect, cupPaint);
-    canvas.drawRRect(rightCupRect, cupGlow);
+    canvas.drawRRect(rightCupRect, _cupPaint);
+    canvas.drawRRect(rightCupRect, _cupGlow);
   }
 
   void _drawCupEqualizer(Canvas canvas, Offset center, Color color) {
-    final eqPaint = Paint()
-      ..color = color
-      ..strokeWidth = 1.0;
+    _eqPaint.color = color;
     final h1 = (sin(_runPhase * 3) * 3).abs() + 2;
     final h2 = (cos(_runPhase * 2.5) * 4).abs() + 2;
     canvas.drawLine(
       Offset(center.dx - 1.5, center.dy - h1),
       Offset(center.dx - 1.5, center.dy + h1),
-      eqPaint,
+      _eqPaint,
     );
     canvas.drawLine(
       Offset(center.dx + 1.5, center.dy - h2),
       Offset(center.dx + 1.5, center.dy + h2),
-      eqPaint,
+      _eqPaint,
     );
   }
 
@@ -780,39 +825,37 @@ class Player extends Component {
     final stride = sin(_runPhase);
     final colors = _getHoodieColors();
 
-    final sleevePaint = Paint()
-      ..color = colors.first
-      ..style = PaintingStyle.fill;
-
-    final skinPaint = Paint()..color = const Color(0xFFFBBF24);
+    _sleevePaint.color = colors.first;
 
     final leftArmSwing = -stride * r * 0.22;
     final leftShoulder = Offset(-r * 0.50, -r * 0.28);
     final leftHand = Offset(-r * 0.62, r * 0.05 + leftArmSwing);
 
-    final leftArmPath = Path()
+    _leftArmPath
+      ..reset()
       ..moveTo(leftShoulder.dx, leftShoulder.dy)
       ..lineTo(leftShoulder.dx - 8, leftShoulder.dy + 6)
       ..lineTo(leftHand.dx, leftHand.dy)
       ..lineTo(leftHand.dx + 7, leftHand.dy + 2)
       ..lineTo(leftShoulder.dx + 4, leftShoulder.dy + 12)
       ..close();
-    canvas.drawPath(leftArmPath, sleevePaint);
-    canvas.drawCircle(leftHand, 4.0, skinPaint);
+    canvas.drawPath(_leftArmPath, _sleevePaint);
+    canvas.drawCircle(leftHand, 4.0, _skinPaint);
 
     final rightArmSwing = stride * r * 0.12;
     final rightShoulder = Offset(r * 0.50, -r * 0.28);
     final rightHand = Offset(r * 0.52, r * 0.02 + rightArmSwing);
 
-    final rightArmPath = Path()
+    _rightArmPath
+      ..reset()
       ..moveTo(rightShoulder.dx, rightShoulder.dy)
       ..lineTo(rightShoulder.dx + 8, rightShoulder.dy + 6)
       ..lineTo(rightHand.dx + 6, rightHand.dy)
       ..lineTo(rightHand.dx - 2, rightHand.dy + 6)
       ..lineTo(rightShoulder.dx - 4, rightShoulder.dy + 12)
       ..close();
-    canvas.drawPath(rightArmPath, sleevePaint);
-    canvas.drawCircle(rightHand, 4.0, skinPaint);
+    canvas.drawPath(_rightArmPath, _sleevePaint);
+    canvas.drawCircle(rightHand, 4.0, _skinPaint);
 
     _drawLaptop(canvas, Offset(rightHand.dx + 8, rightHand.dy - 6));
   }
@@ -826,27 +869,14 @@ class Player extends Component {
       const Rect.fromLTWH(-8, -12, 16, 12),
       const Radius.circular(2),
     );
-    final lidPaint = Paint()..color = const Color(0xFF1E293B);
-    canvas.drawRRect(lidRect, lidPaint);
+    canvas.drawRRect(lidRect, _lidPaint);
 
-    final stickerPaint = Paint()
-      ..color = const Color(0xFF00D4FF)
-      ..style = PaintingStyle.fill;
-    canvas.drawCircle(const Offset(0, -6), 2.5, stickerPaint);
-
-    final screenEdge = Paint()
-      ..color = const Color(0xFF00FF88)
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 1.5;
-    canvas.drawLine(const Offset(-7, 0), const Offset(7, 0), screenEdge);
+    canvas.drawCircle(const Offset(0, -6), 2.5, _stickerPaint);
+    canvas.drawLine(const Offset(-7, 0), const Offset(7, 0), _screenEdge);
 
     // Concentric screen glow (no blur)
-    final screenGlowOuter = Paint()
-      ..color = const Color(0xFF00FF88).withValues(alpha: 0.22);
-    canvas.drawCircle(const Offset(0, 0), 7, screenGlowOuter);
-    final screenGlowInner = Paint()
-      ..color = const Color(0xFF00FF88).withValues(alpha: 0.65);
-    canvas.drawCircle(const Offset(0, 0), 3.5, screenGlowInner);
+    canvas.drawCircle(const Offset(0, 0), 7, _screenGlowOuter);
+    canvas.drawCircle(const Offset(0, 0), 3.5, _screenGlowInner);
 
     canvas.restore();
   }

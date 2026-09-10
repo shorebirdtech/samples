@@ -10,5 +10,6 @@ export 'player.dart';
 export 'player_skin.dart';
 export 'shooting_star.dart';
 export 'sparkle.dart';
+export 'speed_warp_fx.dart';
 export 'star.dart';
 export 'starfield.dart';

@@ -44,14 +44,22 @@ class ShorebirdRunnerGame extends FlameGame
   double _patchTimer = 0;
   double _timePointTimer = 0;
   double _scoreBroadcastTimer = 0;
+  // Hot Reload Booster pacing: paced reliably every 11-14 patches (~once per tier milestone)
+  int _patchesSinceLastBooster = 0;
 
   // Components
   late final Player _player;
   late final Hud _hud;
   late final LaneWorld _laneWorld;
+  late final SpeedWarpFx _speedWarp;
   final List<Obstacle> _obstacles = [];
   final List<Patch> _patches = [];
   final _rng = Random();
+
+  // Reusable vignette paints
+  final Paint _crashFlashPaint = Paint();
+  final Paint _crashVignettePaint = Paint();
+  Rect? _lastVignetteRect;
 
   // Screen shake & crash flash
   double _screenShake = 0;
@@ -79,6 +87,9 @@ class ShorebirdRunnerGame extends FlameGame
     _laneWorld = LaneWorld();
     await world.add(_laneWorld);
 
+    _speedWarp = SpeedWarpFx();
+    await world.add(_speedWarp);
+
     _player = Player(currentLane: 1, skin: skin);
     await world.add(_player);
 
@@ -91,6 +102,7 @@ class ShorebirdRunnerGame extends FlameGame
   void onGameResize(Vector2 size) {
     super.onGameResize(size);
     GameConfig.updateDimensions(size.x, size.y);
+    _lastVignetteRect = null;
   }
 
   @override
@@ -105,12 +117,16 @@ class ShorebirdRunnerGame extends FlameGame
     _hud.elapsed = _elapsed;
     _hud.totalPatches = totalPatches;
     _laneWorld.totalPatches = totalPatches;
+    _laneWorld.isInvincible = _player.isInvincible;
+    _speedWarp.isHotReload = _player.isInvincible;
+    _speedWarp.speedMultiplier =
+        currentLevel.speedMultiplier * (_player.isInvincible ? 1.65 : 1.0);
 
-    // Survival points
-    _timePointTimer += safeDt;
+    // Survival points (boosted ticking and double points during invincibility)
+    _timePointTimer += safeDt * (_player.isInvincible ? 2.0 : 1.0);
     if (_timePointTimer >= GameConfig.timePointInterval) {
       _timePointTimer -= GameConfig.timePointInterval;
-      score += GameConfig.timePoints;
+      score += GameConfig.timePoints * (_player.isInvincible ? 2 : 1);
       _hud.score = score;
     }
 
@@ -121,8 +137,8 @@ class ShorebirdRunnerGame extends FlameGame
       onScoreUpdate?.call(score, totalPatches, currentLevel, !_isOver);
     }
 
-    // Spawn obstacles (guaranteeing at least 1 open lane)
-    _obstacleTimer += safeDt;
+    // Spawn obstacles (faster spawn to provide smash targets during invincibility)
+    _obstacleTimer += safeDt * (_player.isInvincible ? 1.5 : 1.0);
     final obstInterval = GameConfig.obstacleInterval(totalPatches);
     if (_obstacleTimer >= obstInterval) {
       _obstacleTimer = 0;
@@ -130,28 +146,31 @@ class ShorebirdRunnerGame extends FlameGame
     }
 
     // Spawn patches
-    _patchTimer += safeDt;
+    _patchTimer += safeDt * (_player.isInvincible ? 1.15 : 1.0);
     final patchInterval = GameConfig.patchInterval(totalPatches);
     if (_patchTimer >= patchInterval) {
       _patchTimer = 0;
       _spawnPatch();
     }
 
-    // Hot Reload Magnetic Pull on Collectibles
+    // Hot Reload Magnetic Pull on Collectibles (regular patches only; never pulls rare boosters)
     if (_player.isInvincible) {
-      for (final p in _patches) {
-        if (!p.isCollected && p.depth > 0.10) {
+      for (int i = 0; i < _patches.length; i++) {
+        final p = _patches[i];
+        if (!p.isCollected && !p.isHotReloadBooster && p.depth > 0.10) {
           p.attractTowards(_player.currentLane, safeDt);
         }
       }
     }
 
-    // Update obstacles
-    for (final o in List.of(_obstacles)) {
+    // Zero-allocation backwards loop for obstacles
+    for (int i = _obstacles.length - 1; i >= 0; i--) {
+      final o = _obstacles[i];
       o.totalPatches = totalPatches;
+      o.isInvincible = _player.isInvincible;
       if (o.isPastPlayer) {
         _clearedObstacles.remove(o);
-        _obstacles.remove(o);
+        _obstacles.removeAt(i);
         world.remove(o);
         continue;
       }
@@ -161,11 +180,13 @@ class ShorebirdRunnerGame extends FlameGame
       }
     }
 
-    // Update patches
-    for (final p in List.of(_patches)) {
+    // Zero-allocation backwards loop for patches
+    for (int i = _patches.length - 1; i >= 0; i--) {
+      final p = _patches[i];
       p.totalPatches = totalPatches;
+      p.isInvincible = _player.isInvincible;
       if (p.isDone || p.isPastPlayer) {
-        _patches.remove(p);
+        _patches.removeAt(i);
         world.remove(p);
         continue;
       }
@@ -196,26 +217,27 @@ class ShorebirdRunnerGame extends FlameGame
   void render(Canvas canvas) {
     super.render(canvas);
 
-    // Fullscreen Red Danger Flash & Vignette (covers entire canvas seamlessly)
+    // Fullscreen Red Danger Flash & Vignette (zero per-frame allocations)
     if (_crashFlash > 0) {
       final fullRect = Rect.fromLTWH(0, 0, size.x, size.y);
-      canvas.drawRect(
-        fullRect,
-        Paint()
-          ..color =
-              const Color(0xFFFF2A4B).withValues(alpha: _crashFlash * 0.45),
-      );
-      // Soft radial edge vignette
-      final vignettePaint = Paint()
-        ..shader = RadialGradient(
+      _crashFlashPaint.color =
+          const Color(0xFFFF2A4B).withValues(alpha: _crashFlash * 0.45);
+      canvas.drawRect(fullRect, _crashFlashPaint);
+
+      if (_lastVignetteRect != fullRect) {
+        _lastVignetteRect = fullRect;
+        _crashVignettePaint.shader = const RadialGradient(
           center: Alignment.center,
           radius: 0.85,
           colors: [
-            const Color(0x00000000),
-            const Color(0xFFFF1744).withValues(alpha: _crashFlash * 0.75),
+            Color(0x00000000),
+            Color(0xFFFF1744),
           ],
         ).createShader(fullRect);
-      canvas.drawRect(fullRect, vignettePaint);
+      }
+      _crashVignettePaint.color =
+          const Color(0xFFFFFFFF).withValues(alpha: _crashFlash * 0.75);
+      canvas.drawRect(fullRect, _crashVignettePaint);
     }
   }
 
@@ -232,9 +254,8 @@ class ShorebirdRunnerGame extends FlameGame
     world.add(obs1);
 
     if (spawnDouble) {
-      // Pick a second distinct lane - guarantees exactly 1 open lane to dodge into!
-      final otherLanes = [0, 1, 2]..remove(firstLane);
-      final secondLane = otherLanes[_rng.nextInt(otherLanes.length)];
+      // Pick a second distinct lane - guarantees exactly 1 open lane to dodge into (zero allocations)
+      final secondLane = (firstLane + 1 + _rng.nextInt(2)) % 3;
       final secondType =
           ObstacleType.values[_rng.nextInt(ObstacleType.values.length)];
 
@@ -247,8 +268,20 @@ class ShorebirdRunnerGame extends FlameGame
 
   void _spawnPatch() {
     final lane = _rng.nextInt(GameConfig.laneCount);
-    // 16% chance of spawning a glowing Hot Reload Booster patch
-    final isBooster = _rng.nextDouble() < 0.16;
+    _patchesSinceLastBooster++;
+
+    // Paced powerup delivery:
+    // - Never spawns during active Hot Reload (invincibility)
+    // - Requires at least 11 regular patches between boosters to prevent spam
+    // - Spawns reliably between patches 11-14 (~once per tier milestone)
+    final canSpawnBooster =
+        !_player.isInvincible && _patchesSinceLastBooster >= 11;
+    final isBooster = canSpawnBooster &&
+        (_patchesSinceLastBooster >= 14 || _rng.nextDouble() < 0.40);
+
+    if (isBooster) {
+      _patchesSinceLastBooster = 0;
+    }
 
     final patch = Patch(
       lane: lane,
@@ -288,7 +321,7 @@ class ShorebirdRunnerGame extends FlameGame
         _hud.score = score;
         AudioService.playStomp();
         _addFloatingText(
-          '🦘 LEAP! +150',
+          'LEAP! +150',
           o.worldPosition,
           const Color(0xFF00E5FF),
           size: 17,
@@ -305,7 +338,7 @@ class ShorebirdRunnerGame extends FlameGame
         _hud.score = score;
         AudioService.playSlide();
         _addFloatingText(
-          '⚡ SLIDE! +150',
+          'SLIDE! +150',
           o.worldPosition,
           const Color(0xFFFFD700),
           size: 17,
@@ -331,7 +364,7 @@ class ShorebirdRunnerGame extends FlameGame
     _screenShake = 0.8;
 
     _addFloatingText(
-      '💥 SQUASHED! +300',
+      'SQUASHED! +300',
       o.worldPosition,
       const Color(0xFF00FF88),
       size: 18,
@@ -353,25 +386,30 @@ class ShorebirdRunnerGame extends FlameGame
     final pos = p.worldPosition;
     totalPatches++;
     _combo++;
-    score += GameConfig.patchPoints;
+
+    final isBoosted = _player.isInvincible;
+    final regularPoints =
+        isBoosted ? GameConfig.patchPoints * 2 : GameConfig.patchPoints;
 
     if (p.isHotReloadBooster) {
-      _player
-          .triggerHotReload(6.0); // 6 seconds of invincible Hot Reload power!
+      // 4.5 seconds of high-octane invincibility
+      _player.triggerHotReload(4.5);
+      _patchesSinceLastBooster = 0;
       _hud.triggerComboFlash();
       _screenShake = 0.5;
+      score += 500;
       _addFloatingText(
-        '🔥 HOT RELOAD! +500',
+        'HOT RELOAD! +500',
         pos,
         const Color(0xFFFF9100),
         size: 20,
       );
-      score += 500;
     } else {
+      score += regularPoints;
       _addFloatingText(
-        '+${GameConfig.patchPoints} 🐤 PATCH!',
+        isBoosted ? '+$regularPoints (2X PATCH)' : '+$regularPoints PATCH',
         pos,
-        const Color(0xFFFFD700),
+        isBoosted ? const Color(0xFF00FFCC) : const Color(0xFFFFD700),
       );
     }
 
@@ -380,7 +418,7 @@ class ShorebirdRunnerGame extends FlameGame
       _hud.triggerComboFlash();
       AudioService.playCombo();
       _addFloatingText(
-        'COMBO ×$_combo! +${GameConfig.comboBonus}',
+        'COMBO x$_combo! +${GameConfig.comboBonus}',
         Offset(pos.dx, pos.dy - 30),
         const Color(GameConfig.colorAmber),
       );
@@ -406,7 +444,7 @@ class ShorebirdRunnerGame extends FlameGame
 
     AudioService.playMiss();
     _addFloatingText(
-      '-${GameConfig.missedPatchPenalty} 🐤 MISSED!',
+      '-${GameConfig.missedPatchPenalty} MISSED!',
       Offset(pos.dx, GameConfig.nearY - 20),
       const Color(0xFFFF2A4B),
       size: 18,
@@ -423,7 +461,7 @@ class ShorebirdRunnerGame extends FlameGame
     _screenShake = 1.0;
 
     _addFloatingText(
-      '${newLevel.emoji} ${newLevel.name} UNLOCKED! +${GameConfig.levelUpBonus}',
+      '${newLevel.name} UNLOCKED! +${GameConfig.levelUpBonus}',
       Offset(GameConfig.designWidth / 2, 260),
       Color(newLevel.accentColor),
       size: 24,
@@ -459,8 +497,8 @@ class ShorebirdRunnerGame extends FlameGame
     HighScoreService.save(score).then((_) async {
       highScore = await HighScoreService.load();
       await Future.delayed(const Duration(milliseconds: 650));
+      if (!isMounted) return;
       onGameOver(score, totalPatches, currentLevel);
-      overlays.add('game_over');
     });
   }
 
@@ -562,6 +600,7 @@ class ShorebirdRunnerGame extends FlameGame
   void moveToLane(int lane) => _player.moveToLane(lane);
   void moveLeft() => _player.moveLeft();
   void moveRight() => _player.moveRight();
+
   void jump() => _player.jump();
   void slide() => _player.slide();
   int get currentLane => _player.currentLane;
@@ -575,11 +614,11 @@ class ShorebirdRunnerGame extends FlameGame
 
     // Directly click on the desired lane to move player there
     if (tapX < size.x * 0.36) {
-      _player.moveToLane(0);
+      moveToLane(0);
     } else if (tapX > size.x * 0.64) {
-      _player.moveToLane(2);
+      moveToLane(2);
     } else {
-      _player.moveToLane(1);
+      moveToLane(1);
     }
   }
 }

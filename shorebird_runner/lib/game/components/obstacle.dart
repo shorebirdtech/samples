@@ -16,6 +16,7 @@ class Obstacle extends Component {
   final double _rotationPhase;
   bool isDead = false;
   int totalPatches = 0;
+  bool isInvincible = false;
 
   bool get isJumpable =>
       type == ObstacleType.wormBug || type == ObstacleType.mergeBarricade;
@@ -44,7 +45,8 @@ class Obstacle extends Component {
 
   @override
   void update(double dt) {
-    final speed = GameConfig.scrollSpeed(totalPatches);
+    final speed =
+        GameConfig.scrollSpeed(totalPatches, isInvincible: isInvincible);
     depth += dt * speed * 0.54;
   }
 
@@ -80,6 +82,202 @@ class Obstacle extends Component {
     }
   }
 
+  static final Paint _shadowOuterPaint = Paint();
+  static final Paint _shadowInnerPaint = Paint();
+
+  // App Store static assets
+  static const Rect _appBoxRect = Rect.fromLTWH(-50, -50, 100, 100);
+  static final RRect _appUnitRRect =
+      RRect.fromRectAndRadius(_appBoxRect, const Radius.circular(23));
+  static const Rect _appSheenRect = Rect.fromLTWH(-46, -43, 92, 42);
+  static final RRect _appSheenUnitRRect =
+      RRect.fromRectAndRadius(_appSheenRect, const Radius.circular(18));
+
+  static final Paint _appHaloOuterPaint = Paint();
+  static final Paint _appHaloInnerPaint = Paint();
+
+  static final Paint _appBgPaint = Paint()
+    ..shader = const LinearGradient(
+      begin: Alignment.topCenter,
+      end: Alignment.bottomCenter,
+      colors: [
+        Color(0xFF1E90FF),
+        Color(0xFF0071E3),
+        Color(0xFF0040DD),
+      ],
+      stops: [0.0, 0.55, 1.0],
+    ).createShader(_appBoxRect)
+    ..style = PaintingStyle.fill;
+
+  static final Paint _appSheenPaint = Paint()
+    ..shader = LinearGradient(
+      begin: Alignment.topCenter,
+      end: Alignment.bottomCenter,
+      colors: [
+        Colors.white.withValues(alpha: 0.35),
+        Colors.white.withValues(alpha: 0.0),
+      ],
+    ).createShader(_appSheenRect)
+    ..style = PaintingStyle.fill;
+
+  static final Paint _appBorderPaint = Paint()..style = PaintingStyle.stroke;
+  static final Paint _appAPaint = Paint()
+    ..color = Colors.white
+    ..strokeCap = StrokeCap.round
+    ..style = PaintingStyle.stroke;
+  static final Paint _appJointPaint = Paint()..color = const Color(0xFF0071E3);
+
+  // Play Store static assets
+  static final Paint _playHaloOuterPaint = Paint();
+  static final Paint _playHaloInnerPaint = Paint();
+
+  static final Path _playBluePath = Path()
+    ..moveTo(-42, -44)
+    ..lineTo(-42, 44)
+    ..lineTo(5, 0)
+    ..close();
+
+  static final Path _playGreenPath = Path()
+    ..moveTo(-42, -44)
+    ..lineTo(5, 0)
+    ..lineTo(46, 0)
+    ..close();
+
+  static final Path _playYellowPath = Path()
+    ..moveTo(46, 0)
+    ..lineTo(5, 0)
+    ..lineTo(-12, 32)
+    ..close();
+
+  static final Path _playRedPath = Path()
+    ..moveTo(-42, 44)
+    ..lineTo(5, 0)
+    ..lineTo(46, 0)
+    ..lineTo(-42, 44)
+    ..close();
+
+  static final Path _playOuterPath = Path()
+    ..moveTo(-42, -44)
+    ..lineTo(46, 0)
+    ..lineTo(-42, 44)
+    ..close();
+
+  static final Paint _playBluePaint = Paint()
+    ..shader = const LinearGradient(
+      colors: [Color(0xFF00C6FF), Color(0xFF0072FF)],
+      begin: Alignment.topLeft,
+      end: Alignment.bottomRight,
+    ).createShader(const Rect.fromLTWH(-42, -44, 47, 44))
+    ..style = PaintingStyle.fill;
+
+  static final Paint _playGreenPaint = Paint()
+    ..shader = const LinearGradient(
+      colors: [Color(0xFF00F5A0), Color(0xFF00D95A)],
+      begin: Alignment.topCenter,
+      end: Alignment.bottomRight,
+    ).createShader(const Rect.fromLTWH(-42, -44, 88, 44))
+    ..style = PaintingStyle.fill;
+
+  static final Paint _playYellowPaint = Paint()
+    ..shader = const LinearGradient(
+      colors: [Color(0xFFFFDD00), Color(0xFFFF9900)],
+      begin: Alignment.topRight,
+      end: Alignment.bottomCenter,
+    ).createShader(const Rect.fromLTWH(5, 0, 41, 32))
+    ..style = PaintingStyle.fill;
+
+  static final Paint _playRedPaint = Paint()
+    ..shader = const LinearGradient(
+      colors: [Color(0xFFFF4E50), Color(0xFFF9D423)],
+      begin: Alignment.bottomLeft,
+      end: Alignment.topRight,
+    ).createShader(const Rect.fromLTWH(-42, 0, 88, 44))
+    ..style = PaintingStyle.fill;
+
+  static final Paint _playBorderPaint = Paint()
+    ..color = Colors.white.withValues(alpha: 0.3)
+    ..style = PaintingStyle.stroke;
+
+  // Worm Bug static assets
+  static final Paint _wormHeadBodyPaint = Paint()
+    ..shader = const RadialGradient(
+      colors: [
+        Color(0xFF86EFAC),
+        Color(0xFF22C55E),
+        Color(0xFF052E16),
+      ],
+      center: Alignment(-0.25, -0.35),
+    ).createShader(const Rect.fromLTWH(-50, -50, 100, 100))
+    ..style = PaintingStyle.fill;
+
+  static final Paint _wormBodyPaint = Paint()
+    ..shader = const RadialGradient(
+      colors: [
+        Color(0xFF86EFAC),
+        Color(0xFF16A34A),
+        Color(0xFF052E16),
+      ],
+      center: Alignment(-0.25, -0.35),
+    ).createShader(const Rect.fromLTWH(-50, -50, 100, 100))
+    ..style = PaintingStyle.fill;
+
+  static final Paint _wormSpotPaint = Paint()
+    ..color = const Color(0xFFFACC15).withValues(alpha: 0.85);
+  static final Paint _wormFootPaint = Paint()..color = const Color(0xFF15803D);
+  static final Paint _wormAntennaPaint = Paint()
+    ..color = const Color(0xFF15803D)
+    ..strokeCap = StrokeCap.round
+    ..style = PaintingStyle.stroke;
+  static final Paint _wormAntennaTipPaint = Paint()
+    ..color = const Color(0xFFFF4E50);
+  static final Paint _wormWhitePaint = Paint()..color = Colors.white;
+  static final Paint _wormBlackPaint = Paint()..color = Colors.black;
+  static final Paint _wormBlushPaint = Paint()
+    ..color = const Color(0xFFFF69B4).withValues(alpha: 0.6);
+  static final Paint _wormMouthPaint = Paint()
+    ..color = const Color(0xFF052E16)
+    ..strokeCap = StrokeCap.round
+    ..style = PaintingStyle.stroke;
+
+  static final Path _reusableLeftAntenna = Path();
+  static final Path _reusableRightAntenna = Path();
+  static final Path _reusableMouth = Path();
+
+  // Merge Barricade static assets
+  static final Paint _barricadeLegPaint = Paint()
+    ..color = const Color(0xFF334155)
+    ..style = PaintingStyle.stroke;
+  static final Paint _barricadeRailPaint = Paint()
+    ..color = const Color(0xFFFFB300);
+  static final Paint _barricadeStripePaint = Paint()
+    ..color = const Color(0xFF1E293B)
+    ..style = PaintingStyle.stroke;
+  static final Paint _beaconGlowPaint = Paint();
+  static final Paint _beaconCorePaint = Paint();
+
+  // Review Gate static assets
+  static final Paint _gatePostPaint = Paint()
+    ..color = const Color(0xFF1E293B)
+    ..strokeCap = StrokeCap.round
+    ..style = PaintingStyle.stroke;
+  static final Paint _gateNeonLinePaint = Paint()
+    ..color = const Color(0xFF00E5FF).withValues(alpha: 0.8)
+    ..style = PaintingStyle.stroke;
+  static final Paint _gateCrossbarBgPaint = Paint()
+    ..color = const Color(0xFF0F172A);
+  static final Paint _gateCrossbarBorderPaint = Paint()
+    ..color = const Color(0xFFFFC107).withValues(alpha: 0.7)
+    ..style = PaintingStyle.stroke;
+  static final Paint _gateLaserGlowPaint = Paint()
+    ..strokeCap = StrokeCap.round
+    ..style = PaintingStyle.stroke;
+  static final Paint _gateLaserCorePaint = Paint()
+    ..strokeCap = StrokeCap.round
+    ..style = PaintingStyle.stroke;
+  static final Paint _gateLaserFilamentPaint = Paint()
+    ..strokeCap = StrokeCap.round
+    ..style = PaintingStyle.stroke;
+
   // ── 🍎 Apple App Store Logo Obstacle ───────────────────────────────────────
   void _drawAppStore(Canvas canvas, Offset pos, double scale, double size) {
     final hoverBob = sin(_wobblePhase + depth * 6) * 4 * scale;
@@ -87,21 +285,25 @@ class Obstacle extends Component {
 
     // Dual-concentric ground shadow (zero blur, butter smooth)
     final shadowCenter = Offset(pos.dx, pos.dy + 8 * scale);
+    _shadowOuterPaint.color =
+        const Color(0xFF001133).withValues(alpha: 0.25 * scale);
     canvas.drawOval(
       Rect.fromCenter(
         center: shadowCenter,
         width: size * 1.25,
         height: 16 * scale,
       ),
-      Paint()..color = const Color(0xFF001133).withValues(alpha: 0.25 * scale),
+      _shadowOuterPaint,
     );
+    _shadowInnerPaint.color =
+        const Color(0xFF001133).withValues(alpha: 0.55 * scale);
     canvas.drawOval(
       Rect.fromCenter(
         center: shadowCenter,
         width: size * 0.92,
         height: 10 * scale,
       ),
-      Paint()..color = const Color(0xFF001133).withValues(alpha: 0.55 * scale),
+      _shadowInnerPaint,
     );
 
     canvas.save();
@@ -110,101 +312,81 @@ class Obstacle extends Component {
 
     final boxW = size * 0.96;
     final boxH = size * 0.96;
-    final boxRect =
-        Rect.fromCenter(center: Offset.zero, width: boxW, height: boxH);
-    final cornerRadius = Radius.circular(boxW * 0.23);
-    final rrect = RRect.fromRectAndRadius(boxRect, cornerRadius);
 
     // Neon Blue Stepped Ambient Halo (replaces MaskFilter.blur)
-    canvas.drawRRect(
-      rrect.inflate(8 * scale),
-      Paint()..color = const Color(0xFF0A84FF).withValues(alpha: 0.15 * scale),
+    _appHaloOuterPaint.color =
+        const Color(0xFF0A84FF).withValues(alpha: 0.15 * scale);
+    final haloOuterRect = Rect.fromCenter(
+      center: Offset.zero,
+      width: boxW + 16 * scale,
+      height: boxH + 16 * scale,
     );
     canvas.drawRRect(
-      rrect.inflate(3 * scale),
-      Paint()..color = const Color(0xFF0A84FF).withValues(alpha: 0.35 * scale),
+      RRect.fromRectAndRadius(
+        haloOuterRect,
+        Radius.circular(boxW * 0.23 + 8 * scale),
+      ),
+      _appHaloOuterPaint,
     );
 
-    // App Store Signature Blue Gradient
-    final bgPaint = Paint()
-      ..shader = const LinearGradient(
-        begin: Alignment.topCenter,
-        end: Alignment.bottomCenter,
-        colors: [
-          Color(0xFF1E90FF),
-          Color(0xFF0071E3),
-          Color(0xFF0040DD),
-        ],
-        stops: [0.0, 0.55, 1.0],
-      ).createShader(boxRect)
-      ..style = PaintingStyle.fill;
-    canvas.drawRRect(rrect, bgPaint);
-
-    // Subtle Glass Top Sheen
-    final sheenRect = Rect.fromCenter(
-      center: Offset(0, -boxH * 0.22),
-      width: boxW * 0.92,
-      height: boxH * 0.42,
+    _appHaloInnerPaint.color =
+        const Color(0xFF0A84FF).withValues(alpha: 0.35 * scale);
+    final haloInnerRect = Rect.fromCenter(
+      center: Offset.zero,
+      width: boxW + 6 * scale,
+      height: boxH + 6 * scale,
     );
-    final sheenPaint = Paint()
-      ..shader = LinearGradient(
-        begin: Alignment.topCenter,
-        end: Alignment.bottomCenter,
-        colors: [
-          Colors.white.withValues(alpha: 0.35),
-          Colors.white.withValues(alpha: 0.0),
-        ],
-      ).createShader(sheenRect)
-      ..style = PaintingStyle.fill;
     canvas.drawRRect(
-      RRect.fromRectAndRadius(sheenRect, Radius.circular(boxW * 0.18)),
-      sheenPaint,
+      RRect.fromRectAndRadius(
+        haloInnerRect,
+        Radius.circular(boxW * 0.23 + 3 * scale),
+      ),
+      _appHaloInnerPaint,
     );
+
+    // App Store Signature Blue Gradient (rendered via unit scale)
+    canvas.save();
+    canvas.scale(boxW / 100, boxH / 100);
+    canvas.drawRRect(_appUnitRRect, _appBgPaint);
+    canvas.drawRRect(_appSheenUnitRRect, _appSheenPaint);
 
     // Outer Crisp Border
-    final borderPaint = Paint()
+    _appBorderPaint
       ..color = const Color(0xFF80BFFF).withValues(alpha: 0.65)
-      ..strokeWidth = 2.0 * scale
-      ..style = PaintingStyle.stroke;
-    canvas.drawRRect(rrect, borderPaint);
+      ..strokeWidth = (2.0 * scale) * (100 / boxW);
+    canvas.drawRRect(_appUnitRRect, _appBorderPaint);
 
     // Apple App Store "A" Logo (Pencil, Ruler, Brush bars)
-    final aStrokeW = boxW * 0.11;
-    final aPaint = Paint()
-      ..color = Colors.white
-      ..strokeWidth = aStrokeW
-      ..strokeCap = StrokeCap.round
-      ..style = PaintingStyle.stroke;
-
-    final topPeakY = -boxH * 0.26;
-    final bottomY = boxH * 0.26;
-    final legLeftX = -boxW * 0.26;
-    final legRightX = boxW * 0.26;
-    final crossY = boxH * 0.06;
+    const aStrokeW = 11.0;
+    _appAPaint.strokeWidth = aStrokeW;
 
     canvas.drawLine(
-      Offset(-boxW * 0.03, topPeakY),
-      Offset(legLeftX, bottomY),
-      aPaint,
+      const Offset(-3.0, -26.0),
+      const Offset(-26.0, 26.0),
+      _appAPaint,
     );
     canvas.drawLine(
-      Offset(boxW * 0.03, topPeakY),
-      Offset(legRightX, bottomY),
-      aPaint,
+      const Offset(3.0, -26.0),
+      const Offset(26.0, 26.0),
+      _appAPaint,
     );
     canvas.drawLine(
-      Offset(-boxW * 0.28, crossY),
-      Offset(boxW * 0.28, crossY),
-      aPaint,
+      const Offset(-28.0, 6.0),
+      const Offset(28.0, 6.0),
+      _appAPaint,
     );
 
-    final jointPaint = Paint()..color = const Color(0xFF0071E3);
     canvas.drawCircle(
-      Offset(-boxW * 0.14, crossY),
+      const Offset(-14.0, 6.0),
       aStrokeW * 0.22,
-      jointPaint,
+      _appJointPaint,
     );
-    canvas.drawCircle(Offset(boxW * 0.14, crossY), aStrokeW * 0.22, jointPaint);
+    canvas.drawCircle(
+      const Offset(14.0, 6.0),
+      aStrokeW * 0.22,
+      _appJointPaint,
+    );
+    canvas.restore();
 
     canvas.restore();
   }
@@ -216,122 +398,63 @@ class Obstacle extends Component {
 
     // Dual-concentric ground shadow
     final shadowCenter = Offset(pos.dx, pos.dy + 8 * scale);
+    _shadowOuterPaint.color =
+        const Color(0xFF000000).withValues(alpha: 0.25 * scale);
     canvas.drawOval(
       Rect.fromCenter(
         center: shadowCenter,
         width: size * 1.25,
         height: 16 * scale,
       ),
-      Paint()..color = const Color(0xFF000000).withValues(alpha: 0.25 * scale),
+      _shadowOuterPaint,
     );
+    _shadowInnerPaint.color =
+        const Color(0xFF000000).withValues(alpha: 0.55 * scale);
     canvas.drawOval(
       Rect.fromCenter(
         center: shadowCenter,
         width: size * 0.92,
         height: 10 * scale,
       ),
-      Paint()..color = const Color(0xFF000000).withValues(alpha: 0.55 * scale),
+      _shadowInnerPaint,
     );
 
     canvas.save();
     canvas.translate(pos.dx, centerY);
 
     // Multi-hue stepped halo (replaces blur)
+    _playHaloOuterPaint.color =
+        const Color(0xFF00E676).withValues(alpha: 0.15 * scale);
     canvas.drawCircle(
       Offset.zero,
       size * 0.62,
-      Paint()..color = const Color(0xFF00E676).withValues(alpha: 0.15 * scale),
+      _playHaloOuterPaint,
     );
+    _playHaloInnerPaint.color =
+        const Color(0xFF00E676).withValues(alpha: 0.32 * scale);
     canvas.drawCircle(
       Offset.zero,
       size * 0.52,
-      Paint()..color = const Color(0xFF00E676).withValues(alpha: 0.32 * scale),
+      _playHaloInnerPaint,
     );
 
     final w = size * 0.92;
     final h = size * 0.98;
 
-    final pTopLeft = Offset(-w * 0.42, -h * 0.44);
-    final pBottomLeft = Offset(-w * 0.42, h * 0.44);
-    final pRightTip = Offset(w * 0.46, 0);
-    final pCenter = Offset(w * 0.05, 0);
+    // 4 Facets drawn using static unit paths and pre-baked shaders
+    canvas.save();
+    canvas.scale(w / 100, h / 100);
 
-    // 1. Blue Facet (Top-Left)
-    final bluePath = Path()
-      ..moveTo(pTopLeft.dx, pTopLeft.dy)
-      ..lineTo(pBottomLeft.dx, pBottomLeft.dy)
-      ..lineTo(pCenter.dx, pCenter.dy)
-      ..close();
-    final bluePaint = Paint()
-      ..shader = const LinearGradient(
-        colors: [Color(0xFF00C6FF), Color(0xFF0072FF)],
-        begin: Alignment.topLeft,
-        end: Alignment.bottomRight,
-      ).createShader(Rect.fromPoints(pTopLeft, pCenter))
-      ..style = PaintingStyle.fill;
-    canvas.drawPath(bluePath, bluePaint);
+    canvas.drawPath(_playBluePath, _playBluePaint);
+    canvas.drawPath(_playGreenPath, _playGreenPaint);
+    canvas.drawPath(_playYellowPath, _playYellowPaint);
+    canvas.drawPath(_playRedPath, _playRedPaint);
+    canvas.drawPath(_playBluePath, _playBluePaint);
 
-    // 2. Green Facet (Top-Right)
-    final greenPath = Path()
-      ..moveTo(pTopLeft.dx, pTopLeft.dy)
-      ..lineTo(pCenter.dx, pCenter.dy)
-      ..lineTo(pRightTip.dx, pRightTip.dy)
-      ..close();
-    final greenPaint = Paint()
-      ..shader = const LinearGradient(
-        colors: [Color(0xFF00F5A0), Color(0xFF00D95A)],
-        begin: Alignment.topCenter,
-        end: Alignment.bottomRight,
-      ).createShader(Rect.fromPoints(pTopLeft, pRightTip))
-      ..style = PaintingStyle.fill;
-    canvas.drawPath(greenPath, greenPaint);
+    _playBorderPaint.strokeWidth = (1.5 * scale) * (100 / w);
+    canvas.drawPath(_playOuterPath, _playBorderPaint);
 
-    // 3. Yellow Facet (Bottom-Right)
-    final yellowPath = Path()
-      ..moveTo(pRightTip.dx, pRightTip.dy)
-      ..lineTo(pCenter.dx, pCenter.dy)
-      ..lineTo(pBottomLeft.dx + w * 0.3, h * 0.32)
-      ..close();
-    final yellowPaint = Paint()
-      ..shader = const LinearGradient(
-        colors: [Color(0xFFFFDD00), Color(0xFFFF9900)],
-        begin: Alignment.topRight,
-        end: Alignment.bottomCenter,
-      ).createShader(Rect.fromPoints(pCenter, pRightTip))
-      ..style = PaintingStyle.fill;
-    canvas.drawPath(yellowPath, yellowPaint);
-
-    // 4. Red Facet (Bottom-Left)
-    final redPath = Path()
-      ..moveTo(pBottomLeft.dx, pBottomLeft.dy)
-      ..lineTo(pCenter.dx, pCenter.dy)
-      ..lineTo(pRightTip.dx, pRightTip.dy)
-      ..lineTo(pBottomLeft.dx, pBottomLeft.dy)
-      ..close();
-    final redPaint = Paint()
-      ..shader = const LinearGradient(
-        colors: [Color(0xFFFF4E50), Color(0xFFF9D423)],
-        begin: Alignment.bottomLeft,
-        end: Alignment.topRight,
-      ).createShader(Rect.fromPoints(pBottomLeft, pRightTip))
-      ..style = PaintingStyle.fill;
-    canvas.drawPath(redPath, redPaint);
-
-    canvas.drawPath(bluePath, bluePaint);
-
-    // Outer Crisp Edge
-    final outerPath = Path()
-      ..moveTo(pTopLeft.dx, pTopLeft.dy)
-      ..lineTo(pRightTip.dx, pRightTip.dy)
-      ..lineTo(pBottomLeft.dx, pBottomLeft.dy)
-      ..close();
-    canvas.drawPath(
-      outerPath,
-      Paint()
-        ..color = Colors.white.withValues(alpha: 0.3)
-        ..strokeWidth = 1.5 * scale
-        ..style = PaintingStyle.stroke,
-    );
+    canvas.restore();
 
     canvas.restore();
   }
@@ -343,21 +466,25 @@ class Obstacle extends Component {
 
     // Dual-concentric ground shadow
     final shadowCenter = Offset(pos.dx, pos.dy + 4 * scale);
+    _shadowOuterPaint.color =
+        const Color(0xFF000000).withValues(alpha: 0.22 * scale);
     canvas.drawOval(
       Rect.fromCenter(
         center: shadowCenter,
         width: size * 1.3,
         height: 14 * scale,
       ),
-      Paint()..color = const Color(0xFF000000).withValues(alpha: 0.22 * scale),
+      _shadowOuterPaint,
     );
+    _shadowInnerPaint.color =
+        const Color(0xFF000000).withValues(alpha: 0.52 * scale);
     canvas.drawOval(
       Rect.fromCenter(
         center: shadowCenter,
         width: size * 0.95,
         height: 8 * scale,
       ),
-      Paint()..color = const Color(0xFF000000).withValues(alpha: 0.52 * scale),
+      _shadowInnerPaint,
     );
 
     const segmentCount = 5;
@@ -376,51 +503,40 @@ class Obstacle extends Component {
           ? segmentRadius * 1.25
           : segmentRadius * (0.85 + (1.0 - t) * 0.25);
 
-      final segRect =
-          Rect.fromCircle(center: Offset(segX, segY), radius: radius);
-
-      final bodyPaint = Paint()
-        ..shader = RadialGradient(
-          colors: [
-            const Color(0xFF86EFAC),
-            isHead ? const Color(0xFF22C55E) : const Color(0xFF16A34A),
-            const Color(0xFF052E16),
-          ],
-          center: const Alignment(-0.25, -0.35),
-        ).createShader(segRect)
-        ..style = PaintingStyle.fill;
-      canvas.drawCircle(Offset(segX, segY), radius, bodyPaint);
+      canvas.save();
+      canvas.translate(segX, segY);
+      canvas.scale(radius / 50, radius / 50);
+      canvas.drawCircle(
+        Offset.zero,
+        50,
+        isHead ? _wormHeadBodyPaint : _wormBodyPaint,
+      );
+      canvas.restore();
 
       if (!isHead) {
-        final spotPaint = Paint()
-          ..color = const Color(0xFFFACC15).withValues(alpha: 0.85);
         canvas.drawCircle(
           Offset(segX, segY - radius * 0.45),
           radius * 0.28,
-          spotPaint,
+          _wormSpotPaint,
         );
 
-        final footPaint = Paint()..color = const Color(0xFF15803D);
         canvas.drawCircle(
           Offset(segX - radius * 0.35, segY + radius * 0.9),
           radius * 0.22,
-          footPaint,
+          _wormFootPaint,
         );
         canvas.drawCircle(
           Offset(segX + radius * 0.35, segY + radius * 0.9),
           radius * 0.22,
-          footPaint,
+          _wormFootPaint,
         );
       }
 
       if (isHead) {
-        final antennaPaint = Paint()
-          ..color = const Color(0xFF15803D)
-          ..strokeWidth = 2.5 * scale
-          ..strokeCap = StrokeCap.round
-          ..style = PaintingStyle.stroke;
+        _wormAntennaPaint.strokeWidth = 2.5 * scale;
 
-        final leftAntenna = Path()
+        _reusableLeftAntenna
+          ..reset()
           ..moveTo(segX - radius * 0.35, segY - radius * 0.7)
           ..quadraticBezierTo(
             segX - radius * 0.8,
@@ -428,14 +544,15 @@ class Obstacle extends Component {
             segX - radius * 0.6,
             segY - radius * 1.8,
           );
-        canvas.drawPath(leftAntenna, antennaPaint);
+        canvas.drawPath(_reusableLeftAntenna, _wormAntennaPaint);
         canvas.drawCircle(
           Offset(segX - radius * 0.6, segY - radius * 1.8),
           radius * 0.22,
-          Paint()..color = const Color(0xFFFF4E50),
+          _wormAntennaTipPaint,
         );
 
-        final rightAntenna = Path()
+        _reusableRightAntenna
+          ..reset()
           ..moveTo(segX + radius * 0.35, segY - radius * 0.7)
           ..quadraticBezierTo(
             segX + radius * 0.8,
@@ -443,34 +560,30 @@ class Obstacle extends Component {
             segX + radius * 0.6,
             segY - radius * 1.8,
           );
-        canvas.drawPath(rightAntenna, antennaPaint);
+        canvas.drawPath(_reusableRightAntenna, _wormAntennaPaint);
         canvas.drawCircle(
           Offset(segX + radius * 0.6, segY - radius * 1.8),
           radius * 0.22,
-          Paint()..color = const Color(0xFFFF4E50),
+          _wormAntennaTipPaint,
         );
 
         final eyeRadius = radius * 0.32;
         final leftEyePos = Offset(segX - radius * 0.36, segY - radius * 0.15);
         final rightEyePos = Offset(segX + radius * 0.36, segY - radius * 0.15);
 
-        canvas.drawCircle(leftEyePos, eyeRadius, Paint()..color = Colors.white);
-        canvas.drawCircle(
-          rightEyePos,
-          eyeRadius,
-          Paint()..color = Colors.white,
-        );
+        canvas.drawCircle(leftEyePos, eyeRadius, _wormWhitePaint);
+        canvas.drawCircle(rightEyePos, eyeRadius, _wormWhitePaint);
 
         final pupilRadius = eyeRadius * 0.55;
         canvas.drawCircle(
           Offset(leftEyePos.dx, leftEyePos.dy + eyeRadius * 0.1),
           pupilRadius,
-          Paint()..color = Colors.black,
+          _wormBlackPaint,
         );
         canvas.drawCircle(
           Offset(rightEyePos.dx, rightEyePos.dy + eyeRadius * 0.1),
           pupilRadius,
-          Paint()..color = Colors.black,
+          _wormBlackPaint,
         );
 
         canvas.drawCircle(
@@ -479,7 +592,7 @@ class Obstacle extends Component {
             leftEyePos.dy - pupilRadius * 0.3,
           ),
           pupilRadius * 0.35,
-          Paint()..color = Colors.white,
+          _wormWhitePaint,
         );
         canvas.drawCircle(
           Offset(
@@ -487,28 +600,23 @@ class Obstacle extends Component {
             rightEyePos.dy - pupilRadius * 0.3,
           ),
           pupilRadius * 0.35,
-          Paint()..color = Colors.white,
+          _wormWhitePaint,
         );
 
-        final blushPaint = Paint()
-          ..color = const Color(0xFFFF69B4).withValues(alpha: 0.6);
         canvas.drawCircle(
           Offset(segX - radius * 0.55, segY + radius * 0.25),
           radius * 0.22,
-          blushPaint,
+          _wormBlushPaint,
         );
         canvas.drawCircle(
           Offset(segX + radius * 0.55, segY + radius * 0.25),
           radius * 0.22,
-          blushPaint,
+          _wormBlushPaint,
         );
 
-        final mouthPaint = Paint()
-          ..color = const Color(0xFF052E16)
-          ..strokeWidth = 2.0 * scale
-          ..strokeCap = StrokeCap.round
-          ..style = PaintingStyle.stroke;
-        final mouthPath = Path()
+        _wormMouthPaint.strokeWidth = 2.0 * scale;
+        _reusableMouth
+          ..reset()
           ..moveTo(segX - radius * 0.22, segY + radius * 0.35)
           ..quadraticBezierTo(
             segX,
@@ -516,7 +624,7 @@ class Obstacle extends Component {
             segX + radius * 0.22,
             segY + radius * 0.35,
           );
-        canvas.drawPath(mouthPath, mouthPaint);
+        canvas.drawPath(_reusableMouth, _wormMouthPaint);
       }
     }
   }
@@ -533,29 +641,28 @@ class Obstacle extends Component {
     final groundY = pos.dy;
 
     // Ground shadow
+    _shadowOuterPaint.color =
+        const Color(0xFF000000).withValues(alpha: 0.45 * scale);
     canvas.drawOval(
       Rect.fromCenter(
         center: Offset(pos.dx, groundY + 4 * scale),
         width: barW * 1.1,
         height: 12 * scale,
       ),
-      Paint()..color = const Color(0xFF000000).withValues(alpha: 0.45 * scale),
+      _shadowOuterPaint,
     );
 
     // Stanchion Legs
-    final legPaint = Paint()
-      ..color = const Color(0xFF334155)
-      ..strokeWidth = 4.0 * scale
-      ..style = PaintingStyle.stroke;
+    _barricadeLegPaint.strokeWidth = 4.0 * scale;
     canvas.drawLine(
       Offset(pos.dx - barW * 0.38, groundY),
       Offset(pos.dx - barW * 0.38, groundY - barH),
-      legPaint,
+      _barricadeLegPaint,
     );
     canvas.drawLine(
       Offset(pos.dx + barW * 0.38, groundY),
       Offset(pos.dx + barW * 0.38, groundY - barH),
-      legPaint,
+      _barricadeLegPaint,
     );
 
     // Barricade Rail with Hazard Diagonal Stripes
@@ -567,20 +674,17 @@ class Obstacle extends Component {
     final railRRect =
         RRect.fromRectAndRadius(railRect, Radius.circular(4 * scale));
 
-    canvas.drawRRect(railRRect, Paint()..color = const Color(0xFFFFB300));
+    canvas.drawRRect(railRRect, _barricadeRailPaint);
 
     // Black chevron stripes
     canvas.save();
     canvas.clipRRect(railRRect);
-    final stripePaint = Paint()
-      ..color = const Color(0xFF1E293B)
-      ..strokeWidth = 8.0 * scale
-      ..style = PaintingStyle.stroke;
+    _barricadeStripePaint.strokeWidth = 8.0 * scale;
     for (double x = -barW; x <= barW * 2; x += 18 * scale) {
       canvas.drawLine(
         Offset(railRect.left + x, railRect.bottom + 5 * scale),
         Offset(railRect.left + x + 16 * scale, railRect.top - 5 * scale),
-        stripePaint,
+        _barricadeStripePaint,
       );
     }
     canvas.restore();
@@ -596,18 +700,20 @@ class Obstacle extends Component {
           Offset(pos.dx + xSign * (barW * 0.38), groundY - barH - 4 * scale);
 
       if (strobeFlash) {
+        _beaconGlowPaint.color =
+            const Color(0xFFFFD54F).withValues(alpha: 0.25 * scale);
         canvas.drawCircle(
           beaconPos,
           10 * scale,
-          Paint()
-            ..color = const Color(0xFFFFD54F).withValues(alpha: 0.25 * scale),
+          _beaconGlowPaint,
         );
       }
 
+      _beaconCorePaint.color = strobeColor;
       canvas.drawCircle(
         beaconPos,
         5 * scale,
-        Paint()..color = strobeColor,
+        _beaconCorePaint,
       );
     }
   }
@@ -619,13 +725,15 @@ class Obstacle extends Component {
     final groundY = pos.dy;
 
     // Ground shadow beneath posts
+    _shadowOuterPaint.color =
+        const Color(0xFF000000).withValues(alpha: 0.35 * scale);
     canvas.drawOval(
       Rect.fromCenter(
         center: Offset(pos.dx, groundY + 4 * scale),
         width: gateW * 1.05,
         height: 10 * scale,
       ),
-      Paint()..color = const Color(0xFF000000).withValues(alpha: 0.35 * scale),
+      _shadowOuterPaint,
     );
 
     final leftPostX = pos.dx - gateW * 0.45;
@@ -633,36 +741,29 @@ class Obstacle extends Component {
     final topY = groundY - gateH;
 
     // Cybernetic Vertical Pylons
-    final postPaint = Paint()
-      ..color = const Color(0xFF1E293B)
-      ..strokeWidth = 6.0 * scale
-      ..strokeCap = StrokeCap.round
-      ..style = PaintingStyle.stroke;
+    _gatePostPaint.strokeWidth = 6.0 * scale;
     canvas.drawLine(
       Offset(leftPostX, groundY),
       Offset(leftPostX, topY),
-      postPaint,
+      _gatePostPaint,
     );
     canvas.drawLine(
       Offset(rightPostX, groundY),
       Offset(rightPostX, topY),
-      postPaint,
+      _gatePostPaint,
     );
 
     // Cyan accent lines on pylons
-    final neonLinePaint = Paint()
-      ..color = const Color(0xFF00E5FF).withValues(alpha: 0.8)
-      ..strokeWidth = 2.0 * scale
-      ..style = PaintingStyle.stroke;
+    _gateNeonLinePaint.strokeWidth = 2.0 * scale;
     canvas.drawLine(
       Offset(leftPostX, groundY),
       Offset(leftPostX, topY),
-      neonLinePaint,
+      _gateNeonLinePaint,
     );
     canvas.drawLine(
       Offset(rightPostX, groundY),
       Offset(rightPostX, topY),
-      neonLinePaint,
+      _gateNeonLinePaint,
     );
 
     // Top Crossbar
@@ -673,13 +774,12 @@ class Obstacle extends Component {
     );
     final crossbarRRect =
         RRect.fromRectAndRadius(crossbarRect, Radius.circular(4 * scale));
-    canvas.drawRRect(crossbarRRect, Paint()..color = const Color(0xFF0F172A));
+    canvas.drawRRect(crossbarRRect, _gateCrossbarBgPaint);
+
+    _gateCrossbarBorderPaint.strokeWidth = 1.5 * scale;
     canvas.drawRRect(
       crossbarRRect,
-      Paint()
-        ..color = const Color(0xFFFFC107).withValues(alpha: 0.7)
-        ..strokeWidth = 1.5 * scale
-        ..style = PaintingStyle.stroke,
+      _gateCrossbarBorderPaint,
     );
 
     // "UNDER REVIEW" pre-cached text banner
@@ -693,42 +793,41 @@ class Obstacle extends Component {
     canvas.restore();
 
     // High Security Laser Beams (positioned from 55% to 85% height off the ground)
-    // Low slide clears cleanly below!
     final laserPulse = (sin(_wobblePhase + depth * 18) * 0.5 + 0.5);
     final laserY1 = topY + 22 * scale;
     final laserY2 = topY + 36 * scale;
+
+    _gateLaserGlowPaint
+      ..color =
+          const Color(0xFFFF1744).withValues(alpha: 0.25 * laserPulse * scale)
+      ..strokeWidth = 8.0 * scale;
+
+    _gateLaserCorePaint
+      ..color = const Color(0xFFFF5252).withValues(alpha: 0.95 * scale)
+      ..strokeWidth = 3.0 * scale;
+
+    _gateLaserFilamentPaint
+      ..color = Colors.white.withValues(alpha: 0.85 * scale)
+      ..strokeWidth = 1.2 * scale;
 
     for (final ly in [laserY1, laserY2]) {
       // Stepped soft outer glow
       canvas.drawLine(
         Offset(leftPostX, ly),
         Offset(rightPostX, ly),
-        Paint()
-          ..color = const Color(0xFFFF1744)
-              .withValues(alpha: 0.25 * laserPulse * scale)
-          ..strokeWidth = 8.0 * scale
-          ..strokeCap = StrokeCap.round
-          ..style = PaintingStyle.stroke,
+        _gateLaserGlowPaint,
       );
       // Bright laser core
       canvas.drawLine(
         Offset(leftPostX, ly),
         Offset(rightPostX, ly),
-        Paint()
-          ..color = const Color(0xFFFF5252).withValues(alpha: 0.95 * scale)
-          ..strokeWidth = 3.0 * scale
-          ..strokeCap = StrokeCap.round
-          ..style = PaintingStyle.stroke,
+        _gateLaserCorePaint,
       );
       // White hot filament
       canvas.drawLine(
         Offset(leftPostX, ly),
         Offset(rightPostX, ly),
-        Paint()
-          ..color = Colors.white.withValues(alpha: 0.85 * scale)
-          ..strokeWidth = 1.2 * scale
-          ..strokeCap = StrokeCap.round
-          ..style = PaintingStyle.stroke,
+        _gateLaserFilamentPaint,
       );
     }
   }
