@@ -25,6 +25,7 @@ class Patch extends Component {
   double _spinPhase;
   double _pulsePhase;
   int totalPatches = 0;
+  bool isInvincible = false;
   final Random _rng;
 
   final void Function(Offset pos)? onMissed;
@@ -81,7 +82,8 @@ class Patch extends Component {
   @override
   void update(double dt) {
     if (!isCollected) {
-      final speed = GameConfig.scrollSpeed(totalPatches);
+      final speed =
+          GameConfig.scrollSpeed(totalPatches, isInvincible: isInvincible);
       final forwardBoost = isBeingMagnetized ? 1.18 : 1.0;
       depth += dt * speed * 0.54 * forwardBoost;
       _spinPhase += dt * (isHotReloadBooster ? 4.8 : 3.6);

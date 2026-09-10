@@ -16,6 +16,7 @@ class Obstacle extends Component {
   final double _rotationPhase;
   bool isDead = false;
   int totalPatches = 0;
+  bool isInvincible = false;
 
   bool get isJumpable =>
       type == ObstacleType.wormBug || type == ObstacleType.mergeBarricade;
@@ -44,7 +45,8 @@ class Obstacle extends Component {
 
   @override
   void update(double dt) {
-    final speed = GameConfig.scrollSpeed(totalPatches);
+    final speed =
+        GameConfig.scrollSpeed(totalPatches, isInvincible: isInvincible);
     depth += dt * speed * 0.54;
   }
 

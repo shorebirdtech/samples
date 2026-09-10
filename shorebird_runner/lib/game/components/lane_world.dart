@@ -9,6 +9,7 @@ import 'package:shorebird_runner/game/utils/utils.dart';
 /// Optimized for steady 120 FPS with pre-baked window geometry and cached text.
 class LaneWorld extends Component {
   int totalPatches = 0;
+  bool isInvincible = false;
   double _scroll = 0;
 
   Offset get _nearLeft => Offset(
@@ -353,7 +354,8 @@ class LaneWorld extends Component {
 
   @override
   void update(double dt) {
-    final speed = GameConfig.scrollSpeed(totalPatches);
+    final speed =
+        GameConfig.scrollSpeed(totalPatches, isInvincible: isInvincible);
     _scroll = (_scroll + dt * speed * 0.45) % 1.0;
     _searchlightAngle += dt * 0.85;
 
