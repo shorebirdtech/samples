@@ -18,7 +18,8 @@ class EventConfigDialog extends StatefulWidget {
       transitionDuration: const Duration(milliseconds: 250),
       pageBuilder: (context, _, __) => const EventConfigDialog(),
       transitionBuilder: (context, anim1, anim2, child) {
-        final curved = CurvedAnimation(parent: anim1, curve: Curves.easeOutCubic);
+        final curved =
+            CurvedAnimation(parent: anim1, curve: Curves.easeOutCubic);
         return ScaleTransition(
           scale: Tween<double>(begin: 0.9, end: 1.0).animate(curved),
           child: FadeTransition(
