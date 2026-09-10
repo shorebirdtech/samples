@@ -293,8 +293,8 @@ class Player extends Component {
 
     _runPhase += dt * 14.0;
 
-    // Cyber ghosting echo trail tracking
-    if (_laneProgress < 1.0 || isInvincible) {
+    // Cyber ghosting echo trail tracking (only during Hot Reload overdrive)
+    if (isInvincible) {
       _ghostPositions.insert(0, worldPosition);
       if (_ghostPositions.length > 3) _ghostPositions.removeLast();
     } else if (_ghostPositions.isNotEmpty) {

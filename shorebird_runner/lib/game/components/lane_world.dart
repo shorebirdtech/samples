@@ -111,19 +111,6 @@ class LaneWorld extends Component {
   final List<Paint> _refPaints =
       List.generate(5, (_) => Paint()..style = PaintingStyle.fill);
 
-  final List<double> _lanePulses = [0.0, 0.0, 0.0];
-  final Path _lanePulsePath = Path();
-  final Paint _lanePulsePaint = Paint()..style = PaintingStyle.fill;
-  final Paint _lanePulseBorderPaint = Paint()
-    ..style = PaintingStyle.stroke
-    ..strokeWidth = 2.0;
-
-  void triggerLanePulse(int lane) {
-    if (lane >= 0 && lane < 3) {
-      _lanePulses[lane] = 1.0;
-    }
-  }
-
   @override
   Future<void> onLoad() async {
     _initStaticGeometry();
@@ -375,12 +362,6 @@ class LaneWorld extends Component {
     _scroll = (_scroll + dt * speed * 0.45) % 1.0;
     _searchlightAngle += dt * 0.85;
 
-    for (int i = 0; i < 3; i++) {
-      if (_lanePulses[i] > 0) {
-        _lanePulses[i] = (_lanePulses[i] - dt * 3.5).clamp(0.0, 1.0);
-      }
-    }
-
     final targetLevel = GameConfig.levelFor(totalPatches);
     final targetAccent = Color(targetLevel.accentColor);
     final targetRoad = Color(targetLevel.roadColor);
@@ -403,36 +384,8 @@ class LaneWorld extends Component {
     _drawSubwayRails(canvas);
     _drawLaneDividers(canvas);
     _drawGuardRails(canvas);
-    _drawLanePulses(canvas);
     _draw3DPylons(canvas);
     _drawPlanGantry(canvas);
-  }
-
-  void _drawLanePulses(Canvas canvas) {
-    for (int l = 0; l < 3; l++) {
-      final pulse = _lanePulses[l];
-      if (pulse <= 0.01) continue;
-
-      final pNearL = _lerpRoadPoint(l / 3.0, 0.98);
-      final pNearR = _lerpRoadPoint((l + 1.0) / 3.0, 0.98);
-      final pFarR = _lerpRoadPoint((l + 1.0) / 3.0, 0.62);
-      final pFarL = _lerpRoadPoint(l / 3.0, 0.62);
-
-      _lanePulsePath
-        ..reset()
-        ..moveTo(pNearL.dx, pNearL.dy)
-        ..lineTo(pNearR.dx, pNearR.dy)
-        ..lineTo(pFarR.dx, pFarR.dy)
-        ..lineTo(pFarL.dx, pFarL.dy)
-        ..close();
-
-      _lanePulsePaint.color = _curAccentColor.withValues(alpha: pulse * 0.32);
-      canvas.drawPath(_lanePulsePath, _lanePulsePaint);
-
-      _lanePulseBorderPaint.color =
-          const Color(0xFFFFFFFF).withValues(alpha: pulse * 0.75);
-      canvas.drawPath(_lanePulsePath, _lanePulseBorderPaint);
-    }
   }
 
   void _drawCinematicCityscape(Canvas canvas) {

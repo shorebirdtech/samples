@@ -191,9 +191,6 @@ class ShorebirdRunnerGame extends FlameGame
       }
     }
 
-    // Dynamic Camera Banking (leans smoothly into turns)
-    camera.viewfinder.angle = -_player.rollAngle * 0.14;
-
     // Screen shake
     if (_screenShake > 0) {
       _screenShake = (_screenShake - safeDt * 3.5).clamp(0, 10);
@@ -578,20 +575,9 @@ class ShorebirdRunnerGame extends FlameGame
     }
   }
 
-  void moveToLane(int lane) {
-    _player.moveToLane(lane);
-    _laneWorld.triggerLanePulse(lane);
-  }
-
-  void moveLeft() {
-    _player.moveLeft();
-    _laneWorld.triggerLanePulse(_player.currentLane);
-  }
-
-  void moveRight() {
-    _player.moveRight();
-    _laneWorld.triggerLanePulse(_player.currentLane);
-  }
+  void moveToLane(int lane) => _player.moveToLane(lane);
+  void moveLeft() => _player.moveLeft();
+  void moveRight() => _player.moveRight();
 
   void jump() => _player.jump();
   void slide() => _player.slide();
