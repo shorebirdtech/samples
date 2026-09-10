@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shorebird_runner/core/core.dart';
 import 'package:shorebird_runner/features/lead_capture/models/lead_model.dart';
+import 'package:shorebird_runner/features/leaderboard/leaderboard.dart';
 import 'package:shorebird_runner/features/solo_runner/bloc/solo_runner_bloc.dart';
 import 'package:shorebird_runner/features/solo_runner/widgets/widgets.dart';
 import 'package:shorebird_runner/game/game.dart';
@@ -43,6 +44,20 @@ class _SoloRunnerScreenState extends State<SoloRunnerScreen> {
         context.read<SoloRunnerBloc>().add(
               SoloGameOver(score: score, patches: patches, level: level),
             );
+
+        if (score > 0) {
+          final lead = widget.lead;
+          final entry = LeaderboardEntryModel(
+            playerName:
+                lead?.name.isNotEmpty == true ? lead!.name : 'Anonymous Runner',
+            score: score,
+            patches: patches,
+            organization: lead?.organization ?? '',
+            event: lead?.event ?? '',
+            createdAt: DateTime.now(),
+          );
+          context.read<LeaderboardBloc>().add(RecordScore(entry));
+        }
       },
     );
   }

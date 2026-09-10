@@ -312,21 +312,23 @@ class _LeadCaptureDialogState extends State<LeadCaptureDialog> {
 
                               const SizedBox(height: 16),
 
-                              // Field 3: Phone
+                              // Field 3: Phone (Optional)
                               _buildField(
                                 controller: _phoneController,
-                                label: 'CONTACT NUMBER',
+                                label: 'CONTACT NUMBER (OPTIONAL)',
                                 hint: 'e.g. +1 (555) 019-2834',
                                 icon: Icons.phone_outlined,
                                 keyboardType: TextInputType.phone,
                                 validator: (val) {
-                                  if (val == null ||
-                                      val
-                                              .trim()
-                                              .replaceAll(RegExp(r'[^0-9]'), '')
-                                              .length <
-                                          6) {
-                                    return 'Please enter a valid phone number';
+                                  if (val == null || val.trim().isEmpty) {
+                                    return null;
+                                  }
+                                  if (val
+                                          .trim()
+                                          .replaceAll(RegExp(r'[^0-9]'), '')
+                                          .length <
+                                      6) {
+                                    return 'Please enter a valid phone number or leave blank';
                                   }
                                   return null;
                                 },

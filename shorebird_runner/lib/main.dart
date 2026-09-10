@@ -4,6 +4,7 @@ import 'package:shorebird_runner/core/core.dart';
 import 'package:shorebird_runner/features/app_shell/bloc/app_shell_bloc.dart';
 import 'package:shorebird_runner/features/app_shell/screens/app_shell_screen.dart';
 import 'package:shorebird_runner/features/lead_capture/lead_capture.dart';
+import 'package:shorebird_runner/features/leaderboard/leaderboard.dart';
 import 'package:shorebird_runner/features/solo_runner/bloc/solo_runner_bloc.dart';
 import 'package:shorebird_runner/features/start_menu/bloc/start_menu_bloc.dart';
 
@@ -25,11 +26,15 @@ class PatchRushApp extends StatelessWidget {
         RepositoryProvider<ILeadRepository>(
           create: (_) => SupabaseLeadRepository(),
         ),
+        RepositoryProvider<ILeaderboardRepository>(
+          create: (_) => SupabaseLeaderboardRepository(),
+        ),
       ],
       child: Builder(
         builder: (context) {
           final highScoreRepo = context.read<IHighScoreRepository>();
           final leadRepo = context.read<ILeadRepository>();
+          final leaderboardRepo = context.read<ILeaderboardRepository>();
 
           return MultiBlocProvider(
             providers: [
@@ -45,6 +50,9 @@ class PatchRushApp extends StatelessWidget {
               ),
               BlocProvider<StartMenuBloc>(
                 create: (_) => StartMenuBloc(),
+              ),
+              BlocProvider<LeaderboardBloc>(
+                create: (_) => LeaderboardBloc(repository: leaderboardRepo),
               ),
             ],
             child: MaterialApp(

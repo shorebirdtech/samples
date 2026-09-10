@@ -151,5 +151,37 @@ void main() {
         ),
       );
     });
+
+    test('validates and submits successfully when phone number is omitted',
+        () async {
+      bloc.add(const LeadNameChanged('Katherine Johnson'));
+      bloc.add(const LeadEmailChanged('katherine@nasa.gov'));
+      // Phone left empty
+      bloc.add(const LeadPhoneChanged(''));
+      bloc.add(const LeadOrgChanged('NASA'));
+
+      await expectLater(
+        bloc.stream,
+        emitsThrough(
+          predicate<LeadCaptureState>(
+            (state) => state.isValid && state.phone.isEmpty,
+          ),
+        ),
+      );
+
+      bloc.add(const LeadSubmitted());
+
+      await expectLater(
+        bloc.stream,
+        emitsThrough(
+          predicate<LeadCaptureState>(
+            (state) =>
+                state.status == LeadSubmissionStatus.success &&
+                state.submittedLead?.name == 'Katherine Johnson' &&
+                state.submittedLead?.phone == '',
+          ),
+        ),
+      );
+    });
   });
 }
