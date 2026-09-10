@@ -1,17 +1,20 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shorebird_runner/core/constants/constants.dart';
+import 'package:shorebird_runner/features/lead_capture/bloc/bloc.dart';
+import 'package:shorebird_runner/features/lead_capture/models/lead_model.dart';
+import 'package:shorebird_runner/features/lead_capture/widgets/widgets.dart';
 import 'package:shorebird_runner/features/start_menu/widgets/widgets.dart';
 
-/// Full Shorebird-branded start screen with cinematic parallax background,
-/// golden bird logo, animated title, and glassmorphic mode selection cards.
+/// Full Shorebird-branded start screen with obsidian theme,
+/// signature Shorebird golden emblem, stages roadmap, and "Start Patching" lead capture.
+/// Includes a secret 3-tap trigger on the Shorebird Logo to configure the active event.
 class StartScreen extends StatefulWidget {
-  final VoidCallback onStartSolo;
-  final VoidCallback onOpenLobby;
+  final void Function(LeadModel lead) onStartPatching;
 
   const StartScreen({
     super.key,
-    required this.onStartSolo,
-    required this.onOpenLobby,
+    required this.onStartPatching,
   });
 
   @override
@@ -28,6 +31,9 @@ class _StartScreenState extends State<StartScreen>
   late Animation<double> _float;
   late Animation<double> _fade;
 
+  int _logoTapCount = 0;
+  DateTime? _lastLogoTap;
+
   @override
   void initState() {
     super.initState();
@@ -41,7 +47,7 @@ class _StartScreenState extends State<StartScreen>
       vsync: this,
       duration: const Duration(milliseconds: 1800),
     )..repeat(reverse: true);
-    _pulse = Tween<double>(begin: 0.92, end: 1.0).animate(
+    _pulse = Tween<double>(begin: 0.94, end: 1.0).animate(
       CurvedAnimation(parent: _pulseCtrl, curve: Curves.easeInOut),
     );
 
@@ -49,7 +55,7 @@ class _StartScreenState extends State<StartScreen>
       vsync: this,
       duration: const Duration(milliseconds: 3000),
     )..repeat(reverse: true);
-    _float = Tween<double>(begin: -8, end: 8).animate(
+    _float = Tween<double>(begin: -5, end: 5).animate(
       CurvedAnimation(parent: _floatCtrl, curve: Curves.easeInOut),
     );
 
@@ -69,6 +75,30 @@ class _StartScreenState extends State<StartScreen>
     super.dispose();
   }
 
+  void _onStartPressed() {
+    LeadCaptureDialog.show(
+      context,
+      onStartGame: widget.onStartPatching,
+    );
+  }
+
+  /// Secret Easter Egg: Tapping the Shorebird logo 3 times opens the booth event configuration dialog.
+  void _onLogoTapped() {
+    final now = DateTime.now();
+    if (_lastLogoTap == null ||
+        now.difference(_lastLogoTap!) > const Duration(milliseconds: 1200)) {
+      _logoTapCount = 1;
+    } else {
+      _logoTapCount++;
+    }
+    _lastLogoTap = now;
+
+    if (_logoTapCount >= 3) {
+      _logoTapCount = 0;
+      EventConfigDialog.show(context);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
@@ -76,7 +106,7 @@ class _StartScreenState extends State<StartScreen>
       backgroundColor: AppColors.backgroundDark,
       body: Stack(
         children: [
-          // === ANIMATED BACKGROUND ===
+          // === ANIMATED AMBIENT BACKGROUND ===
           AnimatedBuilder(
             animation: _bgCtrl,
             builder: (_, __) => CustomPaint(
@@ -90,156 +120,228 @@ class _StartScreenState extends State<StartScreen>
             opacity: _fade,
             child: SafeArea(
               child: Center(
-                child: SingleChildScrollView(
-                  padding: const EdgeInsets.symmetric(vertical: 24),
-                  child: ConstrainedBox(
-                    constraints: const BoxConstraints(maxWidth: 680),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        // Animated Shorebird Logo
-                        AnimatedBuilder(
-                          animation: _floatCtrl,
-                          builder: (_, __) => Transform.translate(
-                            offset: Offset(0, _float.value),
-                            child: const ShorebirdLogo(),
+                child: ScrollConfiguration(
+                  behavior: ScrollConfiguration.of(context)
+                      .copyWith(scrollbars: false),
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.symmetric(
+                      vertical: 12,
+                      horizontal: 16,
+                    ),
+                    child: ConstrainedBox(
+                      constraints: const BoxConstraints(maxWidth: 640),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          // Animated Shorebird Logo (with 3-tap secret trigger)
+                          AnimatedBuilder(
+                            animation: _floatCtrl,
+                            builder: (_, __) => Transform.translate(
+                              offset: Offset(0, _float.value),
+                              child: Tooltip(
+                                message: '',
+                                child: GestureDetector(
+                                  behavior: HitTestBehavior.opaque,
+                                  onTap: _onLogoTapped,
+                                  child: const ShorebirdLogo(),
+                                ),
+                              ),
+                            ),
                           ),
-                        ),
 
-                        const SizedBox(height: 28),
+                          const SizedBox(height: 16),
 
-                        // PATCH RUSH title
-                        ShaderMask(
-                          shaderCallback: (bounds) => const LinearGradient(
-                            colors: [
-                              AppColors.shorebirdGold,
-                              AppColors.goldPale,
-                              AppColors.shorebirdGold,
-                            ],
-                            stops: [0.0, 0.5, 1.0],
-                          ).createShader(bounds),
-                          child: const Text(
-                            'PATCH RUSH',
+                          // PATCH RUSH title
+                          ShaderMask(
+                            shaderCallback: (bounds) => const LinearGradient(
+                              colors: [
+                                AppColors.shorebirdGold,
+                                AppColors.goldPale,
+                                AppColors.shorebirdGold,
+                              ],
+                              stops: [0.0, 0.5, 1.0],
+                            ).createShader(bounds),
+                            child: const Text(
+                              'PATCH RUSH',
+                              style: TextStyle(
+                                fontSize: 48,
+                                fontWeight: FontWeight.w900,
+                                color: Colors.white,
+                                letterSpacing: 10,
+                                height: 1.0,
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
+                          ),
+
+                          const SizedBox(height: 4),
+
+                          // Subtitle
+                          const Text(
+                            'BY SHOREBIRD',
                             style: TextStyle(
-                              fontSize: 54,
-                              fontWeight: FontWeight.w900,
-                              color: Colors.white,
-                              letterSpacing: 10,
-                              height: 1.0,
-                            ),
-                            textAlign: TextAlign.center,
-                          ),
-                        ),
-
-                        const SizedBox(height: 6),
-
-                        // Subtitle
-                        const Text(
-                          'BY SHOREBIRD',
-                          style: TextStyle(
-                            color: AppColors.slateMuted,
-                            fontSize: 12,
-                            fontWeight: FontWeight.w700,
-                            letterSpacing: 6,
-                          ),
-                        ),
-
-                        const SizedBox(height: 14),
-
-                        // Tagline
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 16,
-                            vertical: 8,
-                          ),
-                          decoration: BoxDecoration(
-                            color:
-                                AppColors.shorebirdGold.withValues(alpha: 0.08),
-                            borderRadius: BorderRadius.circular(24),
-                            border: Border.all(
-                              color: AppColors.shorebirdGold
-                                  .withValues(alpha: 0.2),
+                              color: AppColors.slateMuted,
+                              fontSize: 11,
+                              fontWeight: FontWeight.w700,
+                              letterSpacing: 6,
                             ),
                           ),
-                          child: const Text(
-                            'Run as a Developer · Collect 🐤 Patches · Dodge App Store Delays',
-                            textAlign: TextAlign.center,
-                            style: TextStyle(
-                              color: AppColors.slateSubtle,
-                              fontSize: 13,
-                              letterSpacing: 0.8,
-                              fontWeight: FontWeight.w500,
+
+                          // Active Event Pill (visible only when event is configured)
+                          BlocBuilder<LeadCaptureBloc, LeadCaptureState>(
+                            buildWhen: (prev, cur) => prev.event != cur.event,
+                            builder: (context, state) {
+                              if (state.event.isEmpty) {
+                                return const SizedBox.shrink();
+                              }
+                              return Padding(
+                                padding: const EdgeInsets.only(top: 6),
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 12,
+                                    vertical: 3,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: AppColors.shorebirdGold
+                                        .withValues(alpha: 0.12),
+                                    borderRadius: BorderRadius.circular(16),
+                                    border: Border.all(
+                                      color: AppColors.shorebirdGold
+                                          .withValues(alpha: 0.35),
+                                    ),
+                                  ),
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      const Icon(
+                                        Icons.location_on_rounded,
+                                        size: 12,
+                                        color: AppColors.shorebirdGold,
+                                      ),
+                                      const SizedBox(width: 4),
+                                      Text(
+                                        state.event.toUpperCase(),
+                                        style: const TextStyle(
+                                          color: AppColors.shorebirdGold,
+                                          fontSize: 10,
+                                          fontWeight: FontWeight.w800,
+                                          letterSpacing: 1.2,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              );
+                            },
+                          ),
+
+                          const SizedBox(height: 10),
+
+                          // Refined Developer Pill
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 16,
+                              vertical: 6,
+                            ),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFF111827),
+                              borderRadius: BorderRadius.circular(24),
+                              border: Border.all(
+                                color: AppColors.shorebirdGold
+                                    .withValues(alpha: 0.25),
+                              ),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: AppColors.shorebirdGold
+                                      .withValues(alpha: 0.05),
+                                  blurRadius: 16,
+                                ),
+                              ],
+                            ),
+                            child: const Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(
+                                  Icons.bolt_rounded,
+                                  color: AppColors.shorebirdGold,
+                                  size: 15,
+                                ),
+                                SizedBox(width: 6),
+                                Text(
+                                  'Code Push Arcade · Dodge App Store Delays · Deploy Instantly',
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(
+                                    color: AppColors.slateSubtle,
+                                    fontSize: 11.5,
+                                    letterSpacing: 0.5,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
-                        ),
 
-                        const SizedBox(height: 28),
+                          const SizedBox(height: 18),
 
-                        // Stage Progression roadmap
-                        const StagesRoadmap(),
+                          // Stage Progression roadmap
+                          const StagesRoadmap(),
 
-                        const SizedBox(height: 28),
+                          const SizedBox(height: 18),
 
-                        // Mode selection buttons
-                        Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 24),
-                          child: Column(
-                            children: [
-                              // Primary CTA
-                              AnimatedBuilder(
-                                animation: _pulseCtrl,
-                                builder: (_, __) => Transform.scale(
-                                  scale: _pulse.value,
-                                  child: StartMenuPrimaryButton(
-                                    icon: '▶',
-                                    title: 'SOLO RUN',
-                                    subtitle: '1 PLAYER · CAMPAIGN MODE',
-                                    onTap: () => showGameRulesDialog(
-                                      context,
-                                      onStart: widget.onStartSolo,
+                          // Action Buttons
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 24),
+                            child: Column(
+                              children: [
+                                // Primary "START PATCHING" CTA
+                                AnimatedBuilder(
+                                  animation: _pulseCtrl,
+                                  builder: (_, __) => Transform.scale(
+                                    scale: _pulse.value,
+                                    child: StartMenuPrimaryButton(
+                                      icon: '⚡',
+                                      title: 'START PATCHING',
+                                      subtitle:
+                                          'SOLO RUNNER · INSTANT OTA FIXES',
+                                      onTap: _onStartPressed,
                                     ),
                                   ),
                                 ),
-                              ),
-                              const SizedBox(height: 12),
-                              // Secondary buttons row
-                              Row(
-                                children: [
-                                  Expanded(
-                                    child: StartMenuSecondaryButton(
-                                      icon: '🌐',
-                                      title: 'MULTIPLAYER',
-                                      subtitle: 'LOBBY · COMPETE',
-                                      color: AppColors.lightCyan,
-                                      onTap: widget.onOpenLobby,
+
+                                const SizedBox(height: 10),
+
+                                // Secondary actions row
+                                Row(
+                                  children: [
+                                    Expanded(
+                                      child: StartMenuSecondaryButton(
+                                        icon: '📖',
+                                        title: 'HOW TO PLAY',
+                                        subtitle: 'RULES · TIERS · CONTROLS',
+                                        color: AppColors.shorebirdGold,
+                                        onTap: () => showGameRulesDialog(
+                                          context,
+                                          onStart: _onStartPressed,
+                                        ),
+                                      ),
                                     ),
-                                  ),
-                                  const SizedBox(width: 12),
-                                  Expanded(
-                                    child: StartMenuSecondaryButton(
-                                      icon: '📜',
-                                      title: 'HOW TO PLAY',
-                                      subtitle: 'RULES · CONTROLS',
-                                      color: AppColors.lightGreen,
-                                      onTap: () => showGameRulesDialog(context),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ],
+                                  ],
+                                ),
+                              ],
+                            ),
                           ),
-                        ),
 
-                        const SizedBox(height: 24),
+                          const SizedBox(height: 16),
 
-                        // Controls hint
-                        const ControlsHint(),
+                          // Controls hint
+                          const ControlsHint(),
 
-                        const SizedBox(height: 24),
+                          const SizedBox(height: 14),
 
-                        // Shorebird footer
-                        const ShorebirdFooter(),
-                      ],
+                          // Shorebird footer
+                          const ShorebirdFooter(),
+                        ],
+                      ),
                     ),
                   ),
                 ),

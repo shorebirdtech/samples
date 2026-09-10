@@ -149,7 +149,11 @@
             "cwd": "shorebird_runner",
             "request": "launch",
             "type": "dart",
-            "deviceId": "chrome"
+            "deviceId": "chrome",
+            "args": [
+                "--dart-define=SUPABASE_URL=https://tvubyhaaprglwtbvrscl.supabase.co",
+                "--dart-define=SUPABASE_ANON_KEY=sb_publishable_k3iCVJjY8Mq849vmWlXMCg_xp2QQeFL"
+            ]
         },
         {
             "name": "🎮 Patch Rush (profile mode)",
@@ -157,7 +161,11 @@
             "request": "launch",
             "type": "dart",
             "deviceId": "chrome",
-            "flutterMode": "profile"
+            "flutterMode": "profile",
+            "args": [
+                "--dart-define=SUPABASE_URL=https://tvubyhaaprglwtbvrscl.supabase.co",
+                "--dart-define=SUPABASE_ANON_KEY=sb_publishable_k3iCVJjY8Mq849vmWlXMCg_xp2QQeFL"
+            ]
         },
         {
             "name": "🎮 Patch Rush (release mode)",
@@ -165,7 +173,11 @@
             "request": "launch",
             "type": "dart",
             "deviceId": "chrome",
-            "flutterMode": "release"
+            "flutterMode": "release",
+            "args": [
+                "--dart-define=SUPABASE_URL=https://tvubyhaaprglwtbvrscl.supabase.co",
+                "--dart-define=SUPABASE_ANON_KEY=sb_publishable_k3iCVJjY8Mq849vmWlXMCg_xp2QQeFL"
+            ]
         }
     ]
 }

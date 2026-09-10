@@ -1,6 +1,6 @@
 import 'package:equatable/equatable.dart';
 import 'package:shorebird_runner/features/app_shell/bloc/app_mode.dart';
-import 'package:shorebird_runner/features/tournament_lobby/models/models.dart';
+import 'package:shorebird_runner/features/lead_capture/models/lead_model.dart';
 
 abstract class AppShellEvent extends Equatable {
   const AppShellEvent();
@@ -11,14 +11,10 @@ abstract class AppShellEvent extends Equatable {
 
 class NavigateToMode extends AppShellEvent {
   final AppMode mode;
-  final List<RacerStanding>? podiumRankings;
+  final LeadModel? lead;
 
-  const NavigateToMode(this.mode, {this.podiumRankings});
+  const NavigateToMode(this.mode, {this.lead});
 
   @override
-  List<Object?> get props => [mode, podiumRankings];
-}
-
-class AppRematchTriggered extends AppShellEvent {
-  const AppRematchTriggered();
+  List<Object?> get props => [mode, lead];
 }

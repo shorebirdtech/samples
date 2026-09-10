@@ -1,6 +1,6 @@
 [build]
   publish = "build/web"
-  command = "flutter build web --release"
+  command = "./build.sh"
 
 [[headers]]
   for = "/*"

@@ -2,17 +2,20 @@ import 'package:flame/game.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shorebird_runner/core/core.dart';
+import 'package:shorebird_runner/features/lead_capture/models/lead_model.dart';
 import 'package:shorebird_runner/features/solo_runner/bloc/solo_runner_bloc.dart';
 import 'package:shorebird_runner/features/solo_runner/widgets/widgets.dart';
 import 'package:shorebird_runner/game/game.dart';
 
 class SoloRunnerScreen extends StatefulWidget {
   final PlayerSkin skin;
+  final LeadModel? lead;
   final VoidCallback onBackToMenu;
 
   const SoloRunnerScreen({
     super.key,
     this.skin = PlayerSkin.blueBird,
+    this.lead,
     required this.onBackToMenu,
   });
 
@@ -34,6 +37,7 @@ class _SoloRunnerScreenState extends State<SoloRunnerScreen> {
     _game = ShorebirdRunnerGame(
       controlScheme: ControlScheme.both,
       skin: widget.skin,
+      playerTag: widget.lead?.playerTag,
       onGameOver: (score, patches, level) {
         if (!mounted) return;
         context.read<SoloRunnerBloc>().add(

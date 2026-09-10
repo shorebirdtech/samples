@@ -1,15 +1,11 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shorebird_runner/core/core.dart';
 import 'package:shorebird_runner/features/app_shell/bloc/app_shell_bloc.dart';
 import 'package:shorebird_runner/features/app_shell/screens/app_shell_screen.dart';
-import 'package:shorebird_runner/features/booth_battle/bloc/booth_battle_bloc.dart';
-import 'package:shorebird_runner/features/multiplayer_race/bloc/race_bloc.dart';
+import 'package:shorebird_runner/features/lead_capture/lead_capture.dart';
 import 'package:shorebird_runner/features/solo_runner/bloc/solo_runner_bloc.dart';
 import 'package:shorebird_runner/features/start_menu/bloc/start_menu_bloc.dart';
-import 'package:shorebird_runner/features/tournament_lobby/bloc/lobby_bloc.dart';
-import 'package:shorebird_runner/features/tournament_lobby/data/data.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -23,39 +19,29 @@ class PatchRushApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiRepositoryProvider(
       providers: [
-        RepositoryProvider<ILobbyRepository>(
-          create: (_) => WebSocketLobbyRepository(),
-        ),
         RepositoryProvider<IHighScoreRepository>(
           create: (_) => const HighScoreRepository(),
+        ),
+        RepositoryProvider<ILeadRepository>(
+          create: (_) => SupabaseLeadRepository(),
         ),
       ],
       child: Builder(
         builder: (context) {
-          final lobbyRepo = context.read<ILobbyRepository>();
           final highScoreRepo = context.read<IHighScoreRepository>();
-
-          final hasInvite =
-              kIsWeb && Uri.base.queryParameters.containsKey('room');
-          final initialMode = hasInvite ? AppMode.lobby : AppMode.menu;
+          final leadRepo = context.read<ILeadRepository>();
 
           return MultiBlocProvider(
             providers: [
               BlocProvider<AppShellBloc>(
-                create: (_) => AppShellBloc(initialMode: initialMode),
+                create: (_) => AppShellBloc(initialMode: AppMode.menu),
               ),
-              BlocProvider<LobbyBloc>(
-                create: (_) => LobbyBloc(lobbyRepository: lobbyRepo),
-              ),
-              BlocProvider<RaceBloc>(
-                create: (_) => RaceBloc(lobbyRepository: lobbyRepo),
+              BlocProvider<LeadCaptureBloc>(
+                create: (_) => LeadCaptureBloc(leadRepository: leadRepo),
               ),
               BlocProvider<SoloRunnerBloc>(
                 create: (_) =>
                     SoloRunnerBloc(highScoreRepository: highScoreRepo),
-              ),
-              BlocProvider<BoothBattleBloc>(
-                create: (_) => BoothBattleBloc(),
               ),
               BlocProvider<StartMenuBloc>(
                 create: (_) => StartMenuBloc(),

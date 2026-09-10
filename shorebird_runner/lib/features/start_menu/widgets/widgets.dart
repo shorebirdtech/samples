@@ -1,5 +1,6 @@
 export 'control_row.dart';
 export 'controls_hint.dart';
+export 'event_config_dialog.dart';
 export 'game_rules_dialog.dart';
 export 'particle_data.dart';
 export 'plan_chip.dart';

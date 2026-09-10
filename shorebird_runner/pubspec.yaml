@@ -15,8 +15,8 @@ dependencies:
 
   # High score persistence (localStorage on web)
   shared_preferences: ^2.3.2
-  web_socket_channel: ^3.0.3
-  qr_flutter: ^4.1.0
+  # Networking (Supabase REST API for OSS lead capture)
+  http: ^1.2.2
 
   # Architecture & State Management
   flutter_bloc: ^9.1.1
