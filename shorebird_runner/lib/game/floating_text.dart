@@ -20,6 +20,8 @@ class FloatingText extends Component {
     _updateTextPainter();
   }
 
+  int _lastAlphaStep = -1;
+
   void _updateTextPainter() {
     final currentAlpha = life.clamp(0.0, 1.0);
     _textPainter.text = TextSpan(
@@ -52,7 +54,11 @@ class FloatingText extends Component {
     if (life <= 0) {
       removeFromParent();
     } else {
-      _updateTextPainter();
+      final step = (life * 8).floor();
+      if (step != _lastAlphaStep) {
+        _lastAlphaStep = step;
+        _updateTextPainter();
+      }
     }
   }
 

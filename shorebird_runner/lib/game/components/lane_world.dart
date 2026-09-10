@@ -717,34 +717,22 @@ class LaneWorld extends Component {
     );
 
     _postPaint
-      ..shader = LinearGradient(
-        begin: Alignment.bottomCenter,
-        end: Alignment.topCenter,
-        colors: [
-          const Color(0xFF0A192F).withValues(alpha: alpha),
-          _curAccentColor.withValues(alpha: alpha),
-        ],
-      ).createShader(Rect.fromPoints(base, top))
+      ..shader = null
+      ..color = Color.lerp(const Color(0xFF0A192F), _curAccentColor, 0.45)!
+          .withValues(alpha: alpha)
       ..strokeWidth = width * 0.6;
     canvas.drawLine(base, top, _postPaint);
 
-    // Multi-ring concentric beacon glow (replaces expensive blur pass)
+    // Multi-ring concentric beacon glow (zero per-frame allocations)
     final beaconColor = _curAccentColor.withValues(alpha: alpha);
-    canvas.drawCircle(
-      top,
-      width * 1.2,
-      Paint()..color = beaconColor.withValues(alpha: alpha * 0.25),
-    );
-    canvas.drawCircle(
-      top,
-      width * 0.7,
-      Paint()..color = beaconColor.withValues(alpha: alpha * 0.7),
-    );
-    canvas.drawCircle(
-      top,
-      width * 0.35,
-      Paint()..color = const Color(0xFFFFFFFF).withValues(alpha: alpha),
-    );
+    _beaconGlow.color = beaconColor.withValues(alpha: alpha * 0.25);
+    canvas.drawCircle(top, width * 1.2, _beaconGlow);
+
+    _beaconMid.color = beaconColor.withValues(alpha: alpha * 0.7);
+    canvas.drawCircle(top, width * 0.7, _beaconMid);
+
+    _beaconCore.color = const Color(0xFFFFFFFF).withValues(alpha: alpha);
+    canvas.drawCircle(top, width * 0.35, _beaconCore);
   }
 
   void _drawPlanGantry(Canvas canvas) {
@@ -781,14 +769,9 @@ class LaneWorld extends Component {
       height: boardH,
     );
 
-    _boardBgPaint.shader = LinearGradient(
-      begin: Alignment.topCenter,
-      end: Alignment.bottomCenter,
-      colors: [
-        const Color(0xFF0F172A).withValues(alpha: alpha * 0.95),
-        const Color(0xFF020617).withValues(alpha: alpha * 0.95),
-      ],
-    ).createShader(boardRect);
+    _boardBgPaint
+      ..shader = null
+      ..color = const Color(0xFF0A1324).withValues(alpha: alpha * 0.95);
     canvas.drawRRect(
       RRect.fromRectAndRadius(boardRect, Radius.circular(4 * t)),
       _boardBgPaint,

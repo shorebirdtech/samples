@@ -87,6 +87,14 @@ class Hud extends Component {
   final Paint _comboBgPaint = Paint();
   final Paint _comboBorderPaint = Paint()..style = PaintingStyle.stroke;
 
+  // Pre-allocated banner paints & cached shaders for zero-allocation rendering
+  final Paint _bannerGlowPaint = Paint()..style = PaintingStyle.stroke;
+  final Paint _bannerBgPaint = Paint();
+  final Paint _bannerBorderPaint = Paint()..style = PaintingStyle.stroke;
+  late final Shader _borderShader;
+  late final Shader _borderMissShader;
+  int _lastProgressLevel = -1;
+
   Hud({this.playerTag}) {
     _initStaticPainters();
     _updateScorePainter();
@@ -100,6 +108,57 @@ class Hud extends Component {
       text: const TextSpan(text: '🐤', style: TextStyle(fontSize: 18)),
       textDirection: TextDirection.ltr,
     )..layout();
+
+    final panelRect = Rect.fromLTWH(0, 0, GameConfig.designWidth, 68);
+    _bgPaint.shader = const LinearGradient(
+      begin: Alignment.topCenter,
+      end: Alignment.bottomCenter,
+      colors: [
+        Color(0xF00D111A),
+        Color(0xF007090F),
+      ],
+    ).createShader(panelRect);
+
+    final sheenRect = Rect.fromLTWH(0, 0, GameConfig.designWidth, 18);
+    _sheenPaint.shader = const LinearGradient(
+      begin: Alignment.topCenter,
+      end: Alignment.bottomCenter,
+      colors: [
+        Color(0x14FFFFFF),
+        Color(0x00FFFFFF),
+      ],
+    ).createShader(sheenRect);
+
+    final borderRect = Rect.fromLTWH(0, 67, GameConfig.designWidth, 1.5);
+    _borderShader = LinearGradient(
+      colors: [
+        _shorebirdGold.withValues(alpha: 0.0),
+        _shorebirdGold.withValues(alpha: 0.9),
+        _shorebirdGold.withValues(alpha: 0.0),
+      ],
+    ).createShader(borderRect);
+    _borderPaint.shader = _borderShader;
+
+    _borderMissShader = LinearGradient(
+      colors: [
+        const Color(0xFFFF3D57).withValues(alpha: 0.0),
+        const Color(0xFFFF3D57).withValues(alpha: 0.9),
+        const Color(0xFFFF3D57).withValues(alpha: 0.0),
+      ],
+    ).createShader(borderRect);
+
+    const bannerW = 500.0;
+    const bannerH = 120.0;
+    final bannerRect =
+        Rect.fromCenter(center: Offset.zero, width: bannerW, height: bannerH);
+    _bannerBgPaint.shader = const LinearGradient(
+      begin: Alignment.topLeft,
+      end: Alignment.bottomRight,
+      colors: [
+        Color(0xF8111520),
+        Color(0xF80C0F18),
+      ],
+    ).createShader(bannerRect);
   }
 
   void _updateScorePainter() {
@@ -290,41 +349,18 @@ class Hud extends Component {
 
   void _drawTopPanel(Canvas canvas) {
     final isMissing = _missFlash > 0;
-    final accentColor = isMissing ? const Color(0xFFFF3D57) : _shorebirdGold;
 
-    // Panel background — deep navy with subtle gradient
+    // Panel background — deep navy with subtle gradient (cached shader)
     final panelRect = Rect.fromLTWH(0, 0, GameConfig.designWidth, 68);
-    _bgPaint.shader = const LinearGradient(
-      begin: Alignment.topCenter,
-      end: Alignment.bottomCenter,
-      colors: [
-        Color(0xF00D111A),
-        Color(0xF007090F),
-      ],
-    ).createShader(panelRect);
     canvas.drawRect(panelRect, _bgPaint);
 
-    // Top sheen
+    // Top sheen (cached shader)
     final sheenRect = Rect.fromLTWH(0, 0, GameConfig.designWidth, 18);
-    _sheenPaint.shader = const LinearGradient(
-      begin: Alignment.topCenter,
-      end: Alignment.bottomCenter,
-      colors: [
-        Color(0x14FFFFFF),
-        Color(0x00FFFFFF),
-      ],
-    ).createShader(sheenRect);
     canvas.drawRect(sheenRect, _sheenPaint);
 
-    // Shorebird gold bottom border
+    // Shorebird gold bottom border (cached shader)
     final borderRect = Rect.fromLTWH(0, 67, GameConfig.designWidth, 1.5);
-    _borderPaint.shader = LinearGradient(
-      colors: [
-        accentColor.withValues(alpha: 0.0),
-        accentColor.withValues(alpha: 0.9),
-        accentColor.withValues(alpha: 0.0),
-      ],
-    ).createShader(borderRect);
+    _borderPaint.shader = isMissing ? _borderMissShader : _borderShader;
     canvas.drawRect(borderRect, _borderPaint);
 
     // Miss flash overlay
@@ -367,16 +403,9 @@ class Hud extends Component {
     const barY = 67.5;
     const barH = 3.5;
 
-    // Track
-    canvas.drawRect(
-      Rect.fromLTWH(0, barY, GameConfig.designWidth, barH),
-      _trackPaint,
-    );
-
-    // Fill with accent gradient
-    if (fraction > 0) {
-      final fillW = GameConfig.designWidth * fraction;
-      final fillRect = Rect.fromLTWH(0, barY, fillW, barH);
+    // Cache gradient shader only when tier changes
+    if (_lastProgressLevel != curLevel.level) {
+      _lastProgressLevel = curLevel.level;
       _progressFillPaint.shader = LinearGradient(
         colors: [
           accent.withValues(alpha: 0.6),
@@ -384,7 +413,19 @@ class Hud extends Component {
           const Color(0xFFFFFFFF),
         ],
         stops: const [0.0, 0.75, 1.0],
-      ).createShader(fillRect);
+      ).createShader(Rect.fromLTWH(0, barY, GameConfig.designWidth, barH));
+    }
+
+    // Track
+    canvas.drawRect(
+      Rect.fromLTWH(0, barY, GameConfig.designWidth, barH),
+      _trackPaint,
+    );
+
+    // Fill with accent gradient (zero allocations)
+    if (fraction > 0) {
+      final fillW = GameConfig.designWidth * fraction;
+      final fillRect = Rect.fromLTWH(0, barY, fillW, barH);
       canvas.drawRect(fillRect, _progressFillPaint);
 
       // Progress glow orb without expensive blur pass
@@ -441,33 +482,22 @@ class Hud extends Component {
     final rrect = RRect.fromRectAndRadius(rect, const Radius.circular(20));
     final accent = Color(level.accentColor);
 
-    // Multi-layer crisp ambient glow (no expensive blur pass)
-    final glowPaint = Paint()..style = PaintingStyle.stroke;
-    glowPaint.color = accent.withValues(alpha: 0.15 * alpha);
-    glowPaint.strokeWidth = 10;
-    canvas.drawRRect(rrect, glowPaint);
-    glowPaint.color = accent.withValues(alpha: 0.35 * alpha);
-    glowPaint.strokeWidth = 4;
-    canvas.drawRRect(rrect, glowPaint);
+    // Multi-layer crisp ambient glow (zero allocations)
+    _bannerGlowPaint.color = accent.withValues(alpha: 0.15 * alpha);
+    _bannerGlowPaint.strokeWidth = 10;
+    canvas.drawRRect(rrect, _bannerGlowPaint);
+    _bannerGlowPaint.color = accent.withValues(alpha: 0.35 * alpha);
+    _bannerGlowPaint.strokeWidth = 4;
+    canvas.drawRRect(rrect, _bannerGlowPaint);
 
-    // Background
-    final bgPaint = Paint()
-      ..shader = const LinearGradient(
-        begin: Alignment.topLeft,
-        end: Alignment.bottomRight,
-        colors: [
-          Color(0xF8111520),
-          Color(0xF80C0F18),
-        ],
-      ).createShader(rect);
-    canvas.drawRRect(rrect, bgPaint);
+    // Background (pre-cached shader)
+    canvas.drawRRect(rrect, _bannerBgPaint);
 
-    // Border
-    final borderPaint = Paint()
+    // Border (reusable paint)
+    _bannerBorderPaint
       ..color = accent.withValues(alpha: 0.9 * alpha)
-      ..strokeWidth = 2
-      ..style = PaintingStyle.stroke;
-    canvas.drawRRect(rrect, borderPaint);
+      ..strokeWidth = 2;
+    canvas.drawRRect(rrect, _bannerBorderPaint);
 
     // Render text
     if (_tpBannerTitle != null) {

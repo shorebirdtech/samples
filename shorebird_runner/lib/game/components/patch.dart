@@ -93,10 +93,13 @@ class Patch extends Component {
         _magnetLean *= (1.0 - dt * 5.0).clamp(0.0, 1.0);
       }
 
-      for (final mp in _magnetParticles) {
+      for (int i = _magnetParticles.length - 1; i >= 0; i--) {
+        final mp = _magnetParticles[i];
         mp.update(dt);
+        if (mp.life <= 0) {
+          _magnetParticles.removeAt(i);
+        }
       }
-      _magnetParticles.removeWhere((mp) => mp.life <= 0);
 
       if (depth >= 1.04 && !hasTriggeredMiss) {
         hasTriggeredMiss = true;
@@ -106,8 +109,12 @@ class Patch extends Component {
       }
     } else {
       _collectAnimation = (_collectAnimation + dt * 3.5).clamp(0, 1);
-      for (final s in _sparkles) {
+      for (int i = _sparkles.length - 1; i >= 0; i--) {
+        final s = _sparkles[i];
         s.update(dt);
+        if (s.life <= 0) {
+          _sparkles.removeAt(i);
+        }
       }
     }
   }
@@ -129,10 +136,9 @@ class Patch extends Component {
     }
 
     final pos = worldPosition;
-    final rng = Random();
     final count = isHotReloadBooster ? 24 : 18;
     for (int i = 0; i < count; i++) {
-      _sparkles.add(Sparkle(pos, rng, isBooster: isHotReloadBooster));
+      _sparkles.add(Sparkle(pos, _rng, isBooster: isHotReloadBooster));
     }
   }
 

@@ -197,18 +197,19 @@ class Player extends Component {
     return -sin(t * pi) * 78.0;
   }
 
-  Offset get worldPosition {
-    final baseOffset = () {
-      if (_laneProgress >= 1.0) {
-        return PerspectiveHelper.lanePosition(_targetLane, 1.0);
-      }
-      final from = PerspectiveHelper.lanePosition(currentLane, 1.0);
-      final to = PerspectiveHelper.lanePosition(_targetLane, 1.0);
-      final t = Curves.easeInOutCubic.transform(_laneProgress.clamp(0, 1));
-      return Offset(from.dx + (to.dx - from.dx) * t, from.dy);
-    }();
+  Offset get groundPosition {
+    if (_laneProgress >= 1.0) {
+      return PerspectiveHelper.lanePosition(_targetLane, 1.0);
+    }
+    final from = PerspectiveHelper.lanePosition(currentLane, 1.0);
+    final to = PerspectiveHelper.lanePosition(_targetLane, 1.0);
+    final t = Curves.easeInOutCubic.transform(_laneProgress.clamp(0, 1));
+    return Offset(from.dx + (to.dx - from.dx) * t, from.dy);
+  }
 
-    return Offset(baseOffset.dx, baseOffset.dy + jumpOffsetY);
+  Offset get worldPosition {
+    final gp = groundPosition;
+    return Offset(gp.dx, gp.dy + jumpOffsetY);
   }
 
   double get rollAngle {
@@ -312,10 +313,13 @@ class Player extends Component {
       }
     }
 
-    for (final p in _particles) {
+    for (int i = _particles.length - 1; i >= 0; i--) {
+      final p = _particles[i];
       p.update(dt);
+      if (p.life <= 0) {
+        _particles.removeAt(i);
+      }
     }
-    _particles.removeWhere((p) => p.life <= 0);
   }
 
   Color _getAuraColor() {
@@ -339,16 +343,7 @@ class Player extends Component {
   }
 
   void _drawShadow(Canvas canvas) {
-    final groundPos = () {
-      if (_laneProgress >= 1.0) {
-        return PerspectiveHelper.lanePosition(_targetLane, 1.0);
-      }
-      final from = PerspectiveHelper.lanePosition(currentLane, 1.0);
-      final to = PerspectiveHelper.lanePosition(_targetLane, 1.0);
-      final t = Curves.easeInOutCubic.transform(_laneProgress.clamp(0, 1));
-      return Offset(from.dx + (to.dx - from.dx) * t, from.dy);
-    }();
-
+    final groundPos = groundPosition;
     final shadowY = groundPos.dy + 34;
     final stepBounce = sin(_runPhase * 2).abs() * 3.0;
 

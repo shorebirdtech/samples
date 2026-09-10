@@ -252,9 +252,8 @@ class ShorebirdRunnerGame extends FlameGame
     world.add(obs1);
 
     if (spawnDouble) {
-      // Pick a second distinct lane - guarantees exactly 1 open lane to dodge into!
-      final otherLanes = [0, 1, 2]..remove(firstLane);
-      final secondLane = otherLanes[_rng.nextInt(otherLanes.length)];
+      // Pick a second distinct lane - guarantees exactly 1 open lane to dodge into (zero allocations)
+      final secondLane = (firstLane + 1 + _rng.nextInt(2)) % 3;
       final secondType =
           ObstacleType.values[_rng.nextInt(ObstacleType.values.length)];
 
