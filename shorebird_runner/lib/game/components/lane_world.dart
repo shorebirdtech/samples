@@ -13,22 +13,22 @@ class LaneWorld extends Component {
 
   Offset get _nearLeft => Offset(
         GameConfig.nearLaneX[0] -
-            (GameConfig.nearLaneX[1] - GameConfig.nearLaneX[0]) * 0.65,
+            (GameConfig.nearLaneX[1] - GameConfig.nearLaneX[0]) * 0.5,
         GameConfig.nearY + 20,
       );
   Offset get _nearRight => Offset(
         GameConfig.nearLaneX[2] +
-            (GameConfig.nearLaneX[2] - GameConfig.nearLaneX[1]) * 0.65,
+            (GameConfig.nearLaneX[2] - GameConfig.nearLaneX[1]) * 0.5,
         GameConfig.nearY + 20,
       );
   Offset get _farLeft => Offset(
         GameConfig.farLaneX[0] -
-            (GameConfig.farLaneX[1] - GameConfig.farLaneX[0]) * 0.45,
+            (GameConfig.farLaneX[1] - GameConfig.farLaneX[0]) * 0.5,
         GameConfig.horizonY,
       );
   Offset get _farRight => Offset(
         GameConfig.farLaneX[2] +
-            (GameConfig.farLaneX[2] - GameConfig.farLaneX[1]) * 0.45,
+            (GameConfig.farLaneX[2] - GameConfig.farLaneX[1]) * 0.5,
         GameConfig.horizonY,
       );
 
@@ -83,9 +83,6 @@ class LaneWorld extends Component {
     ..strokeWidth = 1.5
     ..style = PaintingStyle.stroke;
   final Paint _postPaint = Paint()..strokeCap = StrokeCap.round;
-  final Paint _tiePaint = Paint()..strokeCap = StrokeCap.square;
-  final Paint _railBasePaint = Paint();
-  final Paint _railSheenPaint = Paint();
   final Paint _trussPaint = Paint();
   final Paint _boardBgPaint = Paint()
     ..color = const Color(0xFF070B14)
@@ -109,7 +106,7 @@ class LaneWorld extends Component {
   final Paint _beaconMid = Paint();
   final Paint _beaconCore = Paint()..color = const Color(0xFFFFFFFF);
   final List<Paint> _refPaints =
-      List.generate(5, (_) => Paint()..style = PaintingStyle.fill);
+      List.generate(3, (_) => Paint()..style = PaintingStyle.fill);
 
   @override
   Future<void> onLoad() async {
@@ -242,12 +239,10 @@ class LaneWorld extends Component {
 
     const refColors = [
       Color(0xFF00E5FF),
-      Color(0xFFFF8F00),
       Color(0xFFFFC107),
       Color(0xFF00FFCC),
-      Color(0xFF38BDF8),
     ];
-    for (int i = 0; i < 5; i++) {
+    for (int i = 0; i < 3; i++) {
       _refPaints[i].shader = LinearGradient(
         begin: Alignment.topCenter,
         end: Alignment.bottomCenter,
@@ -381,7 +376,6 @@ class LaneWorld extends Component {
   void render(Canvas canvas) {
     _drawCinematicCityscape(canvas);
     _drawRoadSegments(canvas);
-    _drawSubwayRails(canvas);
     _drawLaneDividers(canvas);
     _drawGuardRails(canvas);
     _draw3DPylons(canvas);
@@ -564,7 +558,7 @@ class LaneWorld extends Component {
   }
 
   void _drawWetRoadReflections(Canvas canvas) {
-    const reflections = [0.20, 0.35, 0.50, 0.65, 0.80];
+    const reflections = [1.0 / 6.0, 0.50, 5.0 / 6.0];
 
     for (int i = 0; i < reflections.length; i++) {
       final xFrac = reflections[i];
@@ -660,10 +654,10 @@ class LaneWorld extends Component {
         final p1 = _lerpRoadPoint(laneFrac, t1);
         final p2 = _lerpRoadPoint(laneFrac, t2);
 
-        final dashAlpha = (t1 * 0.75).clamp(0.0, 0.75);
+        final dashAlpha = (t1 * 0.9).clamp(0.15, 0.95);
         _dashPaint
           ..color = _curAccentColor.withValues(alpha: dashAlpha)
-          ..strokeWidth = 1.0 + t1 * 2.5;
+          ..strokeWidth = 2.0 + t1 * 3.5;
 
         canvas.drawLine(p1, p2, _dashPaint);
       }
@@ -749,55 +743,6 @@ class LaneWorld extends Component {
       width * 0.35,
       Paint()..color = const Color(0xFFFFFFFF).withValues(alpha: alpha),
     );
-  }
-
-  void _drawSubwayRails(Canvas canvas) {
-    for (int lane = 0; lane < GameConfig.laneCount; lane++) {
-      final centerFrac = (lane + 0.5) / GameConfig.laneCount;
-      const railHalfWidth = 0.085;
-      final leftFrac = centerFrac - railHalfWidth;
-      final rightFrac = centerFrac + railHalfWidth;
-
-      // Cross ties
-      const ties = 14;
-      for (int i = 0; i < ties; i++) {
-        final tRaw = ((i / ties) + _scroll) % 1.0;
-        final t = pow(tRaw, 1.8).toDouble();
-        final pL = _lerpRoadPoint(leftFrac - 0.02, t);
-        final pR = _lerpRoadPoint(rightFrac + 0.02, t);
-        final tieAlpha = (t * 0.55).clamp(0.0, 0.55);
-        _tiePaint
-          ..color = const Color(0xFF1E293B).withValues(alpha: tieAlpha)
-          ..strokeWidth = 2.5 + t * 4.5;
-        canvas.drawLine(pL, pR, _tiePaint);
-      }
-
-      // Rails
-      const railSegments = 20;
-      for (int i = 0; i < railSegments; i++) {
-        final t1 = pow(i / railSegments, 1.8).toDouble();
-        final t2 = pow((i + 1) / railSegments, 1.8).toDouble();
-
-        final pL1 = _lerpRoadPoint(leftFrac, t1);
-        final pL2 = _lerpRoadPoint(leftFrac, t2);
-        final pR1 = _lerpRoadPoint(rightFrac, t1);
-        final pR2 = _lerpRoadPoint(rightFrac, t2);
-
-        final railAlpha = (t2 * 0.85).clamp(0.1, 0.85);
-
-        _railBasePaint
-          ..color = const Color(0xFF475569).withValues(alpha: railAlpha)
-          ..strokeWidth = 1.2 + t2 * 3.5;
-        canvas.drawLine(pL1, pL2, _railBasePaint);
-        canvas.drawLine(pR1, pR2, _railBasePaint);
-
-        _railSheenPaint
-          ..color = const Color(0xFFFFFFFF).withValues(alpha: railAlpha * 0.75)
-          ..strokeWidth = 0.8 + t2 * 1.5;
-        canvas.drawLine(pL1, pL2, _railSheenPaint);
-        canvas.drawLine(pR1, pR2, _railSheenPaint);
-      }
-    }
   }
 
   void _drawPlanGantry(Canvas canvas) {
