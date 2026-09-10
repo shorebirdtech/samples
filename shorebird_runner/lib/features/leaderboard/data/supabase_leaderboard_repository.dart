@@ -78,7 +78,7 @@ class SupabaseLeaderboardRepository implements ILeaderboardRepository {
 
         // If remote is empty, fall back to local seed so new users see benchmark targets
         if (entries.isEmpty) {
-          return _localFallback.getScores(event: event);
+          return await _localFallback.getScores(event: event);
         }
 
         return entries;
@@ -86,13 +86,13 @@ class SupabaseLeaderboardRepository implements ILeaderboardRepository {
         debugPrint(
           '[SupabaseLeaderboardRepository] Status ${response.statusCode}: ${response.body}. Using local fallback.',
         );
-        return _localFallback.getScores(event: event);
+        return await _localFallback.getScores(event: event);
       }
     } catch (e) {
       debugPrint(
         '[SupabaseLeaderboardRepository] Network exception: $e. Using local fallback.',
       );
-      return _localFallback.getScores(event: event);
+      return await _localFallback.getScores(event: event);
     }
   }
 
