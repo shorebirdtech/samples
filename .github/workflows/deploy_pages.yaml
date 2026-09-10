@@ -24,7 +24,7 @@ jobs:
   deploy:
     environment:
       name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
+      url: ${{ steps.deployment.outputs.page_url }}patch-runner/
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -49,17 +49,36 @@ jobs:
       - name: Build Flutter Web
         working-directory: shorebird_runner
         run: |
-          BASE_HREF="${{ steps.pages.outputs.base_path }}/"
+          BASE_HREF="${{ steps.pages.outputs.base_path }}/patch-runner/"
           echo "Building for base href: $BASE_HREF"
           flutter build web --release \
             --base-href "$BASE_HREF" \
-            --dart-define=SUPABASE_URL="${{ secrets.SUPABASE_URL }}" \
-            --dart-define=SUPABASE_ANON_KEY="${{ secrets.SUPABASE_ANON_KEY }}"
+            --dart-define=SUPABASE_URL="${{ secrets.SUPABASE_URL || vars.SUPABASE_URL }}" \
+            --dart-define=SUPABASE_ANON_KEY="${{ secrets.SUPABASE_ANON_KEY || vars.SUPABASE_ANON_KEY }}"
+
+      - name: Prepare Pages Artifact
+        run: |
+          mkdir -p dist/patch-runner
+          cp -r shorebird_runner/build/web/* dist/patch-runner/
+          cat <<'EOF' > dist/index.html
+          <!DOCTYPE html>
+          <html>
+          <head>
+            <meta charset="UTF-8">
+            <meta http-equiv="refresh" content="0; url=patch-runner/">
+            <script>window.location.href = "patch-runner/";</script>
+            <title>Shorebird Samples - Patch Runner</title>
+          </head>
+          <body>
+            <p>Redirecting to <a href="patch-runner/">Patch Runner</a>...</p>
+          </body>
+          </html>
+          EOF
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: shorebird_runner/build/web
+          path: dist
 
       - name: Deploy to GitHub Pages
         id: deployment

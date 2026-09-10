@@ -56,7 +56,7 @@ SUPABASE_KEY_ARG=""
 while [[ $# -gt 0 ]]; do
   case $1 in
     --gh-pages)
-      BASE_HREF_VAL="/samples/"
+      BASE_HREF_VAL="/samples/patch-runner/"
       shift
       ;;
     --base-href)
@@ -75,7 +75,7 @@ while [[ $# -gt 0 ]]; do
       echo "Usage: ./deploy.sh [OPTIONS]"
       echo ""
       echo "Options:"
-      echo "  --gh-pages               Build for GitHub Pages with base-href /samples/"
+      echo "  --gh-pages               Build for GitHub Pages with base-href /samples/patch-runner/"
       echo "  --base-href <PATH>       Specify custom base-href (default: /)"
       echo "  --supabase-url <URL>     Embed Supabase URL via --dart-define"
       echo "  --supabase-key <KEY>     Embed Supabase Anon Key via --dart-define"
