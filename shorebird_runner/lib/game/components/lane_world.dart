@@ -41,15 +41,16 @@ class LaneWorld extends Component {
 
   // Pre-baked skyline geometry paths to eliminate hundreds of per-frame drawRect calls
   final Path _mountainPath = Path();
+  final Path _skylineBackPath = Path();
   final Path _skylineBuildingsPath = Path();
-  final Path _amberWindowsPath = Path();
-  final Path _cyanWindowsPath = Path();
+  final Path _verticalRibsPath = Path();
+  final Path _crownGlowPath = Path();
 
   // Reusable paths for zero-allocation rendering loops
   final Path _segmentPath = Path();
-  final Path _chevronPath = Path();
   final Path _refPath = Path();
   final Path _searchlightBeamPath = Path();
+  final Path _pylonBasePath = Path();
 
   // Cached TextPainters for Billboards & Gantry
   final Map<String, TextPainter> _cachedBillboards = {};
@@ -64,19 +65,16 @@ class LaneWorld extends Component {
   final Paint _antPaint = Paint()
     ..color = const Color(0xFF64748B)
     ..strokeWidth = 1.5;
-  final Paint _amberWinPaint = Paint()
-    ..color = const Color(0xFFFFD166).withValues(alpha: 0.8)
-    ..style = PaintingStyle.fill;
-  final Paint _cyanWinPaint = Paint()
-    ..color = const Color(0xFF00E5FF).withValues(alpha: 0.7)
-    ..style = PaintingStyle.fill;
+  final Paint _skylineBackPaint = Paint()..style = PaintingStyle.fill;
   final Paint _bldFillPaint = Paint()..style = PaintingStyle.fill;
+  final Paint _ribsPaint = Paint()
+    ..style = PaintingStyle.stroke
+    ..strokeWidth = 1.6;
+  final Paint _crownPaint = Paint()
+    ..style = PaintingStyle.stroke
+    ..strokeWidth = 2.0;
   final Paint _tilePaint = Paint()..style = PaintingStyle.fill;
   final Paint _seamPaint = Paint();
-  final Paint _chevronPaint = Paint()
-    ..style = PaintingStyle.stroke
-    ..strokeCap = StrokeCap.round
-    ..strokeJoin = StrokeJoin.round;
   final Paint _dashPaint = Paint()..strokeCap = StrokeCap.round;
   final Paint _railGlow = Paint()..style = PaintingStyle.stroke;
   final Paint _railCore = Paint()
@@ -125,9 +123,10 @@ class LaneWorld extends Component {
 
   void _initStaticGeometry() {
     _mountainPath.reset();
+    _skylineBackPath.reset();
     _skylineBuildingsPath.reset();
-    _amberWindowsPath.reset();
-    _cyanWindowsPath.reset();
+    _verticalRibsPath.reset();
+    _crownGlowPath.reset();
 
     final cy = GameConfig.horizonY;
     final w = GameConfig.designWidth;
@@ -160,44 +159,62 @@ class LaneWorld extends Component {
       ..lineTo(w, cy)
       ..close();
 
-    // Pre-bake Skyscraper Building blocks and window batches
-    final buildings = [
-      (w * 0.02, 52.0, 90.0 * _bldScale, 0),
-      (w * 0.08, 48.0, 120.0 * _bldScale, 1),
-      (w * 0.15, 58.0, 75.0 * _bldScale, 2),
-      (w * 0.22, 68.0, 135.0 * _bldScale, 3),
-      (w * 0.30, 52.0, 100.0 * _bldScale, 4),
-      (w * 0.68, 54.0, 110.0 * _bldScale, 5),
-      (w * 0.75, 70.0, 145.0 * _bldScale, 6),
-      (w * 0.83, 58.0, 88.0 * _bldScale, 7),
-      (w * 0.90, 64.0, 115.0 * _bldScale, 8),
-      (w * 0.96, 48.0, 80.0 * _bldScale, 9),
+    // ── Layer 1: Distant Background Monolith Silhouettes ──────────────────
+    final backBuildings = [
+      (w * 0.01, 74.0, 140.0 * _bldScale),
+      (w * 0.10, 62.0, 165.0 * _bldScale),
+      (w * 0.19, 88.0, 190.0 * _bldScale),
+      (w * 0.28, 56.0, 130.0 * _bldScale),
+      (w * 0.65, 68.0, 150.0 * _bldScale),
+      (w * 0.74, 95.0, 205.0 * _bldScale),
+      (w * 0.84, 60.0, 170.0 * _bldScale),
+      (w * 0.93, 72.0, 135.0 * _bldScale),
     ];
 
-    for (final b in buildings) {
+    for (final b in backBuildings) {
       final bx = b.$1;
       final bw = b.$2;
       final bh = b.$3;
-      final seed = b.$4;
+      _skylineBackPath.addRect(Rect.fromLTWH(bx, cy - bh, bw, bh));
+      // Tapered rooftop spire
+      _skylineBackPath.moveTo(bx + bw * 0.3, cy - bh);
+      _skylineBackPath.lineTo(bx + bw * 0.5, cy - bh - 24 * _bldScale);
+      _skylineBackPath.lineTo(bx + bw * 0.7, cy - bh);
+      _skylineBackPath.close();
+    }
+
+    // ── Layer 2: Foreground Tech Headquarters & Architectural Ribs ──────
+    final foreBuildings = [
+      (w * 0.03, 56.0, 95.0 * _bldScale),
+      (w * 0.09, 52.0, 125.0 * _bldScale),
+      (w * 0.16, 64.0, 85.0 * _bldScale),
+      (w * 0.23, 72.0, 142.0 * _bldScale),
+      (w * 0.31, 54.0, 105.0 * _bldScale),
+      (w * 0.67, 58.0, 115.0 * _bldScale),
+      (w * 0.76, 75.0, 150.0 * _bldScale),
+      (w * 0.84, 62.0, 92.0 * _bldScale),
+      (w * 0.91, 68.0, 122.0 * _bldScale),
+      (w * 0.97, 50.0, 85.0 * _bldScale),
+    ];
+
+    for (final b in foreBuildings) {
+      final bx = b.$1;
+      final bw = b.$2;
+      final bh = b.$3;
 
       _skylineBuildingsPath.addRect(Rect.fromLTWH(bx, cy - bh, bw, bh));
 
-      // Batch windows into 2 unified paths
-      final winCols = (bw / 10).floor();
-      final winRows = (bh / 10).floor();
-      for (int r = 1; r < winRows; r++) {
-        for (int c = 1; c < winCols; c++) {
-          final hash = (seed * 37 + r * 19 + c * 7) % 100;
-          if (hash > 45) {
-            final winRect =
-                Rect.fromLTWH(bx + c * 10 - 2, cy - bh + r * 10, 4, 5);
-            if (hash % 2 == 0) {
-              _amberWindowsPath.addRect(winRect);
-            } else {
-              _cyanWindowsPath.addRect(winRect);
-            }
-          }
-        }
+      // Crown illumination perimeter line
+      _crownGlowPath.moveTo(bx, cy - bh);
+      _crownGlowPath.lineTo(bx + bw, cy - bh);
+
+      // Vertical architectural LED light strips (modern cyber-tower aesthetics)
+      final ribCount = (bw / 16).floor().clamp(2, 4);
+      final step = bw / (ribCount + 1);
+      for (int i = 1; i <= ribCount; i++) {
+        final rx = bx + step * i;
+        _verticalRibsPath.moveTo(rx, cy - bh + 4);
+        _verticalRibsPath.lineTo(rx, cy - 6);
       }
     }
 
@@ -205,26 +222,32 @@ class LaneWorld extends Component {
     _mountainPaint.shader = const LinearGradient(
       begin: Alignment.topCenter,
       end: Alignment.bottomCenter,
-      colors: [Color(0xFF0F0826), Color(0xFF060312)],
+      colors: [Color(0xFF0C0720), Color(0xFF05020D)],
+    ).createShader(Rect.fromLTWH(0, 0, w, cy));
+
+    _skylineBackPaint.shader = const LinearGradient(
+      begin: Alignment.topCenter,
+      end: Alignment.bottomCenter,
+      colors: [Color(0xFF090F1C), Color(0xFF04070D)],
     ).createShader(Rect.fromLTWH(0, 0, w, cy));
 
     _bldFillPaint.shader = const LinearGradient(
       begin: Alignment.topCenter,
       end: Alignment.bottomCenter,
-      colors: [Color(0xFF0D1826), Color(0xFF040810)],
+      colors: [Color(0xFF0F172A), Color(0xFF050A12)],
     ).createShader(Rect.fromLTWH(0, 0, w, cy));
 
     _towerPaint.shader = const LinearGradient(
       begin: Alignment.topCenter,
       end: Alignment.bottomCenter,
-      colors: [Color(0xFF09061A), Color(0xFF04020C)],
+      colors: [Color(0xFF0B132B), Color(0xFF030712)],
     ).createShader(Rect.fromLTWH(0, 0, w, cy));
 
     _searchlightPaintCyan.shader = LinearGradient(
       begin: Alignment.bottomCenter,
       end: Alignment.topCenter,
       colors: [
-        const Color(0xFF00E5FF).withValues(alpha: 0.22),
+        const Color(0xFF00E5FF).withValues(alpha: 0.18),
         const Color(0xFF00E5FF).withValues(alpha: 0.0),
       ],
     ).createShader(const Rect.fromLTWH(-50, -140, 100, 140));
@@ -233,7 +256,7 @@ class LaneWorld extends Component {
       begin: Alignment.bottomCenter,
       end: Alignment.topCenter,
       colors: [
-        const Color(0xFFFFB300).withValues(alpha: 0.22),
+        const Color(0xFFFFB300).withValues(alpha: 0.18),
         const Color(0xFFFFB300).withValues(alpha: 0.0),
       ],
     ).createShader(const Rect.fromLTWH(-50, -140, 100, 140));
@@ -299,6 +322,9 @@ class LaneWorld extends Component {
     ).createShader(
       Rect.fromLTRB(_farLeft.dx - 160, cy, _farRight.dx + 160, cy),
     );
+
+    _ribsPaint.color = _curAccentColor.withValues(alpha: 0.65);
+    _crownPaint.color = _curAccentColor.withValues(alpha: 0.85);
   }
 
   int _lastShaderLevel = -1;
@@ -398,7 +424,10 @@ class LaneWorld extends Component {
       _hazePaint,
     );
 
-    // 3. Sweeping Hollywood / Los Santos Searchlight Beams (zero allocations)
+    // 3. Layer 1: Distant Background Monolith Silhouettes
+    canvas.drawPath(_skylineBackPath, _skylineBackPaint);
+
+    // 4. Sweeping Searchlight Beams (zero allocations)
     _drawSearchlight(
       canvas,
       w * 0.22,
@@ -414,30 +443,30 @@ class LaneWorld extends Component {
       _searchlightPaintAmber,
     );
 
-    // 4. Distant Giant Spire Towers (scaled relative to sky height)
+    // 5. Layer 2: Foreground Tech Headquarters & Architectural LED Ribs
+    canvas.drawPath(_skylineBuildingsPath, _bldFillPaint);
+    canvas.drawPath(_verticalRibsPath, _ribsPaint);
+    canvas.drawPath(_crownGlowPath, _crownPaint);
+
+    // 6. Distant Giant Spire Towers (scaled relative to sky height)
     final towerHeight = cy * (isDesktop ? 0.48 : 0.65);
     _drawDistantTower(canvas, w * 0.36, cy, 32, towerHeight);
     _drawDistantTower(canvas, w * 0.64, cy, 36, towerHeight * 1.1);
 
-    // 5. Pre-baked Skyscraper Silhouettes & Lit Window Paths (Zero loop allocations!)
-    canvas.drawPath(_skylineBuildingsPath, _bldFillPaint);
-    canvas.drawPath(_amberWindowsPath, _amberWinPaint);
-    canvas.drawPath(_cyanWindowsPath, _cyanWinPaint);
-
     // Billboards & Rooftop Antennas
     _drawRooftopElements(canvas, cy);
 
-    // 6. Horizon Vanishing Point Volumetric Lens Bloom (cached paint)
+    // 7. Horizon Vanishing Point Volumetric Lens Bloom (cached paint)
     canvas.drawCircle(Offset(GameConfig.vanishingX, cy), 110, _bloomPaint);
 
-    // 7. Glowing Horizon Laser Neon Line
+    // 8. Glowing Horizon Laser Neon Line
     canvas.drawLine(
       Offset(_farLeft.dx - 160, cy),
       Offset(_farRight.dx + 160, cy),
       _horizonGlowPaint,
     );
 
-    // 8. Wet asphalt specular road reflections (zero allocations)
+    // 9. Wet asphalt specular road reflections (zero allocations)
     _drawWetRoadReflections(canvas);
   }
 
@@ -620,26 +649,6 @@ class LaneWorld extends Component {
             _curAccentColor.withValues(alpha: (tNear * 0.35).clamp(0.0, 0.4))
         ..strokeWidth = (1.0 + tNear * 1.5);
       canvas.drawLine(pNearL, pNearR, _seamPaint);
-
-      // Dynamic forward-pulsing chevrons in center lane
-      if (i % 3 == 0 && tNear > 0.15 && tNear < 0.88) {
-        final chevronCenter = _lerpRoadPoint(0.5, tNear);
-        final chW = (16.0 * tNear).clamp(3.0, 24.0);
-        final chH = (8.0 * tNear).clamp(2.0, 12.0);
-
-        _chevronPath
-          ..reset()
-          ..moveTo(chevronCenter.dx - chW, chevronCenter.dy + chH)
-          ..lineTo(chevronCenter.dx, chevronCenter.dy - chH * 0.4)
-          ..lineTo(chevronCenter.dx + chW, chevronCenter.dy + chH);
-
-        _chevronPaint
-          ..color =
-              _curAccentColor.withValues(alpha: (tNear * 0.45).clamp(0.0, 0.45))
-          ..strokeWidth = (1.2 + tNear * 2.0);
-
-        canvas.drawPath(_chevronPath, _chevronPaint);
-      }
     }
   }
 
@@ -711,28 +720,49 @@ class LaneWorld extends Component {
     double alpha, {
     required bool isLeft,
   }) {
-    final top = Offset(
-      base.dx + (isLeft ? -width * 0.8 : width * 0.8),
-      base.dy - height,
-    );
+    final dir = isLeft ? -1.0 : 1.0;
+    final top = Offset(base.dx + dir * width * 0.5, base.dy - height);
 
+    // 1. Trapezoidal curb anchor base
+    final baseW = width * 1.5;
+    _pylonBasePath
+      ..reset()
+      ..moveTo(base.dx - baseW * 0.5, base.dy)
+      ..lineTo(base.dx + baseW * 0.5, base.dy)
+      ..lineTo(base.dx + baseW * 0.3, base.dy - height * 0.22)
+      ..lineTo(base.dx - baseW * 0.3, base.dy - height * 0.22)
+      ..close();
     _postPaint
       ..shader = null
-      ..color = Color.lerp(const Color(0xFF0A192F), _curAccentColor, 0.45)!
+      ..color = const Color(0xFF0F172A).withValues(alpha: alpha)
+      ..style = PaintingStyle.fill;
+    canvas.drawPath(_pylonBasePath, _postPaint);
+
+    // 2. Tapered vertical pylon shaft
+    _postPaint
+      ..color = Color.lerp(const Color(0xFF1E293B), _curAccentColor, 0.25)!
           .withValues(alpha: alpha)
-      ..strokeWidth = width * 0.6;
-    canvas.drawLine(base, top, _postPaint);
+      ..strokeWidth = (width * 0.45).clamp(1.2, 8.0)
+      ..style = PaintingStyle.stroke;
+    canvas.drawLine(Offset(base.dx, base.dy - height * 0.22), top, _postPaint);
 
-    // Multi-ring concentric beacon glow (zero per-frame allocations)
+    // 3. Inward-angled luminaire head
+    final headTip = Offset(top.dx - dir * width * 0.8, top.dy + height * 0.08);
+    _postPaint
+      ..color = const Color(0xFF334155).withValues(alpha: alpha)
+      ..strokeWidth = (width * 0.55).clamp(1.5, 9.0);
+    canvas.drawLine(top, headTip, _postPaint);
+
+    // 4. Downward-facing LED light lens
     final beaconColor = _curAccentColor.withValues(alpha: alpha);
-    _beaconGlow.color = beaconColor.withValues(alpha: alpha * 0.25);
-    canvas.drawCircle(top, width * 1.2, _beaconGlow);
+    _beaconGlow.color = beaconColor.withValues(alpha: alpha * 0.35);
+    canvas.drawCircle(headTip, width * 0.75, _beaconGlow);
 
-    _beaconMid.color = beaconColor.withValues(alpha: alpha * 0.7);
-    canvas.drawCircle(top, width * 0.7, _beaconMid);
+    _beaconMid.color = beaconColor.withValues(alpha: alpha * 0.85);
+    canvas.drawCircle(headTip, width * 0.45, _beaconMid);
 
     _beaconCore.color = const Color(0xFFFFFFFF).withValues(alpha: alpha);
-    canvas.drawCircle(top, width * 0.35, _beaconCore);
+    canvas.drawCircle(headTip, width * 0.22, _beaconCore);
   }
 
   void _drawPlanGantry(Canvas canvas) {

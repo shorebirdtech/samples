@@ -97,7 +97,7 @@ class GameOverOverlay extends StatelessWidget {
                     Expanded(
                       child: StatTile(
                         label: AppStrings.patches,
-                        value: '$totalPatches 🐤',
+                        value: totalPatches.toString(),
                         color: AppColors.proCyan,
                       ),
                     ),
@@ -106,7 +106,7 @@ class GameOverOverlay extends StatelessWidget {
                 const SizedBox(height: 10),
                 StatTile(
                   label: AppStrings.tierReached,
-                  value: '${level.emoji} ${level.name} · ${level.planQuota}',
+                  value: '${level.name} · ${level.planQuota}',
                   color: accentColor,
                 ),
                 const SizedBox(height: 24),
@@ -118,10 +118,10 @@ class GameOverOverlay extends StatelessWidget {
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.shorebirdGold,
                     foregroundColor: AppColors.buttonDarkText,
-                    minimumSize: const Size.fromHeight(48),
+                    minimumSize: const Size.fromHeight(50),
                     elevation: 6,
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10),
+                      borderRadius: BorderRadius.circular(14),
                     ),
                   ),
                   child: const Text(

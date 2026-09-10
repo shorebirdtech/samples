@@ -196,11 +196,11 @@ class Patch extends Component {
       begin: Alignment.topLeft,
       end: Alignment.bottomRight,
       colors: [
-        Color(0xFF00F0FF),
-        Color(0xFF0088FF),
-        Color(0xFF0D1B3A),
+        Color(0xFFFFF176),
+        Color(0xFFFFB300),
+        Color(0xFFE65100),
       ],
-      stops: [0.0, 0.5, 1.0],
+      stops: [0.0, 0.55, 1.0],
     ).createShader(_unitRect)
     ..style = PaintingStyle.fill;
 
@@ -209,11 +209,11 @@ class Patch extends Component {
       begin: Alignment.topLeft,
       end: Alignment.bottomRight,
       colors: [
-        Color(0xFF0088FF),
-        Color(0xFF0055BB),
-        Color(0xFF060D1E),
+        Color(0xFFFFD54F),
+        Color(0xFFF57C00),
+        Color(0xFF4E2600),
       ],
-      stops: [0.0, 0.5, 1.0],
+      stops: [0.0, 0.55, 1.0],
     ).createShader(_unitRect)
     ..style = PaintingStyle.fill;
 
