@@ -11,7 +11,6 @@ class AppShellBloc extends Bloc<AppShellEvent, AppShellState> {
   AppShellBloc({AppMode initialMode = AppMode.menu})
       : super(AppShellState(mode: initialMode)) {
     on<NavigateToMode>(_onNavigateToMode);
-    on<AppRematchTriggered>(_onRematchTriggered);
   }
 
   void _onNavigateToMode(
@@ -21,15 +20,8 @@ class AppShellBloc extends Bloc<AppShellEvent, AppShellState> {
     emit(
       state.copyWith(
         mode: event.mode,
-        podiumRankings: event.podiumRankings,
+        currentLead: event.lead,
       ),
     );
-  }
-
-  void _onRematchTriggered(
-    AppRematchTriggered event,
-    Emitter<AppShellState> emit,
-  ) {
-    emit(state.copyWith(mode: AppMode.race));
   }
 }
