@@ -329,10 +329,10 @@ class LaneWorld extends Component {
 
     // Gantry Quota Texts
     const tiers = [
-      '⚡ HOBBY · 5,000 PATCHES',
-      '⚡ PRO · 50,000 PATCHES',
-      '⚡ BUSINESS · 1,000,000 PATCHES',
-      '⚡ ENTERPRISE · CUSTOM PATCHES',
+      'HOBBY · 5,000 PATCHES',
+      'PRO · 50,000 PATCHES',
+      'BUSINESS · 1,000,000 PATCHES',
+      'ENTERPRISE · CUSTOM PATCHES',
     ];
 
     for (final t in tiers) {

@@ -32,13 +32,15 @@ class Patch extends Component {
   final List<Sparkle> _sparkles = [];
   final List<MagneticTrailParticle> _magnetParticles = [];
 
-  static final TextPainter _staticChickPainter = TextPainter(
-    text: const TextSpan(
-      text: '🐤',
-      style: TextStyle(fontSize: 24),
-    ),
-    textDirection: TextDirection.ltr,
-  )..layout();
+  // High-performance vector bird emblem paints (zero font dependencies)
+  static final Paint _birdBodyPaint = Paint()..color = const Color(0xFFFFD54F);
+  static final Paint _birdWingPaint = Paint()..color = const Color(0xFFFFB300);
+  static final Paint _birdEyePaint = Paint()..color = const Color(0xFF0F172A);
+  static final Paint _birdEyeGlint = Paint()..color = const Color(0xFFFFFFFF);
+  static final Paint _birdBeakPaint = Paint()..color = const Color(0xFFFF5722);
+  static final Paint _birdCrestPaint = Paint()..color = const Color(0xFFFFB300);
+  static final Path _beakPath = Path();
+  static final Path _crestPath = Path();
 
   Patch({
     required this.lane,
@@ -365,15 +367,50 @@ class Patch extends Component {
     );
     canvas.restore();
 
-    // 🐤 Shorebird Baby Chick Symbol in center (cached TextPainter)
+    // Vector Shorebird Emblem in center (100% font-independent, zero Noto font requests)
     canvas.save();
-    final chickScale = (badgeH * 0.58) / 24.0;
-    canvas.scale(absCos * chickScale, chickScale);
-    _staticChickPainter.paint(
-      canvas,
-      Offset(-_staticChickPainter.width / 2, -_staticChickPainter.height / 2),
-    );
+    canvas.scale(absCos, 1.0);
+    _drawVectorBird(canvas, badgeH * 0.58);
     canvas.restore();
+
+    canvas.restore();
+  }
+
+  void _drawVectorBird(Canvas canvas, double size) {
+    canvas.save();
+    final s = size / 24.0;
+    canvas.scale(s, s);
+
+    // Head/Body
+    canvas.drawCircle(const Offset(0, 0), 10.5, _birdBodyPaint);
+
+    // Crest
+    _crestPath
+      ..reset()
+      ..moveTo(0, -10.5)
+      ..quadraticBezierTo(2, -15, 6, -14)
+      ..quadraticBezierTo(2, -11, 1, -8.5)
+      ..close();
+    canvas.drawPath(_crestPath, _birdCrestPaint);
+
+    // Wing
+    canvas.drawOval(
+      Rect.fromCenter(center: const Offset(-2.5, 2.0), width: 11, height: 8),
+      _birdWingPaint,
+    );
+
+    // Beak
+    _beakPath
+      ..reset()
+      ..moveTo(8.5, -2)
+      ..lineTo(14.5, 0.5)
+      ..lineTo(8, 3.5)
+      ..close();
+    canvas.drawPath(_beakPath, _birdBeakPaint);
+
+    // Eye & Glint
+    canvas.drawCircle(const Offset(3.5, -2.5), 2.2, _birdEyePaint);
+    canvas.drawCircle(const Offset(4.2, -3.2), 0.8, _birdEyeGlint);
 
     canvas.restore();
   }

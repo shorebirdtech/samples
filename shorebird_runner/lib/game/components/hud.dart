@@ -69,7 +69,6 @@ class Hud extends Component {
   TextPainter? _tpScoreValue;
   TextPainter? _tpNextLabel;
   TextPainter? _tpNextValue;
-  TextPainter? _tpLogo;
   TextPainter? _tpCombo;
   TextPainter? _tpBannerTitle;
   TextPainter? _tpBannerName;
@@ -95,6 +94,16 @@ class Hud extends Component {
   late final Shader _borderMissShader;
   int _lastProgressLevel = -1;
 
+  // Vector bird logo paints & paths (zero web font dependency)
+  static final Paint _birdBodyPaint = Paint()..color = const Color(0xFFFFD54F);
+  static final Paint _birdWingPaint = Paint()..color = const Color(0xFFFFB300);
+  static final Paint _birdEyePaint = Paint()..color = const Color(0xFF0F172A);
+  static final Paint _birdEyeGlint = Paint()..color = const Color(0xFFFFFFFF);
+  static final Paint _birdBeakPaint = Paint()..color = const Color(0xFFFF5722);
+  static final Paint _birdCrestPaint = Paint()..color = const Color(0xFFFFB300);
+  static final Path _beakPath = Path();
+  static final Path _crestPath = Path();
+
   Hud({this.playerTag}) {
     _initStaticPainters();
     _updateScorePainter();
@@ -104,11 +113,6 @@ class Hud extends Component {
   }
 
   void _initStaticPainters() {
-    _tpLogo = TextPainter(
-      text: const TextSpan(text: '🐤', style: TextStyle(fontSize: 18)),
-      textDirection: TextDirection.ltr,
-    )..layout();
-
     final panelRect = Rect.fromLTWH(0, 0, GameConfig.designWidth, 68);
     _bgPaint.shader = const LinearGradient(
       begin: Alignment.topCenter,
@@ -217,7 +221,7 @@ class Hud extends Component {
 
       _tpPlanName = TextPainter(
         text: TextSpan(
-          text: '${curLevel.emoji}  ${curLevel.name}',
+          text: curLevel.name,
           style: const TextStyle(
             color: _shorebirdGold,
             fontSize: 16,
@@ -232,8 +236,8 @@ class Hud extends Component {
     final nextLvl = GameConfig.nextLevel(_totalPatches);
     final patchesInLevel = _totalPatches - curLevel.patchThreshold;
     final nextText = nextLvl != null
-        ? '$patchesInLevel / ${curLevel.patchesNeeded}  🐤'
-        : 'ENTERPRISE  👑';
+        ? '$patchesInLevel / ${curLevel.patchesNeeded}  PATCHES'
+        : 'ENTERPRISE  TIER';
     final nextLabel = nextLvl != null ? 'NEXT: ${nextLvl.name}' : 'MAX TIER';
 
     _tpNextLabel = TextPainter(
@@ -267,7 +271,7 @@ class Hud extends Component {
     if (_combo > 1) {
       _tpCombo = TextPainter(
         text: TextSpan(
-          text: '🔥  STREAK  ×$_combo',
+          text: 'STREAK  ×$_combo',
           style: const TextStyle(
             color: Color(0xFFFFE082),
             fontSize: 11,
@@ -289,7 +293,7 @@ class Hud extends Component {
 
     _tpBannerTitle = TextPainter(
       text: const TextSpan(
-        text: '🚀  PLAN UPGRADED  ·  LEVEL UP!',
+        text: 'PLAN UPGRADED  ·  LEVEL UP!',
         style: TextStyle(
           color: _shorebirdGold,
           fontSize: 12,
@@ -302,7 +306,7 @@ class Hud extends Component {
 
     _tpBannerName = TextPainter(
       text: TextSpan(
-        text: '${newLevel.emoji}  ${newLevel.name}  PLAN',
+        text: '${newLevel.name}  PLAN',
         style: TextStyle(
           color: Color(newLevel.accentColor),
           fontSize: 26,
@@ -392,8 +396,48 @@ class Hud extends Component {
     _tpNextLabel?.paint(canvas, Offset(GameConfig.designWidth - 178, 10));
     _tpNextValue?.paint(canvas, Offset(GameConfig.designWidth - 178, 26));
 
-    // 🐤 Shorebird logo mark on the far right
-    _tpLogo?.paint(canvas, Offset(GameConfig.designWidth - 30, 24));
+    // Vector Shorebird logo mark on far right (zero font dependency)
+    _drawVectorLogo(canvas, Offset(GameConfig.designWidth - 28, 34));
+  }
+
+  void _drawVectorLogo(Canvas canvas, Offset center) {
+    canvas.save();
+    canvas.translate(center.dx, center.dy);
+    const s = 18.0 / 24.0;
+    canvas.scale(s, s);
+
+    // Head/Body
+    canvas.drawCircle(const Offset(0, 0), 10.5, _birdBodyPaint);
+
+    // Crest
+    _crestPath
+      ..reset()
+      ..moveTo(0, -10.5)
+      ..quadraticBezierTo(2, -15, 6, -14)
+      ..quadraticBezierTo(2, -11, 1, -8.5)
+      ..close();
+    canvas.drawPath(_crestPath, _birdCrestPaint);
+
+    // Wing
+    canvas.drawOval(
+      Rect.fromCenter(center: const Offset(-2.5, 2.0), width: 11, height: 8),
+      _birdWingPaint,
+    );
+
+    // Beak
+    _beakPath
+      ..reset()
+      ..moveTo(8.5, -2)
+      ..lineTo(14.5, 0.5)
+      ..lineTo(8, 3.5)
+      ..close();
+    canvas.drawPath(_beakPath, _birdBeakPaint);
+
+    // Eye & Glint
+    canvas.drawCircle(const Offset(3.5, -2.5), 2.2, _birdEyePaint);
+    canvas.drawCircle(const Offset(4.2, -3.2), 0.8, _birdEyeGlint);
+
+    canvas.restore();
   }
 
   void _drawStageProgressBar(Canvas canvas) {

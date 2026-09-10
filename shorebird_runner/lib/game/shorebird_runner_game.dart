@@ -324,7 +324,7 @@ class ShorebirdRunnerGame extends FlameGame
         _hud.score = score;
         AudioService.playStomp();
         _addFloatingText(
-          '🦘 LEAP! +150',
+          'LEAP! +150',
           o.worldPosition,
           const Color(0xFF00E5FF),
           size: 17,
@@ -341,7 +341,7 @@ class ShorebirdRunnerGame extends FlameGame
         _hud.score = score;
         AudioService.playSlide();
         _addFloatingText(
-          '⚡ SLIDE! +150',
+          'SLIDE! +150',
           o.worldPosition,
           const Color(0xFFFFD700),
           size: 17,
@@ -367,7 +367,7 @@ class ShorebirdRunnerGame extends FlameGame
     _screenShake = 0.8;
 
     _addFloatingText(
-      '💥 SQUASHED! +300',
+      'SQUASHED! +300',
       o.worldPosition,
       const Color(0xFF00FF88),
       size: 18,
@@ -402,7 +402,7 @@ class ShorebirdRunnerGame extends FlameGame
       _screenShake = 0.5;
       score += 500;
       _addFloatingText(
-        '🔥 HOT RELOAD! +500',
+        'HOT RELOAD! +500',
         pos,
         const Color(0xFFFF9100),
         size: 20,
@@ -410,7 +410,7 @@ class ShorebirdRunnerGame extends FlameGame
     } else {
       score += regularPoints;
       _addFloatingText(
-        isBoosted ? '+$regularPoints ⚡2X PATCH!' : '+$regularPoints 🐤 PATCH!',
+        isBoosted ? '+$regularPoints (2X PATCH)' : '+$regularPoints PATCH',
         pos,
         isBoosted ? const Color(0xFF00FFCC) : const Color(0xFFFFD700),
       );
@@ -421,7 +421,7 @@ class ShorebirdRunnerGame extends FlameGame
       _hud.triggerComboFlash();
       AudioService.playCombo();
       _addFloatingText(
-        'COMBO ×$_combo! +${GameConfig.comboBonus}',
+        'COMBO x$_combo! +${GameConfig.comboBonus}',
         Offset(pos.dx, pos.dy - 30),
         const Color(GameConfig.colorAmber),
       );
@@ -447,7 +447,7 @@ class ShorebirdRunnerGame extends FlameGame
 
     AudioService.playMiss();
     _addFloatingText(
-      '-${GameConfig.missedPatchPenalty} 🐤 MISSED!',
+      '-${GameConfig.missedPatchPenalty} MISSED!',
       Offset(pos.dx, GameConfig.nearY - 20),
       const Color(0xFFFF2A4B),
       size: 18,
@@ -464,7 +464,7 @@ class ShorebirdRunnerGame extends FlameGame
     _screenShake = 1.0;
 
     _addFloatingText(
-      '${newLevel.emoji} ${newLevel.name} UNLOCKED! +${GameConfig.levelUpBonus}',
+      '${newLevel.name} UNLOCKED! +${GameConfig.levelUpBonus}',
       Offset(GameConfig.designWidth / 2, 260),
       Color(newLevel.accentColor),
       size: 24,
