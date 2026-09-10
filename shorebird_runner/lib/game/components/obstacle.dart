@@ -198,50 +198,57 @@ class Obstacle extends Component {
     ..color = Colors.white.withValues(alpha: 0.3)
     ..style = PaintingStyle.stroke;
 
-  // Worm Bug static assets
-  static final Paint _wormHeadBodyPaint = Paint()
+  // Cyber Glitch Bug static assets
+  static final Paint _glitchShellPaint = Paint()
     ..shader = const RadialGradient(
       colors: [
-        Color(0xFF86EFAC),
-        Color(0xFF22C55E),
-        Color(0xFF052E16),
+        Color(0xFF334155),
+        Color(0xFF1E293B),
+        Color(0xFF020617),
       ],
       center: Alignment(-0.25, -0.35),
     ).createShader(const Rect.fromLTWH(-50, -50, 100, 100))
     ..style = PaintingStyle.fill;
 
-  static final Paint _wormBodyPaint = Paint()
+  static final Paint _glitchCorePaint = Paint()
     ..shader = const RadialGradient(
       colors: [
-        Color(0xFF86EFAC),
-        Color(0xFF16A34A),
-        Color(0xFF052E16),
+        Color(0xFF5EEAD4),
+        Color(0xFF0D9488),
+        Color(0xFF042F2E),
       ],
-      center: Alignment(-0.25, -0.35),
+      center: Alignment(0.0, 0.0),
     ).createShader(const Rect.fromLTWH(-50, -50, 100, 100))
     ..style = PaintingStyle.fill;
 
-  static final Paint _wormSpotPaint = Paint()
-    ..color = const Color(0xFFFACC15).withValues(alpha: 0.85);
-  static final Paint _wormFootPaint = Paint()..color = const Color(0xFF15803D);
-  static final Paint _wormAntennaPaint = Paint()
-    ..color = const Color(0xFF15803D)
-    ..strokeCap = StrokeCap.round
-    ..style = PaintingStyle.stroke;
-  static final Paint _wormAntennaTipPaint = Paint()
-    ..color = const Color(0xFFFF4E50);
-  static final Paint _wormWhitePaint = Paint()..color = Colors.white;
-  static final Paint _wormBlackPaint = Paint()..color = Colors.black;
-  static final Paint _wormBlushPaint = Paint()
-    ..color = const Color(0xFFFF69B4).withValues(alpha: 0.6);
-  static final Paint _wormMouthPaint = Paint()
-    ..color = const Color(0xFF052E16)
+  static final Paint _glitchLegPaint = Paint()
+    ..color = const Color(0xFF475569)
     ..strokeCap = StrokeCap.round
     ..style = PaintingStyle.stroke;
 
-  static final Path _reusableLeftAntenna = Path();
-  static final Path _reusableRightAntenna = Path();
-  static final Path _reusableMouth = Path();
+  static final Paint _glitchLegTipPaint = Paint()
+    ..color = const Color(0xFF00FFCC);
+
+  static final Paint _glitchCircuitPaint = Paint()
+    ..color = const Color(0xFF00FFCC).withValues(alpha: 0.75)
+    ..strokeCap = StrokeCap.round
+    ..style = PaintingStyle.stroke;
+
+  static final Paint _glitchVisorGlow = Paint()
+    ..color = const Color(0xFF00FFCC).withValues(alpha: 0.4);
+  static final Paint _glitchVisorCore = Paint()
+    ..color = const Color(0xFFFFFFFF);
+
+  // Hologram emitter pylons for store checkpoints
+  static final Paint _emitterBasePaint = Paint()
+    ..color = const Color(0xFF0F172A)
+    ..style = PaintingStyle.fill;
+  static final Paint _emitterRingPaint = Paint()
+    ..style = PaintingStyle.stroke
+    ..strokeWidth = 1.5;
+  static final Paint _emitterLaserPaint = Paint()
+    ..style = PaintingStyle.stroke
+    ..strokeWidth = 1.2;
 
   // Merge Barricade static assets
   static final Paint _barricadeLegPaint = Paint()
@@ -283,7 +290,60 @@ class Obstacle extends Component {
     final hoverBob = sin(_wobblePhase + depth * 6) * 4 * scale;
     final centerY = pos.dy - size * 0.55 + hoverBob;
 
-    // Dual-concentric ground shadow (zero blur, butter smooth)
+    // Grounded Holo-Emitter Pylons on lane shoulders
+    final pLeft = Offset(pos.dx - size * 0.62, pos.dy);
+    final pRight = Offset(pos.dx + size * 0.62, pos.dy);
+    final pylonW = 7.0 * scale;
+    final pylonH = 16.0 * scale;
+
+    _emitterRingPaint.color =
+        const Color(0xFF0A84FF).withValues(alpha: 0.65 * scale);
+    _emitterLaserPaint.color =
+        const Color(0xFF0A84FF).withValues(alpha: 0.35 * scale);
+
+    // Left emitter
+    canvas.drawRect(
+      Rect.fromLTWH(
+        pLeft.dx - pylonW * 0.5,
+        pLeft.dy - pylonH,
+        pylonW,
+        pylonH,
+      ),
+      _emitterBasePaint,
+    );
+    canvas.drawCircle(
+      Offset(pLeft.dx, pLeft.dy - pylonH),
+      pylonW * 0.6,
+      _emitterRingPaint,
+    );
+    canvas.drawLine(
+      Offset(pLeft.dx, pLeft.dy - pylonH),
+      Offset(pos.dx - size * 0.45, centerY),
+      _emitterLaserPaint,
+    );
+
+    // Right emitter
+    canvas.drawRect(
+      Rect.fromLTWH(
+        pRight.dx - pylonW * 0.5,
+        pRight.dy - pylonH,
+        pylonW,
+        pylonH,
+      ),
+      _emitterBasePaint,
+    );
+    canvas.drawCircle(
+      Offset(pRight.dx, pRight.dy - pylonH),
+      pylonW * 0.6,
+      _emitterRingPaint,
+    );
+    canvas.drawLine(
+      Offset(pRight.dx, pRight.dy - pylonH),
+      Offset(pos.dx + size * 0.45, centerY),
+      _emitterLaserPaint,
+    );
+
+    // Dual-concentric ground shadow
     final shadowCenter = Offset(pos.dx, pos.dy + 8 * scale);
     _shadowOuterPaint.color =
         const Color(0xFF001133).withValues(alpha: 0.25 * scale);
@@ -313,7 +373,7 @@ class Obstacle extends Component {
     final boxW = size * 0.96;
     final boxH = size * 0.96;
 
-    // Neon Blue Stepped Ambient Halo (replaces MaskFilter.blur)
+    // Neon Blue Stepped Ambient Halo
     _appHaloOuterPaint.color =
         const Color(0xFF0A84FF).withValues(alpha: 0.15 * scale);
     final haloOuterRect = Rect.fromCenter(
@@ -344,7 +404,7 @@ class Obstacle extends Component {
       _appHaloInnerPaint,
     );
 
-    // App Store Signature Blue Gradient (rendered via unit scale)
+    // App Store Signature Blue Gradient
     canvas.save();
     canvas.scale(boxW / 100, boxH / 100);
     canvas.drawRRect(_appUnitRRect, _appBgPaint);
@@ -356,7 +416,7 @@ class Obstacle extends Component {
       ..strokeWidth = (2.0 * scale) * (100 / boxW);
     canvas.drawRRect(_appUnitRRect, _appBorderPaint);
 
-    // Apple App Store "A" Logo (Pencil, Ruler, Brush bars)
+    // Apple App Store "A" Logo
     const aStrokeW = 11.0;
     _appAPaint.strokeWidth = aStrokeW;
 
@@ -396,6 +456,59 @@ class Obstacle extends Component {
     final hoverBob = cos(_wobblePhase + depth * 6) * 4 * scale;
     final centerY = pos.dy - size * 0.55 + hoverBob;
 
+    // Grounded Holo-Emitter Pylons on lane shoulders
+    final pLeft = Offset(pos.dx - size * 0.62, pos.dy);
+    final pRight = Offset(pos.dx + size * 0.62, pos.dy);
+    final pylonW = 7.0 * scale;
+    final pylonH = 16.0 * scale;
+
+    _emitterRingPaint.color =
+        const Color(0xFF00E676).withValues(alpha: 0.65 * scale);
+    _emitterLaserPaint.color =
+        const Color(0xFF00E676).withValues(alpha: 0.35 * scale);
+
+    // Left emitter
+    canvas.drawRect(
+      Rect.fromLTWH(
+        pLeft.dx - pylonW * 0.5,
+        pLeft.dy - pylonH,
+        pylonW,
+        pylonH,
+      ),
+      _emitterBasePaint,
+    );
+    canvas.drawCircle(
+      Offset(pLeft.dx, pLeft.dy - pylonH),
+      pylonW * 0.6,
+      _emitterRingPaint,
+    );
+    canvas.drawLine(
+      Offset(pLeft.dx, pLeft.dy - pylonH),
+      Offset(pos.dx - size * 0.45, centerY),
+      _emitterLaserPaint,
+    );
+
+    // Right emitter
+    canvas.drawRect(
+      Rect.fromLTWH(
+        pRight.dx - pylonW * 0.5,
+        pRight.dy - pylonH,
+        pylonW,
+        pylonH,
+      ),
+      _emitterBasePaint,
+    );
+    canvas.drawCircle(
+      Offset(pRight.dx, pRight.dy - pylonH),
+      pylonW * 0.6,
+      _emitterRingPaint,
+    );
+    canvas.drawLine(
+      Offset(pRight.dx, pRight.dy - pylonH),
+      Offset(pos.dx + size * 0.45, centerY),
+      _emitterLaserPaint,
+    );
+
     // Dual-concentric ground shadow
     final shadowCenter = Offset(pos.dx, pos.dy + 8 * scale);
     _shadowOuterPaint.color =
@@ -422,7 +535,7 @@ class Obstacle extends Component {
     canvas.save();
     canvas.translate(pos.dx, centerY);
 
-    // Multi-hue stepped halo (replaces blur)
+    // Multi-hue stepped halo
     _playHaloOuterPaint.color =
         const Color(0xFF00E676).withValues(alpha: 0.15 * scale);
     canvas.drawCircle(
@@ -459,174 +572,102 @@ class Obstacle extends Component {
     canvas.restore();
   }
 
-  // ── 🐛 Worm Caterpillar Bug Obstacle (Jumpable) ────────────────────────────
+  // ── 👾 Cyber Glitch Bug Entity (Jumpable) ─────────────────────────────────
   void _drawWormBug(Canvas canvas, Offset pos, double scale, double size) {
-    final crawlSpeed = depth * 16 + _wobblePhase;
-    final crawlBob = (sin(crawlSpeed) * 3.5).abs() * scale;
+    final crawlSpeed = depth * 18 + _wobblePhase;
+    final crawlBob = (sin(crawlSpeed * 2) * 2.5).abs() * scale;
 
-    // Dual-concentric ground shadow
-    final shadowCenter = Offset(pos.dx, pos.dy + 4 * scale);
+    // Ground shadow
+    final shadowCenter = Offset(pos.dx, pos.dy + 3 * scale);
     _shadowOuterPaint.color =
-        const Color(0xFF000000).withValues(alpha: 0.22 * scale);
+        const Color(0xFF000000).withValues(alpha: 0.35 * scale);
     canvas.drawOval(
       Rect.fromCenter(
         center: shadowCenter,
-        width: size * 1.3,
-        height: 14 * scale,
+        width: size * 1.35,
+        height: 12 * scale,
       ),
       _shadowOuterPaint,
     );
-    _shadowInnerPaint.color =
-        const Color(0xFF000000).withValues(alpha: 0.52 * scale);
-    canvas.drawOval(
-      Rect.fromCenter(
-        center: shadowCenter,
-        width: size * 0.95,
-        height: 8 * scale,
-      ),
-      _shadowInnerPaint,
+
+    final centerY = pos.dy - size * 0.28 - crawlBob;
+    final bodyW = size * 0.85;
+    final bodyH = size * 0.44;
+
+    // 1. Skittering Mechanical Legs (3 pairs)
+    _glitchLegPaint.strokeWidth = 2.4 * scale;
+    for (int leg = 0; leg < 3; leg++) {
+      final legT = (leg - 1) * 0.35;
+      final legPhase = crawlSpeed + leg * 1.2;
+      final legStep = sin(legPhase) * 6 * scale;
+
+      // Left leg
+      final lBase = Offset(pos.dx - bodyW * 0.38 + legT * bodyW * 0.5, centerY);
+      final lKnee =
+          Offset(lBase.dx - 12 * scale, lBase.dy - 6 * scale + legStep * 0.5);
+      final lFoot = Offset(lBase.dx - 16 * scale, pos.dy + legStep);
+      canvas.drawLine(lBase, lKnee, _glitchLegPaint);
+      canvas.drawLine(lKnee, lFoot, _glitchLegPaint);
+      canvas.drawCircle(lFoot, 1.8 * scale, _glitchLegTipPaint);
+
+      // Right leg
+      final rBase = Offset(pos.dx + bodyW * 0.38 - legT * bodyW * 0.5, centerY);
+      final rKnee =
+          Offset(rBase.dx + 12 * scale, rBase.dy - 6 * scale - legStep * 0.5);
+      final rFoot = Offset(rBase.dx + 16 * scale, pos.dy - legStep);
+      canvas.drawLine(rBase, rKnee, _glitchLegPaint);
+      canvas.drawLine(rKnee, rFoot, _glitchLegPaint);
+      canvas.drawCircle(rFoot, 1.8 * scale, _glitchLegTipPaint);
+    }
+
+    // 2. Armored Robotic Carapace Shell
+    final shellRect = Rect.fromCenter(
+      center: Offset(pos.dx, centerY),
+      width: bodyW,
+      height: bodyH,
+    );
+    final shellRRect =
+        RRect.fromRectAndRadius(shellRect, Radius.circular(8 * scale));
+    canvas.drawRRect(shellRRect, _glitchShellPaint);
+
+    // 3. Central Pulsing Power Core Matrix
+    final pulse = 0.85 + 0.15 * sin(crawlSpeed * 3);
+    final coreRect = Rect.fromCenter(
+      center: Offset(pos.dx, centerY),
+      width: bodyW * 0.42 * pulse,
+      height: bodyH * 0.55 * pulse,
+    );
+    canvas.drawRRect(
+      RRect.fromRectAndRadius(coreRect, Radius.circular(4 * scale)),
+      _glitchCorePaint,
     );
 
-    const segmentCount = 5;
-    final segmentRadius = size * 0.22;
+    // 4. Circuit trace lines
+    _glitchCircuitPaint.strokeWidth = 1.2 * scale;
+    canvas.drawLine(
+      Offset(pos.dx - bodyW * 0.45, centerY),
+      Offset(pos.dx - bodyW * 0.22, centerY),
+      _glitchCircuitPaint,
+    );
+    canvas.drawLine(
+      Offset(pos.dx + bodyW * 0.22, centerY),
+      Offset(pos.dx + bodyW * 0.45, centerY),
+      _glitchCircuitPaint,
+    );
 
-    for (int i = segmentCount - 1; i >= 0; i--) {
-      final t = i / (segmentCount - 1);
-      final segmentOffset = (i - 2) * (segmentRadius * 0.95);
-      final segmentWobble = sin(crawlSpeed - i * 0.75) * 6 * scale;
-      final segX = pos.dx + segmentOffset * 0.5;
-      final segY =
-          pos.dy - size * 0.28 - crawlBob + segmentWobble * (1.0 - t * 0.3);
-
-      final isHead = (i == 0);
-      final radius = isHead
-          ? segmentRadius * 1.25
-          : segmentRadius * (0.85 + (1.0 - t) * 0.25);
-
-      canvas.save();
-      canvas.translate(segX, segY);
-      canvas.scale(radius / 50, radius / 50);
-      canvas.drawCircle(
-        Offset.zero,
-        50,
-        isHead ? _wormHeadBodyPaint : _wormBodyPaint,
-      );
-      canvas.restore();
-
-      if (!isHead) {
-        canvas.drawCircle(
-          Offset(segX, segY - radius * 0.45),
-          radius * 0.28,
-          _wormSpotPaint,
-        );
-
-        canvas.drawCircle(
-          Offset(segX - radius * 0.35, segY + radius * 0.9),
-          radius * 0.22,
-          _wormFootPaint,
-        );
-        canvas.drawCircle(
-          Offset(segX + radius * 0.35, segY + radius * 0.9),
-          radius * 0.22,
-          _wormFootPaint,
-        );
-      }
-
-      if (isHead) {
-        _wormAntennaPaint.strokeWidth = 2.5 * scale;
-
-        _reusableLeftAntenna
-          ..reset()
-          ..moveTo(segX - radius * 0.35, segY - radius * 0.7)
-          ..quadraticBezierTo(
-            segX - radius * 0.8,
-            segY - radius * 1.6,
-            segX - radius * 0.6,
-            segY - radius * 1.8,
-          );
-        canvas.drawPath(_reusableLeftAntenna, _wormAntennaPaint);
-        canvas.drawCircle(
-          Offset(segX - radius * 0.6, segY - radius * 1.8),
-          radius * 0.22,
-          _wormAntennaTipPaint,
-        );
-
-        _reusableRightAntenna
-          ..reset()
-          ..moveTo(segX + radius * 0.35, segY - radius * 0.7)
-          ..quadraticBezierTo(
-            segX + radius * 0.8,
-            segY - radius * 1.6,
-            segX + radius * 0.6,
-            segY - radius * 1.8,
-          );
-        canvas.drawPath(_reusableRightAntenna, _wormAntennaPaint);
-        canvas.drawCircle(
-          Offset(segX + radius * 0.6, segY - radius * 1.8),
-          radius * 0.22,
-          _wormAntennaTipPaint,
-        );
-
-        final eyeRadius = radius * 0.32;
-        final leftEyePos = Offset(segX - radius * 0.36, segY - radius * 0.15);
-        final rightEyePos = Offset(segX + radius * 0.36, segY - radius * 0.15);
-
-        canvas.drawCircle(leftEyePos, eyeRadius, _wormWhitePaint);
-        canvas.drawCircle(rightEyePos, eyeRadius, _wormWhitePaint);
-
-        final pupilRadius = eyeRadius * 0.55;
-        canvas.drawCircle(
-          Offset(leftEyePos.dx, leftEyePos.dy + eyeRadius * 0.1),
-          pupilRadius,
-          _wormBlackPaint,
-        );
-        canvas.drawCircle(
-          Offset(rightEyePos.dx, rightEyePos.dy + eyeRadius * 0.1),
-          pupilRadius,
-          _wormBlackPaint,
-        );
-
-        canvas.drawCircle(
-          Offset(
-            leftEyePos.dx - pupilRadius * 0.3,
-            leftEyePos.dy - pupilRadius * 0.3,
-          ),
-          pupilRadius * 0.35,
-          _wormWhitePaint,
-        );
-        canvas.drawCircle(
-          Offset(
-            rightEyePos.dx - pupilRadius * 0.3,
-            rightEyePos.dy - pupilRadius * 0.3,
-          ),
-          pupilRadius * 0.35,
-          _wormWhitePaint,
-        );
-
-        canvas.drawCircle(
-          Offset(segX - radius * 0.55, segY + radius * 0.25),
-          radius * 0.22,
-          _wormBlushPaint,
-        );
-        canvas.drawCircle(
-          Offset(segX + radius * 0.55, segY + radius * 0.25),
-          radius * 0.22,
-          _wormBlushPaint,
-        );
-
-        _wormMouthPaint.strokeWidth = 2.0 * scale;
-        _reusableMouth
-          ..reset()
-          ..moveTo(segX - radius * 0.22, segY + radius * 0.35)
-          ..quadraticBezierTo(
-            segX,
-            segY + radius * 0.65,
-            segX + radius * 0.22,
-            segY + radius * 0.35,
-          );
-        canvas.drawPath(_reusableMouth, _wormMouthPaint);
-      }
-    }
+    // 5. Front Optical Visor Slit
+    final visorY = centerY - bodyH * 0.25;
+    final visorW = bodyW * 0.48;
+    canvas.drawLine(
+      Offset(pos.dx - visorW * 0.5, visorY),
+      Offset(pos.dx + visorW * 0.5, visorY),
+      _glitchVisorGlow..strokeWidth = 4.0 * scale,
+    );
+    canvas.drawLine(
+      Offset(pos.dx - visorW * 0.5, visorY),
+      Offset(pos.dx + visorW * 0.5, visorY),
+      _glitchVisorCore..strokeWidth = 1.5 * scale,
+    );
   }
 
   // ── 🚧 Low Merge Barricade (Jumpable) ──────────────────────────────────────

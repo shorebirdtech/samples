@@ -315,7 +315,7 @@ class _StartScreenState extends State<StartScreen>
                                   children: [
                                     Expanded(
                                       child: StartMenuSecondaryButton(
-                                        icon: '📖',
+                                        icon: Icons.menu_book_rounded,
                                         title: 'HOW TO PLAY',
                                         subtitle: 'RULES · TIERS · CONTROLS',
                                         color: AppColors.shorebirdGold,
