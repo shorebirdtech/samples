@@ -44,8 +44,8 @@ class ShorebirdRunnerGame extends FlameGame
   double _patchTimer = 0;
   double _timePointTimer = 0;
   double _scoreBroadcastTimer = 0;
-  // Hot Reload Booster pacing: strictly gated, rare (5%), and with cooldowns
-  double _boosterCooldownTimer = 18.0;
+  // Hot Reload Booster pacing: paced reliably every 11-14 patches (~once per tier milestone)
+  int _patchesSinceLastBooster = 0;
 
   // Components
   late final Player _player;
@@ -151,10 +151,6 @@ class ShorebirdRunnerGame extends FlameGame
     if (_patchTimer >= patchInterval) {
       _patchTimer = 0;
       _spawnPatch();
-    }
-
-    if (_boosterCooldownTimer > 0) {
-      _boosterCooldownTimer -= safeDt;
     }
 
     // Hot Reload Magnetic Pull on Collectibles (regular patches only; never pulls rare boosters)
@@ -272,18 +268,19 @@ class ShorebirdRunnerGame extends FlameGame
 
   void _spawnPatch() {
     final lane = _rng.nextInt(GameConfig.laneCount);
-    // Boosters are rare, difficult to obtain, and strictly gated:
-    // 1. Never spawn during active Hot Reload
-    // 2. Cooldown timer must have elapsed (min 25s between boosters)
-    // 3. Must have collected at least 10 patches
-    // 4. Low 5% spawn chance once all conditions are satisfied
-    final canSpawnBooster = !_player.isInvincible &&
-        _boosterCooldownTimer <= 0 &&
-        totalPatches >= 10;
-    final isBooster = canSpawnBooster && (_rng.nextDouble() < 0.05);
+    _patchesSinceLastBooster++;
+
+    // Paced powerup delivery:
+    // - Never spawns during active Hot Reload (invincibility)
+    // - Requires at least 11 regular patches between boosters to prevent spam
+    // - Spawns reliably between patches 11-14 (~once per tier milestone)
+    final canSpawnBooster =
+        !_player.isInvincible && _patchesSinceLastBooster >= 11;
+    final isBooster = canSpawnBooster &&
+        (_patchesSinceLastBooster >= 14 || _rng.nextDouble() < 0.40);
 
     if (isBooster) {
-      _boosterCooldownTimer = 25.0;
+      _patchesSinceLastBooster = 0;
     }
 
     final patch = Patch(
@@ -397,7 +394,7 @@ class ShorebirdRunnerGame extends FlameGame
     if (p.isHotReloadBooster) {
       // 4.5 seconds of high-octane invincibility
       _player.triggerHotReload(4.5);
-      _boosterCooldownTimer = 28.0; // Strict cooldown before another can spawn
+      _patchesSinceLastBooster = 0;
       _hud.triggerComboFlash();
       _screenShake = 0.5;
       score += 500;
