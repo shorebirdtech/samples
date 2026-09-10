@@ -483,8 +483,8 @@ class ShorebirdRunnerGame extends FlameGame
     HighScoreService.save(score).then((_) async {
       highScore = await HighScoreService.load();
       await Future.delayed(const Duration(milliseconds: 650));
+      if (!isMounted) return;
       onGameOver(score, totalPatches, currentLevel);
-      overlays.add('game_over');
     });
   }
 
