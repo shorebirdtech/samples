@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
 # ==============================================================================
-# 🐤 Shorebird Patch Rush — Netlify Build & Deployment Script
+# 🐤 Shorebird Patch Rush — Web Build Script
 # 
-# Builds Flutter Web release and deploys directly to Netlify.
+# Builds Flutter Web release ready for GitHub Pages or static web hosting.
 # 
 # Usage:
-#   ./deploy.sh                  # Interactive build & deploy to Netlify
-#   ./deploy.sh --netlify        # Build & Deploy directly to Netlify
-#   ./deploy.sh --build-only     # Compile build/web release only
+#   ./deploy.sh                  # Build web release for distribution
+#   ./deploy.sh --gh-pages       # Build with GitHub Pages subpath base-href
+#   ./deploy.sh --base-href /... # Build with custom base-href
 # ==============================================================================
 
 set -e
@@ -26,8 +26,8 @@ cd "$ROOT_DIR"
 
 echo -e "${GOLD}${BOLD}"
 echo "  ╔═══════════════════════════════════════════════════════════╗"
-echo "  ║        🐤  SHOREBIRD PATCH RUSH — NETLIFY DEPLOY  🚀       ║"
-echo "  ║             Solo Runner Web Build & Deployment            ║"
+echo "  ║      🐤  SHOREBIRD PATCH RUSH — WEB RELEASE BUILD  🚀      ║"
+echo "  ║             GitHub Pages & Static Web Hosting             ║"
 echo "  ╚═══════════════════════════════════════════════════════════╝"
 echo -e "${NC}"
 
@@ -49,15 +49,19 @@ fi
 echo -e "${CYAN}→ Using Flutter SDK:${NC} $($FLUTTER_CMD --version | head -n 1)"
 
 # Parse optional arguments
-TARGET_ACTION=""
+BASE_HREF_VAL="/"
 SUPABASE_URL_ARG=""
 SUPABASE_KEY_ARG=""
 
 while [[ $# -gt 0 ]]; do
   case $1 in
-    --netlify)
-      TARGET_ACTION="netlify"
+    --gh-pages)
+      BASE_HREF_VAL="/samples/"
       shift
+      ;;
+    --base-href)
+      BASE_HREF_VAL="$2"
+      shift 2
       ;;
     --supabase-url)
       SUPABASE_URL_ARG="$2"
@@ -67,18 +71,14 @@ while [[ $# -gt 0 ]]; do
       SUPABASE_KEY_ARG="$2"
       shift 2
       ;;
-    --build-only)
-      TARGET_ACTION="build-only"
-      shift
-      ;;
     --help|-h)
       echo "Usage: ./deploy.sh [OPTIONS]"
       echo ""
       echo "Options:"
-      echo "  --netlify                Build and deploy web release directly to Netlify"
+      echo "  --gh-pages               Build for GitHub Pages with base-href /samples/"
+      echo "  --base-href <PATH>       Specify custom base-href (default: /)"
       echo "  --supabase-url <URL>     Embed Supabase URL via --dart-define"
       echo "  --supabase-key <KEY>     Embed Supabase Anon Key via --dart-define"
-      echo "  --build-only             Compile Flutter web release without deploying"
       echo "  -h, --help               Show this help message"
       exit 0
       ;;
@@ -89,73 +89,29 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
-# If no target specified, show interactive prompt
-if [ -z "$TARGET_ACTION" ]; then
-  echo -e "${BOLD}Select an Action:${NC}"
-  echo -e "  ${GOLD}1)${NC} ${BOLD}Deploy to Netlify${NC} (Build & deploy web client to Netlify CDN)"
-  echo -e "  ${GOLD}2)${NC} ${BOLD}Build Web Release Only${NC} (Compile to build/web)"
-  echo ""
-  read -p "Enter choice [1-2] (default 1): " CHOICE
-  case $CHOICE in
-    2) TARGET_ACTION="build-only" ;;
-    *) TARGET_ACTION="netlify" ;;
-  esac
+echo ""
+echo -e "${PURPLE}======================================================${NC}"
+echo -e "${BOLD}🔨 Compiling Flutter Web Release (base-href: ${BASE_HREF_VAL})...${NC}"
+echo -e "${PURPLE}======================================================${NC}"
+
+BUILD_ARGS=("build" "web" "--release" "--base-href" "$BASE_HREF_VAL")
+if [ -n "$SUPABASE_URL_ARG" ]; then
+  echo -e "${CYAN}→ Embedding Supabase URL:${NC} $SUPABASE_URL_ARG"
+  BUILD_ARGS+=("--dart-define=SUPABASE_URL=$SUPABASE_URL_ARG")
+fi
+if [ -n "$SUPABASE_KEY_ARG" ]; then
+  echo -e "${CYAN}→ Embedding Supabase Anon Key${NC}"
+  BUILD_ARGS+=("--dart-define=SUPABASE_ANON_KEY=$SUPABASE_KEY_ARG")
 fi
 
-# Step 1: Build the Flutter Web application
-build_flutter_web() {
-  echo ""
-  echo -e "${PURPLE}======================================================${NC}"
-  echo -e "${BOLD}🔨 Compiling Flutter Web Release with 🐤 Branding...${NC}"
-  echo -e "${PURPLE}======================================================${NC}"
+"$FLUTTER_CMD" "${BUILD_ARGS[@]}"
 
-  BUILD_ARGS=("build" "web" "--release")
-  if [ -n "$SUPABASE_URL_ARG" ]; then
-    echo -e "${CYAN}→ Embedding Supabase URL:${NC} $SUPABASE_URL_ARG"
-    BUILD_ARGS+=("--dart-define=SUPABASE_URL=$SUPABASE_URL_ARG")
-  fi
-  if [ -n "$SUPABASE_KEY_ARG" ]; then
-    echo -e "${CYAN}→ Embedding Supabase Anon Key${NC}"
-    BUILD_ARGS+=("--dart-define=SUPABASE_ANON_KEY=$SUPABASE_KEY_ARG")
-  fi
+# Ensure updated icons and assets are synchronized
+cp web/favicon.png web/favicon.svg web/index.html build/web/
+mkdir -p build/web/icons
+cp web/icons/* build/web/icons/
 
-  "$FLUTTER_CMD" "${BUILD_ARGS[@]}"
-
-  # Ensure updated 🐤 icons and assets are synchronized
-  cp web/favicon.png web/favicon.svg web/index.html build/web/
-  mkdir -p build/web/icons
-  cp web/icons/* build/web/icons/
-
-  echo -e "${GREEN}✓ Flutter Web compiled successfully to build/web/${NC}"
-}
-
-# Execute selected action
-case $TARGET_ACTION in
-  netlify)
-    build_flutter_web
-
-    echo ""
-    echo -e "${PURPLE}======================================================${NC}"
-    echo -e "${BOLD}🚀 Deploying to Netlify...${NC}"
-    echo -e "${PURPLE}======================================================${NC}"
-
-    if command -v netlify &> /dev/null; then
-      echo -e "${CYAN}Running installed Netlify CLI...${NC}"
-      netlify deploy --prod --dir=build/web
-    elif command -v npx &> /dev/null; then
-      echo -e "${CYAN}Running Netlify CLI via npx...${NC}"
-      npx netlify-cli deploy --prod --dir=build/web
-    else
-      echo -e "${GOLD}Netlify CLI not found.${NC}"
-      echo -e "You can deploy manually by dragging ${BOLD}build/web/${NC} into: https://app.netlify.com/drop"
-    fi
-    ;;
-
-  build-only)
-    build_flutter_web
-    echo ""
-    echo -e "${GREEN}✓ Build complete! Folder '${BOLD}build/web${NC}' is ready for Netlify hosting.${NC}"
-    ;;
-esac
-
+echo ""
+echo -e "${GREEN}✓ Flutter Web compiled successfully to build/web/${NC}"
+echo -e "${GREEN}✓ Ready for deployment to GitHub Pages or static hosting.${NC}"
 echo ""
