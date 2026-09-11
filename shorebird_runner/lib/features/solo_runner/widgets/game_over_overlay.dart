@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:shorebird_runner/core/core.dart';
+import 'package:shorebird_runner/features/leaderboard/leaderboard.dart';
 import 'package:shorebird_runner/features/solo_runner/widgets/stat_tile.dart';
 import 'package:shorebird_runner/game/game.dart';
 
@@ -131,6 +132,42 @@ class GameOverOverlay extends StatelessWidget {
                       fontWeight: FontWeight.w900,
                       letterSpacing: 1.5,
                     ),
+                  ),
+                ),
+                const SizedBox(height: 10),
+                OutlinedButton(
+                  onPressed: () {
+                    AudioService.playSelect();
+                    LeaderboardDialog.show(context);
+                  },
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: AppColors.shorebirdGold,
+                    side: BorderSide(
+                      color: AppColors.shorebirdGold.withValues(alpha: 0.4),
+                    ),
+                    minimumSize: const Size.fromHeight(46),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                  child: const Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        Icons.emoji_events_rounded,
+                        size: 18,
+                        color: AppColors.shorebirdGold,
+                      ),
+                      SizedBox(width: 8),
+                      Text(
+                        'VIEW LEADERBOARD',
+                        style: TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w800,
+                          letterSpacing: 1.5,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
                 const SizedBox(height: 10),

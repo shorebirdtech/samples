@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shorebird_runner/core/constants/constants.dart';
-import 'package:shorebird_runner/features/lead_capture/bloc/bloc.dart';
-import 'package:shorebird_runner/features/lead_capture/models/lead_model.dart';
-import 'package:shorebird_runner/features/lead_capture/widgets/widgets.dart';
+import 'package:shorebird_runner/features/leaderboard/leaderboard.dart';
+import 'package:shorebird_runner/features/lead_capture/lead_capture.dart';
 import 'package:shorebird_runner/features/start_menu/widgets/widgets.dart';
 
 /// Full Shorebird-branded start screen with obsidian theme,
@@ -315,10 +314,31 @@ class _StartScreenState extends State<StartScreen>
                                   children: [
                                     Expanded(
                                       child: StartMenuSecondaryButton(
+                                        icon: Icons.emoji_events_rounded,
+                                        title: 'LEADERBOARD',
+                                        subtitle: 'TOP SCORES · RANKS',
+                                        color: AppColors.shorebirdGold,
+                                        onTap: () {
+                                          final activeEvent = context
+                                              .read<LeadCaptureBloc>()
+                                              .state
+                                              .event;
+                                          LeaderboardDialog.show(
+                                            context,
+                                            initialEvent: activeEvent.isNotEmpty
+                                                ? activeEvent
+                                                : null,
+                                          );
+                                        },
+                                      ),
+                                    ),
+                                    const SizedBox(width: 10),
+                                    Expanded(
+                                      child: StartMenuSecondaryButton(
                                         icon: Icons.menu_book_rounded,
                                         title: 'HOW TO PLAY',
                                         subtitle: 'RULES · TIERS · CONTROLS',
-                                        color: AppColors.shorebirdGold,
+                                        color: const Color(0xFF38BDF8),
                                         onTap: () => showGameRulesDialog(
                                           context,
                                           onStart: _onStartPressed,

@@ -29,6 +29,7 @@ class LeadCaptureState extends Equatable {
       RegExp(r'^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$')
           .hasMatch(email.trim());
   bool get isPhoneValid =>
+      phone.trim().isEmpty ||
       phone.trim().replaceAll(RegExp(r'[^0-9]'), '').length >= 6;
   bool get isOrgValid => organization.trim().isNotEmpty;
 
