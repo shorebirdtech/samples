@@ -8,8 +8,9 @@ import 'package:shorebird_runner/features/leaderboard/leaderboard.dart';
 import 'package:shorebird_runner/features/solo_runner/bloc/solo_runner_bloc.dart';
 import 'package:shorebird_runner/features/start_menu/bloc/start_menu_bloc.dart';
 
-void main() {
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await AudioService.init();
   runApp(const PatchRushApp());
 }
 

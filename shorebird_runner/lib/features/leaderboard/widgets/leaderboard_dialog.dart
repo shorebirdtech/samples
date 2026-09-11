@@ -43,6 +43,7 @@ class LeaderboardDialog extends StatefulWidget {
 
 class _LeaderboardDialogState extends State<LeaderboardDialog> {
   final TextEditingController _searchController = TextEditingController();
+  bool _todayOnly = false;
 
   @override
   void initState() {
@@ -175,6 +176,26 @@ class _LeaderboardDialogState extends State<LeaderboardDialog> {
                       padding: const EdgeInsets.fromLTRB(20, 16, 20, 12),
                       child: Column(
                         children: [
+                          // Time Scope Selector (All-Time vs Today)
+                          Row(
+                            children: [
+                              _TimePill(
+                                label: 'ALL TIME',
+                                icon: Icons.all_inclusive_rounded,
+                                isSelected: !_todayOnly,
+                                onTap: () => setState(() => _todayOnly = false),
+                              ),
+                              const SizedBox(width: 8),
+                              _TimePill(
+                                label: 'TODAY',
+                                icon: Icons.today_rounded,
+                                isSelected: _todayOnly,
+                                onTap: () => setState(() => _todayOnly = true),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 10),
+
                           // Search Box
                           TextField(
                             controller: _searchController,
@@ -391,7 +412,15 @@ class _LeaderboardDialogState extends State<LeaderboardDialog> {
                         );
                       }
 
-                      final entries = state.filteredEntries;
+                      var entries = state.filteredEntries;
+                      if (_todayOnly) {
+                        final now = DateTime.now();
+                        final startOfToday =
+                            DateTime(now.year, now.month, now.day);
+                        entries = entries
+                            .where((e) => e.createdAt.isAfter(startOfToday))
+                            .toList();
+                      }
 
                       if (entries.isEmpty) {
                         return Center(
@@ -404,9 +433,11 @@ class _LeaderboardDialogState extends State<LeaderboardDialog> {
                                 color: AppColors.slateMuted,
                               ),
                               const SizedBox(height: 12),
-                              const Text(
-                                'No runners found',
-                                style: TextStyle(
+                              Text(
+                                _todayOnly
+                                    ? 'No runners today yet'
+                                    : 'No runners found',
+                                style: const TextStyle(
                                   color: Color(0xFFCBD5E1),
                                   fontSize: 15,
                                   fontWeight: FontWeight.w700,
@@ -414,9 +445,11 @@ class _LeaderboardDialogState extends State<LeaderboardDialog> {
                               ),
                               const SizedBox(height: 4),
                               Text(
-                                state.searchQuery.isNotEmpty
-                                    ? 'No results matching "${state.searchQuery}"'
-                                    : 'Be the first to set a high score in this event!',
+                                _todayOnly
+                                    ? 'Be the first runner on the board today!'
+                                    : state.searchQuery.isNotEmpty
+                                        ? 'No results matching "${state.searchQuery}"'
+                                        : 'Be the first to set a high score in this event!',
                                 style: const TextStyle(
                                   color: AppColors.slateMuted,
                                   fontSize: 12,
@@ -647,6 +680,69 @@ class _LeaderboardRow extends StatelessWidget {
             ],
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _TimePill extends StatelessWidget {
+  final String label;
+  final IconData icon;
+  final bool isSelected;
+  final VoidCallback onTap;
+
+  const _TimePill({
+    required this.label,
+    required this.icon,
+    required this.isSelected,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(8),
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 180),
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+          decoration: BoxDecoration(
+            color: isSelected
+                ? AppColors.shorebirdGold.withValues(alpha: 0.15)
+                : const Color(0xFF131C2E),
+            borderRadius: BorderRadius.circular(8),
+            border: Border.all(
+              color: isSelected
+                  ? AppColors.shorebirdGold.withValues(alpha: 0.6)
+                  : const Color(0xFF1E293B),
+            ),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                icon,
+                size: 13,
+                color:
+                    isSelected ? AppColors.shorebirdGold : AppColors.slateMuted,
+              ),
+              const SizedBox(width: 5),
+              Text(
+                label,
+                style: TextStyle(
+                  color: isSelected
+                      ? AppColors.shorebirdGold
+                      : AppColors.slateMuted,
+                  fontSize: 10.5,
+                  fontWeight: FontWeight.w800,
+                  letterSpacing: 0.8,
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }

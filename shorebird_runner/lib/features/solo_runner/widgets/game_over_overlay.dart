@@ -54,28 +54,59 @@ class GameOverOverlay extends StatelessWidget {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                if (isNewRecord) ...[
-                  const Text(
-                    AppStrings.newRecord,
-                    style: TextStyle(
-                      color: AppColors.shorebirdGold,
-                      fontSize: 12,
-                      fontWeight: FontWeight.w900,
-                      letterSpacing: 2,
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const SizedBox(width: 36),
+                    Expanded(
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          if (isNewRecord) ...[
+                            const Text(
+                              AppStrings.newRecord,
+                              style: TextStyle(
+                                color: AppColors.shorebirdGold,
+                                fontSize: 12,
+                                fontWeight: FontWeight.w900,
+                                letterSpacing: 2,
+                              ),
+                            ),
+                            const SizedBox(height: 6),
+                          ],
+                          Text(
+                            AppStrings.gameOver,
+                            style: TextStyle(
+                              color: isNewRecord
+                                  ? AppColors.shorebirdGold
+                                  : AppColors.errorRed,
+                              fontSize: 26,
+                              fontWeight: FontWeight.w900,
+                              letterSpacing: 2.5,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 6),
-                ],
-                Text(
-                  AppStrings.gameOver,
-                  style: TextStyle(
-                    color: isNewRecord
-                        ? AppColors.shorebirdGold
-                        : AppColors.errorRed,
-                    fontSize: 26,
-                    fontWeight: FontWeight.w900,
-                    letterSpacing: 2.5,
-                  ),
+                    ValueListenableBuilder<bool>(
+                      valueListenable: AudioService.isMutedNotifier,
+                      builder: (context, isMuted, _) {
+                        return IconButton(
+                          icon: Icon(
+                            isMuted
+                                ? Icons.volume_off_rounded
+                                : Icons.volume_up_rounded,
+                            color: isMuted
+                                ? AppColors.slateMuted
+                                : AppColors.shorebirdGold,
+                            size: 22,
+                          ),
+                          tooltip: isMuted ? 'Unmute Audio' : 'Mute Audio',
+                          onPressed: () => AudioService.toggleMute(),
+                        );
+                      },
+                    ),
+                  ],
                 ),
                 const SizedBox(height: 18),
                 StatTile(

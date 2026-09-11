@@ -16,6 +16,14 @@ class RestartSoloGame extends SoloRunnerEvent {
   const RestartSoloGame();
 }
 
+class PauseSoloGame extends SoloRunnerEvent {
+  const PauseSoloGame();
+}
+
+class ResumeSoloGame extends SoloRunnerEvent {
+  const ResumeSoloGame();
+}
+
 class SoloGameOver extends SoloRunnerEvent {
   final int score;
   final int patches;

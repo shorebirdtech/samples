@@ -17,7 +17,27 @@ class SoloRunnerBloc extends Bloc<SoloRunnerEvent, SoloRunnerState> {
         super(SoloRunnerState()) {
     on<StartSoloGame>(_onStartSoloGame);
     on<RestartSoloGame>(_onRestartSoloGame);
+    on<PauseSoloGame>(_onPauseSoloGame);
+    on<ResumeSoloGame>(_onResumeSoloGame);
     on<SoloGameOver>(_onSoloGameOver);
+  }
+
+  void _onPauseSoloGame(
+    PauseSoloGame event,
+    Emitter<SoloRunnerState> emit,
+  ) {
+    if (state.status == SoloGameStatus.playing) {
+      emit(state.copyWith(status: SoloGameStatus.paused));
+    }
+  }
+
+  void _onResumeSoloGame(
+    ResumeSoloGame event,
+    Emitter<SoloRunnerState> emit,
+  ) {
+    if (state.status == SoloGameStatus.paused) {
+      emit(state.copyWith(status: SoloGameStatus.playing));
+    }
   }
 
   Future<void> _onStartSoloGame(
