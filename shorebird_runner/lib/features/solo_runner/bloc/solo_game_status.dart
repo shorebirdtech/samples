@@ -1,1 +1,1 @@
-enum SoloGameStatus { initial, playing, gameOver }
+enum SoloGameStatus { initial, playing, paused, gameOver }

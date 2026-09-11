@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:shorebird_runner/core/constants/constants.dart';
-import 'package:shorebird_runner/features/leaderboard/leaderboard.dart';
+import 'package:shorebird_runner/core/core.dart';
 import 'package:shorebird_runner/features/lead_capture/lead_capture.dart';
+import 'package:shorebird_runner/features/leaderboard/leaderboard.dart';
 import 'package:shorebird_runner/features/start_menu/widgets/widgets.dart';
 
 /// Full Shorebird-branded start screen with obsidian theme,
@@ -364,6 +364,80 @@ class _StartScreenState extends State<StartScreen>
                       ),
                     ),
                   ),
+                ),
+              ),
+            ),
+          ),
+
+          // === TOP RIGHT CONTROLS: AUDIO TOGGLE ===
+          SafeArea(
+            child: Align(
+              alignment: Alignment.topRight,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 10,
+                ),
+                child: ValueListenableBuilder<bool>(
+                  valueListenable: AudioService.isMutedNotifier,
+                  builder: (context, isMuted, _) {
+                    return Material(
+                      color: Colors.transparent,
+                      child: Tooltip(
+                        message: isMuted ? 'Unmute Audio' : 'Mute Audio',
+                        child: InkWell(
+                          onTap: () {
+                            AudioService.playSelect();
+                            AudioService.toggleMute();
+                          },
+                          borderRadius: BorderRadius.circular(10),
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 10,
+                              vertical: 6,
+                            ),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFF111827)
+                                  .withValues(alpha: 0.8),
+                              borderRadius: BorderRadius.circular(10),
+                              border: Border.all(
+                                color: isMuted
+                                    ? Colors.white12
+                                    : AppColors.shorebirdGold
+                                        .withValues(alpha: 0.4),
+                              ),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(
+                                  isMuted
+                                      ? Icons.volume_off_rounded
+                                      : Icons.volume_up_rounded,
+                                  color: isMuted
+                                      ? AppColors.slateMuted
+                                      : AppColors.shorebirdGold,
+                                  size: 16,
+                                ),
+                                const SizedBox(width: 5),
+                                Text(
+                                  isMuted ? 'MUTED' : 'AUDIO',
+                                  style: TextStyle(
+                                    color: isMuted
+                                        ? AppColors.slateMuted
+                                        : AppColors.shorebirdGold,
+                                    fontSize: 10,
+                                    fontWeight: FontWeight.w800,
+                                    letterSpacing: 1,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                    );
+                  },
                 ),
               ),
             ),

@@ -19,6 +19,7 @@ class ShorebirdRunnerGame extends FlameGame
   final void Function(int score, int patches, LevelConfig level) onGameOver;
   final void Function(int score, int patches, LevelConfig level, bool isAlive)?
       onScoreUpdate;
+  final VoidCallback? onPauseRequested;
   final ControlScheme controlScheme;
   final PlayerSkin skin;
   final String? playerTag;
@@ -26,6 +27,7 @@ class ShorebirdRunnerGame extends FlameGame
   ShorebirdRunnerGame({
     required this.onGameOver,
     this.onScoreUpdate,
+    this.onPauseRequested,
     this.controlScheme = ControlScheme.both,
     this.skin = PlayerSkin.blueBird,
     this.playerTag,
@@ -71,6 +73,10 @@ class ShorebirdRunnerGame extends FlameGame
 
   // Track cleared obstacles to award leap/slide bonuses once
   final Set<Obstacle> _clearedObstacles = {};
+
+  // Track near-miss dodging juice
+  int _previousLane = 1;
+  double _lastLaneChangeTime = -10.0;
 
   @override
   Color backgroundColor() => const Color(GameConfig.colorBg);
@@ -174,6 +180,8 @@ class ShorebirdRunnerGame extends FlameGame
         world.remove(o);
         continue;
       }
+
+      _checkNearMiss(o);
 
       if (_checkObstacleInteraction(o)) {
         return;
@@ -352,6 +360,26 @@ class ShorebirdRunnerGame extends FlameGame
     return true;
   }
 
+  void _checkNearMiss(Obstacle o) {
+    if (_player.isInvincible) return;
+    if (o.depth < 0.90 || o.depth > 1.04) return;
+    if (_clearedObstacles.contains(o)) return;
+    if (o.lane == _previousLane && o.lane != _player.currentLane) {
+      if ((_elapsed - _lastLaneChangeTime) < 0.45) {
+        _clearedObstacles.add(o);
+        score += 75;
+        _hud.score = score;
+        AudioService.playCloseCall();
+        _addFloatingText(
+          'CLOSE CALL! +75',
+          o.worldPosition,
+          const Color(0xFF00FFCC),
+          size: 15,
+        );
+      }
+    }
+  }
+
   void _smashObstacle(Obstacle o) {
     o.isDead = true;
     _clearedObstacles.remove(o);
@@ -514,6 +542,11 @@ class ShorebirdRunnerGame extends FlameGame
     if (event is KeyDownEvent) {
       final key = event.logicalKey;
 
+      if (key == LogicalKeyboardKey.escape || key == LogicalKeyboardKey.keyP) {
+        onPauseRequested?.call();
+        return KeyEventResult.handled;
+      }
+
       final allowLeft = (controlScheme == ControlScheme.both &&
               (key == LogicalKeyboardKey.arrowLeft ||
                   key == LogicalKeyboardKey.keyA)) ||
@@ -597,9 +630,25 @@ class ShorebirdRunnerGame extends FlameGame
     }
   }
 
-  void moveToLane(int lane) => _player.moveToLane(lane);
-  void moveLeft() => _player.moveLeft();
-  void moveRight() => _player.moveRight();
+  void moveToLane(int lane) {
+    if (lane != _player.currentLane) {
+      _previousLane = _player.currentLane;
+      _lastLaneChangeTime = _elapsed;
+    }
+    _player.moveToLane(lane);
+  }
+
+  void moveLeft() {
+    _previousLane = _player.currentLane;
+    _lastLaneChangeTime = _elapsed;
+    _player.moveLeft();
+  }
+
+  void moveRight() {
+    _previousLane = _player.currentLane;
+    _lastLaneChangeTime = _elapsed;
+    _player.moveRight();
+  }
 
   void jump() => _player.jump();
   void slide() => _player.slide();
