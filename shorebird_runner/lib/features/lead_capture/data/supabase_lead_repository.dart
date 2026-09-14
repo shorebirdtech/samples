@@ -41,7 +41,8 @@ class SupabaseLeadRepository implements ILeadRepository {
         _httpClient = httpClient ?? http.Client(),
         _localFallback = localFallback ?? const LocalLeadRepository();
 
-  bool get isConfigured => supabaseUrl.isNotEmpty && supabaseAnonKey.isNotEmpty;
+  bool get isConfigured =>
+      !kDebugMode && supabaseUrl.isNotEmpty && supabaseAnonKey.isNotEmpty;
 
   @override
   Future<void> submitLead(LeadModel lead) async {

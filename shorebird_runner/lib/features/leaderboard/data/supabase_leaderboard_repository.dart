@@ -30,7 +30,8 @@ class SupabaseLeaderboardRepository implements ILeaderboardRepository {
         _httpClient = httpClient ?? http.Client(),
         _localFallback = localFallback ?? const LocalLeaderboardRepository();
 
-  bool get isConfigured => supabaseUrl.isNotEmpty && supabaseAnonKey.isNotEmpty;
+  bool get isConfigured =>
+      !kDebugMode && supabaseUrl.isNotEmpty && supabaseAnonKey.isNotEmpty;
 
   @override
   Future<List<LeaderboardEntryModel>> getScores({String? event}) async {

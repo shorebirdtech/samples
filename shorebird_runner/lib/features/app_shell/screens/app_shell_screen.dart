@@ -15,7 +15,7 @@ class AppShellScreen extends StatelessWidget {
         switch (state.mode) {
           case AppMode.menu:
             return StartScreen(
-              onStartPatching: (LeadModel lead) {
+              onStartPatching: (LeadModel? lead) {
                 context.read<AppShellBloc>().add(
                       NavigateToMode(
                         AppMode.solo,
