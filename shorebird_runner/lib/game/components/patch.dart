@@ -28,7 +28,9 @@ class Patch extends Component {
   bool isInvincible = false;
   final Random _rng;
 
-  final void Function(Offset pos)? onMissed;
+  /// Reports where the patch was missed and which lane it was in, so the game
+  /// can tell an avoidable miss from one an obstacle made impossible.
+  final void Function(Offset pos, int lane)? onMissed;
   final List<Sparkle> _sparkles = [];
   final List<MagneticTrailParticle> _magnetParticles = [];
 
@@ -106,7 +108,7 @@ class Patch extends Component {
       if (depth >= 1.04 && !hasTriggeredMiss) {
         hasTriggeredMiss = true;
         if (!isHotReloadBooster) {
-          onMissed?.call(worldPosition);
+          onMissed?.call(worldPosition, lane);
         }
       }
     } else {

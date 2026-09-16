@@ -326,7 +326,7 @@ class ShorebirdRunnerGame extends FlameGame
       lane: lane,
       rng: _rng,
       isHotReloadBooster: isBooster,
-      onMissed: (pos) => _onPatchMissed(pos),
+      onMissed: (pos, missedLane) => _onPatchMissed(pos, missedLane),
     );
     patch.totalPatches = totalPatches;
     _patches.add(patch);
@@ -335,8 +335,11 @@ class ShorebirdRunnerGame extends FlameGame
 
   bool _checkObstacleInteraction(Obstacle o) {
     if (o.depth < 0.86 || o.depth > 1.03) return false;
-    if (o.lane != _player.currentLane) return false;
-
+    // Deliberately no lane gate: currentLane stays on the lane being *left*
+    // until the tween finishes, so gating on it kept hitting the player with
+    // an obstacle they had visually already dodged. The player's x is tweened,
+    // so proximity below decides it, and the lanes are far enough apart on
+    // screen that a neighbouring one can't register.
     final playerPos = _player.worldPosition;
     final obsPos = o.worldPosition;
     final dx = (playerPos.dx - obsPos.dx).abs();
@@ -356,14 +359,17 @@ class ShorebirdRunnerGame extends FlameGame
     if (o.isJumpable && _player.isJumping) {
       if (!_clearedObstacles.contains(o)) {
         _clearedObstacles.add(o);
-        score += 150;
+        // Clearing at all still works — the safety net is unchanged. Clearing
+        // near the top of the arc is the well-judged version and pays more.
+        final apex = (_player.jumpProgress - 0.5).abs() < 0.18;
+        score += apex ? 250 : 150;
         _hud.score = score;
         AudioService.playStomp();
         _addFloatingText(
-          'LEAP! +150',
+          apex ? 'PERFECT LEAP! +250' : 'LEAP! +150',
           o.worldPosition,
-          const Color(0xFF00E5FF),
-          size: 17,
+          apex ? const Color(0xFFFFD700) : const Color(0xFF00E5FF),
+          size: apex ? 19 : 17,
         );
       }
       return false;
@@ -434,7 +440,9 @@ class ShorebirdRunnerGame extends FlameGame
 
   bool _checkPatchCollision(Patch p) {
     if (p.depth < 0.82 || p.depth > 1.03) return false;
-    if (p.lane != _player.currentLane) return false;
+    // Same as obstacles: gating on currentLane made a patch in the lane you
+    // were moving into uncollectable, which then counted as a miss and cost
+    // points and the combo.
     final playerPos = _player.worldPosition;
     final patchPos = p.worldPosition;
     final dx = (playerPos.dx - patchPos.dx).abs();
@@ -495,7 +503,15 @@ class ShorebirdRunnerGame extends FlameGame
     _hud.totalPatches = totalPatches;
   }
 
-  void _onPatchMissed(Offset pos) {
+  void _onPatchMissed(Offset pos, int lane) {
+    // An obstacle sitting in that lane made the patch unreachable, so taking
+    // points and the combo for it would punish the player for the game's own
+    // layout rather than for a mistake.
+    final wasBlocked = _obstacles.any(
+      (o) => o.lane == lane && o.depth > 0.80 && o.depth < 1.06,
+    );
+    if (wasBlocked) return;
+
     // Penalty for missing a patch!
     score = max(0, score - GameConfig.missedPatchPenalty);
     _combo = 0; // reset streak

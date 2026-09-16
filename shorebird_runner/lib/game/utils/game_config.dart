@@ -137,7 +137,10 @@ class GameConfig {
       emoji: '👑',
       patchThreshold: 36,
       nextThreshold: null,
-      speedMultiplier: 3.00,
+      // Floored so an obstacle stays on screen for at least a second between
+      // appearing at the horizon and reaching the player. At 3.00 that window
+      // was 0.95s, which is less time than it takes to see one and react.
+      speedMultiplier: 2.70,
       obstacleInterval: 0.72,
       patchInterval: 0.85,
       doubleObstacleChance: 0.70,

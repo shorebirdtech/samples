@@ -250,10 +250,15 @@ class LaneWorld extends Component {
         for (int c = 0; c < cols; c++) {
           // Deterministic sparseness: most windows stay dark.
           if (_windowRng.nextDouble() > 0.55) continue;
-          final wx = bx + marginX + c * colStep;
-          final wy = cy - bh + 8 * _bldScale + r * rowStep;
-          _windowGroups[_windowRng.nextInt(_windowGroupCount)]
-              .addRect(Rect.fromLTWH(wx, wy, winW, winH));
+          // Nudge each window off the grid: perfectly even columns read as a
+          // pattern rather than as a building.
+          final jitterX = (_windowRng.nextDouble() - 0.5) * winW * 0.5;
+          final jitterY = (_windowRng.nextDouble() - 0.5) * winH * 0.4;
+          final wx = bx + marginX + c * colStep + jitterX;
+          final wy = cy - bh + 8 * _bldScale + r * rowStep + jitterY;
+          _windowGroups[_windowRng.nextInt(_windowGroupCount)].addRect(
+            Rect.fromLTWH(wx, wy, winW, winH * (0.8 + _windowRng.nextDouble() * 0.5)),
+          );
         }
       }
     }

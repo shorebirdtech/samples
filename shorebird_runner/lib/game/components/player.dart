@@ -40,6 +40,11 @@ class Player extends Component {
   double _invincibleTimer = 0.0;
 
   bool get isJumping => _isJumping;
+
+  /// Progress through the jump arc: 0 at take-off, 1 at landing, 0.5 at the
+  /// top. Lets scoring tell a well-judged leap from a panicked early one.
+  double get jumpProgress =>
+      _isJumping ? (_jumpTime / _jumpDuration).clamp(0.0, 1.0) : 0.0;
   bool get isSliding => _isSliding;
   bool get isInvincible => _invincibleTimer > 0;
 
