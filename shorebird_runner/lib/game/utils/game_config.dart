@@ -52,8 +52,11 @@ class GameConfig {
       patchNearSize = (laneSpacing * 0.28).clamp(38.0, 50.0);
       collisionRadius = playerNearSize * 0.52;
     } else {
-      // Desktop / landscape: compact skyline backdrop so game road and action dominate
-      horizonY = height * 0.17; // Only 17% of screen height for sky
+      // Desktop / landscape: the skyline used to get 17% of the height, which
+      // is too thin a band for the rendered buildings — five floors of windows
+      // compress into ~90px and the detail turns to noise. 24% still leaves the
+      // road dominant while giving the city room to read.
+      horizonY = height * 0.24;
       nearY = height * 0.94; // Road extends down to 94%
       final roadWidth =
           min(width * 0.72, height * 1.35); // Generous, immersive road
