@@ -81,6 +81,10 @@ class Starfield extends Component {
   void onGameResize(Vector2 size) {
     super.onGameResize(size);
     _rebuildSkyPaint();
+    // Stars hold absolute pixel positions seeded from the old viewport, so
+    // without this a wider window shows a blank starless band on the right
+    // and a shorter one strands stars below the new horizon.
+    _repopulateStars();
   }
 
   @override

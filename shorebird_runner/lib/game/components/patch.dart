@@ -55,9 +55,14 @@ class Patch extends Component {
         _spinPhase = rng.nextDouble() * pi * 2,
         _pulsePhase = rng.nextDouble() * pi * 2;
 
+  /// Set while Hot Reload is actively pulling this patch. The game calls
+  /// [attractTowards] every frame it applies the pull, and [update] carries
+  /// that forward, so the flag clears on its own once the pull stops.
+  bool _magnetizedThisFrame = false;
+
   void attractTowards(int targetLane, double dt) {
     if (isCollected) return;
-    isBeingMagnetized = true;
+    _magnetizedThisFrame = true;
 
     final diff = targetLane - laneFractional;
     final pullSpeed = 4.8 + depth * 4.2;
@@ -85,6 +90,14 @@ class Patch extends Component {
 
   @override
   void update(double dt) {
+    // Nothing used to clear this, so a patch the booster had touched kept its
+    // 1.18x forward boost for the rest of its life — travelling faster than
+    // every other patch long after Hot Reload ended, which shortened the
+    // reaction window on exactly the patches that carry a miss penalty. It
+    // also pinned the lean and left the attraction glow drawn.
+    isBeingMagnetized = _magnetizedThisFrame;
+    _magnetizedThisFrame = false;
+
     if (!isCollected) {
       final speed =
           GameConfig.scrollSpeed(totalPatches, isInvincible: isInvincible);

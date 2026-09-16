@@ -90,8 +90,10 @@ class Hud extends Component {
   final Paint _bannerGlowPaint = Paint()..style = PaintingStyle.stroke;
   final Paint _bannerBgPaint = Paint();
   final Paint _bannerBorderPaint = Paint()..style = PaintingStyle.stroke;
-  late final Shader _borderShader;
-  late final Shader _borderMissShader;
+  // Not `late final`: onGameResize rebuilds these, and a second assignment to
+  // a late final field throws LateInitializationError.
+  late Shader _borderShader;
+  late Shader _borderMissShader;
   int _lastProgressLevel = -1;
 
   // Vector bird logo paints & paths (zero web font dependency)
@@ -110,6 +112,17 @@ class Hud extends Component {
     _updateTimePainter();
     _updatePatchPainters();
     _updateComboPainter();
+  }
+
+  @override
+  void onGameResize(Vector2 size) {
+    super.onGameResize(size);
+    // Every panel shader is baked against GameConfig.designWidth, and the
+    // progress bar's is cached behind _lastProgressLevel. Without this they
+    // keep the width they were built at, so after a resize or an orientation
+    // change the panel gradient and the gold border span the wrong distance.
+    _initStaticPainters();
+    _lastProgressLevel = -1;
   }
 
   void _initStaticPainters() {
