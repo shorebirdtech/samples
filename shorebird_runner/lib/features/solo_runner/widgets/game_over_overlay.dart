@@ -182,6 +182,7 @@ class GameOverOverlay extends StatelessWidget {
                     ),
                   ),
                   child: const Row(
+                    mainAxisSize: MainAxisSize.min,
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Icon(
@@ -190,12 +191,19 @@ class GameOverOverlay extends StatelessWidget {
                         color: AppColors.shorebirdGold,
                       ),
                       SizedBox(width: 8),
-                      Text(
-                        'VIEW LEADERBOARD',
-                        style: TextStyle(
-                          fontSize: 13,
-                          fontWeight: FontWeight.w800,
-                          letterSpacing: 1.5,
+                      // Must be allowed to shrink: icon + gap + this label at
+                      // 13px with 1.5 letter-spacing does not fit a phone-width
+                      // button, and none of it was flexible.
+                      Flexible(
+                        child: Text(
+                          'VIEW LEADERBOARD',
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w800,
+                            letterSpacing: 1.5,
+                          ),
                         ),
                       ),
                     ],

@@ -55,23 +55,27 @@ class PauseOverlay extends StatelessWidget {
                 // Header with audio toggle
                 Row(
                   children: [
-                    const Spacer(),
+                    // No Spacers: on a narrow phone they hold their width while
+                    // the title and button cannot shrink, overflowing the row.
                     const Icon(
                       Icons.pause_circle_filled_rounded,
                       color: AppColors.shorebirdGold,
                       size: 24,
                     ),
                     const SizedBox(width: 8),
-                    const Text(
-                      'GAME PAUSED',
-                      style: TextStyle(
-                        color: AppColors.shorebirdGold,
-                        fontSize: 20,
-                        fontWeight: FontWeight.w900,
-                        letterSpacing: 2,
+                    const Expanded(
+                      child: Text(
+                        'GAME PAUSED',
+                        textAlign: TextAlign.center,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          color: AppColors.shorebirdGold,
+                          fontSize: 20,
+                          fontWeight: FontWeight.w900,
+                          letterSpacing: 2,
+                        ),
                       ),
                     ),
-                    const Spacer(),
                     ValueListenableBuilder<bool>(
                       valueListenable: AudioService.isMutedNotifier,
                       builder: (context, isMuted, _) {
@@ -155,22 +159,29 @@ class PauseOverlay extends StatelessWidget {
                       ),
                       SizedBox(height: 6),
                       Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceAround,
                         children: [
-                          _ControlItem(
-                            icon: Icons.swap_horiz_rounded,
-                            label: 'A / D / ◀ ▶',
-                            action: 'DODGE',
+                          // Each item takes a third of whatever width there is,
+                          // rather than its natural width — which did not fit.
+                          Expanded(
+                            child: _ControlItem(
+                              icon: Icons.swap_horiz_rounded,
+                              label: 'A / D / ◀ ▶',
+                              action: 'DODGE',
+                            ),
                           ),
-                          _ControlItem(
-                            icon: Icons.arrow_upward_rounded,
-                            label: 'W / ▲ / SPACE',
-                            action: 'LEAP',
+                          Expanded(
+                            child: _ControlItem(
+                              icon: Icons.arrow_upward_rounded,
+                              label: 'W / ▲ / SPACE',
+                              action: 'LEAP',
+                            ),
                           ),
-                          _ControlItem(
-                            icon: Icons.arrow_downward_rounded,
-                            label: 'S / ▼',
-                            action: 'SLIDE',
+                          Expanded(
+                            child: _ControlItem(
+                              icon: Icons.arrow_downward_rounded,
+                              label: 'S / ▼',
+                              action: 'SLIDE',
+                            ),
                           ),
                         ],
                       ),

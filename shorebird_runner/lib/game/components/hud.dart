@@ -374,30 +374,49 @@ class Hud extends Component {
       canvas.drawRect(panelRect, _missOverlayPaint);
     }
 
-    // ── LEFT: Plan Tier ──
-    _tpPlanLabel?.paint(canvas, const Offset(18, 10));
-    _tpPlanName?.paint(canvas, const Offset(18, 26));
+    // Laid out from measured text widths rather than fixed offsets, so the
+    // three blocks never run into each other. On a narrow screen the logo and
+    // then the right-hand block drop out rather than being clipped mid-word.
+    final w = GameConfig.designWidth;
+    final margin = w < 520 ? 10.0 : 18.0;
+    final showLogo = w >= 420;
+    final logoRoom = showLogo ? 34.0 : 0.0;
 
-    // ── CENTER: Score ──
-    if (_tpScoreLabel != null) {
-      _tpScoreLabel!.paint(
-        canvas,
-        Offset((GameConfig.designWidth - _tpScoreLabel!.width) / 2, 12),
-      );
+    final rightWidth = [
+      _tpNextLabel?.width ?? 0,
+      _tpNextValue?.width ?? 0,
+    ].reduce((a, b) => a > b ? a : b);
+    final leftWidth = [
+      _tpPlanLabel?.width ?? 0,
+      _tpPlanName?.width ?? 0,
+    ].reduce((a, b) => a > b ? a : b);
+
+    final centreWidth = [
+      _tpScoreLabel?.width ?? 0,
+      _tpScoreValue?.width ?? 0,
+    ].reduce((a, b) => a > b ? a : b);
+
+    // Only show the side blocks if they fit either side of the score without
+    // colliding with it.
+    final sidesFit =
+        leftWidth + rightWidth + centreWidth + logoRoom + margin * 4 <= w;
+
+    if (sidesFit) {
+      _tpPlanLabel?.paint(canvas, Offset(margin, 10));
+      _tpPlanName?.paint(canvas, Offset(margin, 26));
+
+      final rightX = w - margin - logoRoom - rightWidth;
+      _tpNextLabel?.paint(canvas, Offset(rightX, 10));
+      _tpNextValue?.paint(canvas, Offset(rightX, 26));
+
+      if (showLogo) {
+        _drawVectorLogo(canvas, Offset(w - margin - 14, 34));
+      }
     }
-    if (_tpScoreValue != null) {
-      _tpScoreValue!.paint(
-        canvas,
-        Offset((GameConfig.designWidth - _tpScoreValue!.width) / 2, 28),
-      );
-    }
 
-    // ── RIGHT: Next Level Progress ──
-    _tpNextLabel?.paint(canvas, Offset(GameConfig.designWidth - 178, 10));
-    _tpNextValue?.paint(canvas, Offset(GameConfig.designWidth - 178, 26));
-
-    // Vector Shorebird logo mark on far right (zero font dependency)
-    _drawVectorLogo(canvas, Offset(GameConfig.designWidth - 28, 34));
+    // ── CENTER: Score ── always drawn; it is the one thing that must be legible.
+    _tpScoreLabel?.paint(canvas, Offset((w - (_tpScoreLabel?.width ?? 0)) / 2, 12));
+    _tpScoreValue?.paint(canvas, Offset((w - (_tpScoreValue?.width ?? 0)) / 2, 28));
   }
 
   void _drawVectorLogo(Canvas canvas, Offset center) {
