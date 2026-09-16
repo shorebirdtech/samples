@@ -274,8 +274,28 @@ class ShorebirdRunnerGame extends FlameGame
     }
   }
 
+  /// Lanes with an obstacle still far enough away that a patch spawned now
+  /// would travel behind it.
+  Set<int> _lanesBlockedForSpawn() {
+    final blocked = <int>{};
+    for (final o in _obstacles) {
+      if (o.depth < 0.35) blocked.add(o.lane);
+    }
+    return blocked;
+  }
+
   void _spawnPatch() {
-    final lane = _rng.nextInt(GameConfig.laneCount);
+    // Never drop a patch into a lane that an obstacle is already occupying:
+    // missing one costs points and the combo, so an uncollectable patch is a
+    // penalty the player had no way to avoid.
+    final blocked = _lanesBlockedForSpawn();
+    final open = [
+      for (int i = 0; i < GameConfig.laneCount; i++)
+        if (!blocked.contains(i)) i,
+    ];
+    final lane = open.isEmpty
+        ? _rng.nextInt(GameConfig.laneCount)
+        : open[_rng.nextInt(open.length)];
     _patchesSinceLastBooster++;
 
     // Paced powerup delivery:
