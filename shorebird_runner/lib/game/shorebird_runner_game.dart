@@ -111,9 +111,18 @@ class ShorebirdRunnerGame extends FlameGame
     _lastVignetteRect = null;
   }
 
+  /// Brief freeze on impact. Stopping the world for a few frames is what gives
+  /// a hit its weight — without it a smash passes by unregistered.
+  double _hitStop = 0;
+
   @override
   void update(double dt) {
     if (_isOver) return;
+
+    if (_hitStop > 0) {
+      _hitStop = (_hitStop - dt).clamp(0.0, 1.0);
+      return;
+    }
 
     // Clamp delta time to prevent physics tunneling or large spikes
     final safeDt = dt.clamp(0.001, 0.033);
@@ -205,11 +214,13 @@ class ShorebirdRunnerGame extends FlameGame
       }
     }
 
-    // Screen shake
+    // Screen shake. A sharp kick that decays fast reads as impact, where an
+    // even rattle just reads as noise, so the first frames throw hardest.
     if (_screenShake > 0) {
       _screenShake = (_screenShake - safeDt * 3.5).clamp(0, 10);
-      final shakeX = (_rng.nextDouble() - 0.5) * _screenShake * 12;
-      final shakeY = (_rng.nextDouble() - 0.5) * _screenShake * 12;
+      final punch = _screenShake * _screenShake;
+      final shakeX = (_rng.nextDouble() - 0.5) * punch * 16;
+      final shakeY = (_rng.nextDouble() - 0.5) * punch * 16;
       camera.viewfinder.position = Vector2(shakeX, shakeY);
     } else {
       camera.viewfinder.position = Vector2.zero();
@@ -410,6 +421,8 @@ class ShorebirdRunnerGame extends FlameGame
     _hud.score = score;
     AudioService.playStomp();
     _screenShake = 0.8;
+    // Freeze briefly so the hit lands rather than sliding past.
+    _hitStop = 0.07;
 
     _addFloatingText(
       'SQUASHED! +300',

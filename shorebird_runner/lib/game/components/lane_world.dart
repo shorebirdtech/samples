@@ -122,6 +122,18 @@ class LaneWorld extends Component {
   /// Ever-increasing distance used to slide the skyline layers past.
   double _skylineScroll = 0.0;
 
+  /// Lit windows, split into groups that pulse out of phase so the city looks
+  /// occupied rather than like a row of solid silhouettes.
+  static const int _windowGroupCount = 3;
+  final List<Path> _windowGroups =
+      List.generate(_windowGroupCount, (_) => Path());
+  final Paint _windowPaint = Paint()..style = PaintingStyle.fill;
+  double _twinkle = 0.0;
+
+  /// Re-seeded before each bake so a resize reproduces the same skyline
+  /// instead of shuffling every lit window.
+  Random _windowRng = Random(90210);
+
   double _bldScale = 0.45;
 
   void _initStaticGeometry() {
@@ -130,6 +142,10 @@ class LaneWorld extends Component {
     _skylineBuildingsPath.reset();
     _verticalRibsPath.reset();
     _crownGlowPath.reset();
+    for (final group in _windowGroups) {
+      group.reset();
+    }
+    _windowRng = Random(90210);
 
     final cy = GameConfig.horizonY;
     final w = GameConfig.designWidth;
@@ -218,6 +234,27 @@ class LaneWorld extends Component {
         final rx = bx + step * i;
         _verticalRibsPath.moveTo(rx, cy - bh + 4);
         _verticalRibsPath.lineTo(rx, cy - 6);
+      }
+
+      // Lit windows. Baked once into a few groups; each group pulses at its
+      // own phase at draw time, which costs nothing per frame.
+      final winW = 2.6 * _bldScale.clamp(0.6, 1.4);
+      final winH = 3.4 * _bldScale.clamp(0.6, 1.4);
+      final colStep = winW * 2.6;
+      final rowStep = winH * 2.2;
+      final cols = (bw / colStep).floor().clamp(1, 6);
+      final rows = ((bh - 10 * _bldScale) / rowStep).floor().clamp(1, 12);
+      final marginX = (bw - (cols - 1) * colStep - winW) / 2;
+
+      for (int r = 0; r < rows; r++) {
+        for (int c = 0; c < cols; c++) {
+          // Deterministic sparseness: most windows stay dark.
+          if (_windowRng.nextDouble() > 0.55) continue;
+          final wx = bx + marginX + c * colStep;
+          final wy = cy - bh + 8 * _bldScale + r * rowStep;
+          _windowGroups[_windowRng.nextInt(_windowGroupCount)]
+              .addRect(Rect.fromLTWH(wx, wy, winW, winH));
+        }
       }
     }
 
@@ -389,6 +426,7 @@ class LaneWorld extends Component {
     // The skyline needs a distance that keeps increasing: _scroll wraps every
     // tile and is already consumed by the road.
     _skylineScroll += dt * speed * 26.0;
+    _twinkle += dt;
     _searchlightAngle += dt * 0.85;
 
     final targetLevel = GameConfig.levelFor(totalPatches);
@@ -478,6 +516,16 @@ class LaneWorld extends Component {
     // and crown glows travel with it, otherwise the lighting detaches from the
     // buildings it belongs to.
     _drawParallaxLayer(canvas, _skylineBuildingsPath, _bldFillPaint, 0.30, w);
+
+    // Lit windows, each group breathing at its own phase so the city reads as
+    // occupied. They travel with the buildings they belong to.
+    for (int g = 0; g < _windowGroupCount; g++) {
+      final pulse = 0.55 + 0.45 * sin(_twinkle * (0.7 + g * 0.35) + g * 2.1);
+      _windowPaint.color =
+          const Color(0xFFFFD98A).withValues(alpha: 0.22 + 0.5 * pulse);
+      _drawParallaxLayer(canvas, _windowGroups[g], _windowPaint, 0.30, w);
+    }
+
     _drawParallaxLayer(canvas, _verticalRibsPath, _ribsPaint, 0.30, w);
     _drawParallaxLayer(canvas, _crownGlowPath, _crownPaint, 0.30, w);
 
