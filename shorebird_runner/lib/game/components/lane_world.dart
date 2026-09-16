@@ -16,20 +16,16 @@ class _Rooftop {
 }
 
 /// One rendered building placed on the repeating skyline strip, in screen px.
+/// Holds an index rather than the image itself: every building is drawn from
+/// one packed atlas in a single call, so the individual image is never needed
+/// at draw time.
 class _SkylineBuilding {
-  final ui.Image image;
+  final int imageIndex;
   final double x;
   final double width;
   final double height;
-  final Rect src;
 
-  _SkylineBuilding(this.image, this.x, this.width, this.height)
-      : src = Rect.fromLTWH(
-          0,
-          0,
-          image.width.toDouble(),
-          image.height.toDouble(),
-        );
+  const _SkylineBuilding(this.imageIndex, this.x, this.width, this.height);
 }
 
 /// 3D Mario / Subway Surfers elevated runway with GTA 5 nighttime skyline,
@@ -172,6 +168,19 @@ class LaneWorld extends Component {
 
   final List<ui.Image> _buildingImages = [];
   final List<_SkylineBuilding> _skyline = [];
+
+  /// All 16 buildings packed into one texture. Drawing them individually meant
+  /// ~52 drawImageRect a frame (26 buildings across two wrap passes) hopping
+  /// between 16 textures in random order; from one atlas it is a single
+  /// drawAtlas. Every building shares one scale and never rotates, which is
+  /// exactly the case drawAtlas is for.
+  ui.Image? _atlas;
+  final List<Rect> _atlasSrc = [];
+
+  /// Per-building source rects and transforms, covering both wrap passes.
+  /// Rebuilt only on resize, so a frame just hands these to the canvas.
+  final List<Rect> _atlasRects = [];
+  final List<RSTransform> _atlasTransforms = [];
 
   /// Which skyline buildings carry a billboard or an antenna on the roof.
   final List<_Rooftop> _rooftops = [];
@@ -904,6 +913,38 @@ class LaneWorld extends Component {
     _buildingImages
       ..clear()
       ..addAll(images);
+    await _buildAtlas();
+  }
+
+  /// Packs every building into one texture, left to right, recording where
+  /// each one landed.
+  Future<void> _buildAtlas() async {
+    _atlasSrc.clear();
+    if (_buildingImages.isEmpty) return;
+
+    var totalWidth = 0.0;
+    var maxHeight = 0.0;
+    for (final image in _buildingImages) {
+      totalWidth += image.width;
+      maxHeight = max(maxHeight, image.height.toDouble());
+    }
+
+    final recorder = ui.PictureRecorder();
+    final canvas = Canvas(recorder);
+    final paint = Paint();
+    var x = 0.0;
+    for (final image in _buildingImages) {
+      canvas.drawImage(image, Offset(x, 0), paint);
+      _atlasSrc.add(
+        Rect.fromLTWH(x, 0, image.width.toDouble(), image.height.toDouble()),
+      );
+      x += image.width;
+    }
+
+    final picture = recorder.endRecording();
+    _atlas?.dispose();
+    _atlas = await picture.toImage(totalWidth.ceil(), maxHeight.ceil());
+    picture.dispose();
   }
 
   /// Lays buildings along a strip that runs past the right edge, then records
@@ -927,14 +968,43 @@ class LaneWorld extends Component {
     final rng = Random(90210);
     var x = 0.0;
     while (x < w) {
-      final image = _buildingImages[rng.nextInt(_buildingImages.length)];
+      final index = rng.nextInt(_buildingImages.length);
+      final image = _buildingImages[index];
       final bw = (image.width / _spritePpm) * pxPerMetre;
       final bh = (image.height / _spritePpm) * pxPerMetre;
-      _skyline.add(_SkylineBuilding(image, x, bw, bh));
+      _skyline.add(_SkylineBuilding(index, x, bw, bh));
       x += bw + 4 + rng.nextDouble() * 22;
     }
     _skylineSpan = x;
+    _buildAtlasBatch(cy, pxPerMetre / _spritePpm);
     _layoutRooftops(rng);
+  }
+
+  /// Flattens both wrap passes into one set of transforms so the whole skyline
+  /// is a single draw. Only the scroll offset changes per frame, and that is a
+  /// canvas translate rather than a rebuild of these lists.
+  void _buildAtlasBatch(double cy, double scale) {
+    _atlasRects.clear();
+    _atlasTransforms.clear();
+    if (_atlasSrc.isEmpty) return;
+
+    for (int pass = 0; pass < 2; pass++) {
+      final shift = pass * _skylineSpan;
+      for (final b in _skyline) {
+        if (b.imageIndex >= _atlasSrc.length) continue;
+        _atlasRects.add(_atlasSrc[b.imageIndex]);
+        _atlasTransforms.add(
+          RSTransform.fromComponents(
+            rotation: 0,
+            scale: scale,
+            anchorX: 0,
+            anchorY: 0,
+            translateX: b.x + shift,
+            translateY: cy - b.height,
+          ),
+        );
+      }
+    }
   }
 
   /// Spreads the three billboards and a few antennas across the strip, each
@@ -968,23 +1038,21 @@ class LaneWorld extends Component {
   }
 
   void _drawSkylineSprites(Canvas canvas) {
-    if (_skyline.isEmpty || _skylineSpan <= 0) return;
-    final cy = GameConfig.horizonY;
+    final atlas = _atlas;
+    if (atlas == null || _atlasTransforms.isEmpty || _skylineSpan <= 0) return;
     final offset = (_skylineScroll * 0.30) % _skylineSpan;
 
     canvas.save();
     canvas.translate(-offset, 0);
-    for (int pass = 0; pass < 2; pass++) {
-      for (final b in _skyline) {
-        canvas.drawImageRect(
-          b.image,
-          b.src,
-          Rect.fromLTWH(b.x, cy - b.height, b.width, b.height),
-          _spritePaint,
-        );
-      }
-      canvas.translate(_skylineSpan, 0);
-    }
+    canvas.drawAtlas(
+      atlas,
+      _atlasTransforms,
+      _atlasRects,
+      null,
+      null,
+      null,
+      _spritePaint,
+    );
     canvas.restore();
   }
 
