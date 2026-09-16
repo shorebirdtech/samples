@@ -119,6 +119,9 @@ class LaneWorld extends Component {
     _initStaticGeometry();
   }
 
+  /// Ever-increasing distance used to slide the skyline layers past.
+  double _skylineScroll = 0.0;
+
   double _bldScale = 0.45;
 
   void _initStaticGeometry() {
@@ -383,6 +386,9 @@ class LaneWorld extends Component {
     final speed =
         GameConfig.scrollSpeed(totalPatches, isInvincible: isInvincible);
     _scroll = (_scroll + dt * speed * 0.45) % 1.0;
+    // The skyline needs a distance that keeps increasing: _scroll wraps every
+    // tile and is already consumed by the road.
+    _skylineScroll += dt * speed * 26.0;
     _searchlightAngle += dt * 0.85;
 
     final targetLevel = GameConfig.levelFor(totalPatches);
@@ -410,6 +416,27 @@ class LaneWorld extends Component {
     _drawPlanGantry(canvas);
   }
 
+  /// Draws a baked skyline layer sliding leftward at [factor] of the world
+  /// speed, repeated a screen-width apart so it never runs out.
+  ///
+  /// Far layers take a smaller factor than near ones; that difference in
+  /// apparent speed is what reads as depth.
+  void _drawParallaxLayer(
+    Canvas canvas,
+    Path layer,
+    Paint paint,
+    double factor,
+    double screenWidth,
+  ) {
+    final offset = (_skylineScroll * factor) % screenWidth;
+    canvas.save();
+    canvas.translate(-offset, 0);
+    canvas.drawPath(layer, paint);
+    canvas.translate(screenWidth, 0);
+    canvas.drawPath(layer, paint);
+    canvas.restore();
+  }
+
   void _drawCinematicCityscape(Canvas canvas) {
     final cy = GameConfig.horizonY;
     final w = GameConfig.designWidth;
@@ -425,7 +452,10 @@ class LaneWorld extends Component {
     );
 
     // 3. Layer 1: Distant Background Monolith Silhouettes
-    canvas.drawPath(_skylineBackPath, _skylineBackPaint);
+    // Slid past at a fraction of the road's speed. Baked once and drawn twice,
+    // a screen apart, so the layer wraps without a seam. Without this the
+    // skyline sits frozen while the road rushes underneath it.
+    _drawParallaxLayer(canvas, _skylineBackPath, _skylineBackPaint, 0.12, w);
 
     // 4. Sweeping Searchlight Beams (zero allocations)
     _drawSearchlight(
@@ -444,9 +474,12 @@ class LaneWorld extends Component {
     );
 
     // 5. Layer 2: Foreground Tech Headquarters & Architectural LED Ribs
-    canvas.drawPath(_skylineBuildingsPath, _bldFillPaint);
-    canvas.drawPath(_verticalRibsPath, _ribsPaint);
-    canvas.drawPath(_crownGlowPath, _crownPaint);
+    // Nearer, so it slides past faster than the monoliths behind it. The ribs
+    // and crown glows travel with it, otherwise the lighting detaches from the
+    // buildings it belongs to.
+    _drawParallaxLayer(canvas, _skylineBuildingsPath, _bldFillPaint, 0.30, w);
+    _drawParallaxLayer(canvas, _verticalRibsPath, _ribsPaint, 0.30, w);
+    _drawParallaxLayer(canvas, _crownGlowPath, _crownPaint, 0.30, w);
 
     // 6. Distant Giant Spire Towers (scaled relative to sky height)
     final towerHeight = cy * (isDesktop ? 0.48 : 0.65);

@@ -22,6 +22,13 @@ class Obstacle extends Component {
       type == ObstacleType.wormBug || type == ObstacleType.mergeBarricade;
   bool get isSlideable => type == ObstacleType.reviewGate;
 
+  /// Laid out once at a large size and scaled down when drawn, so the glyph
+  /// stays crisp at every depth without re-laying out per frame.
+  static final TextPainter _bugPainter = TextPainter(
+    text: const TextSpan(text: '🐛', style: TextStyle(fontSize: 64)),
+    textDirection: TextDirection.ltr,
+  )..layout();
+
   static final TextPainter _reviewGatePainter = TextPainter(
     text: const TextSpan(
       text: 'UNDER REVIEW',
@@ -197,47 +204,6 @@ class Obstacle extends Component {
   static final Paint _playBorderPaint = Paint()
     ..color = Colors.white.withValues(alpha: 0.3)
     ..style = PaintingStyle.stroke;
-
-  // Cyber Glitch Bug static assets
-  static final Paint _glitchShellPaint = Paint()
-    ..shader = const RadialGradient(
-      colors: [
-        Color(0xFF334155),
-        Color(0xFF1E293B),
-        Color(0xFF020617),
-      ],
-      center: Alignment(-0.25, -0.35),
-    ).createShader(const Rect.fromLTWH(-50, -50, 100, 100))
-    ..style = PaintingStyle.fill;
-
-  static final Paint _glitchCorePaint = Paint()
-    ..shader = const RadialGradient(
-      colors: [
-        Color(0xFF5EEAD4),
-        Color(0xFF0D9488),
-        Color(0xFF042F2E),
-      ],
-      center: Alignment(0.0, 0.0),
-    ).createShader(const Rect.fromLTWH(-50, -50, 100, 100))
-    ..style = PaintingStyle.fill;
-
-  static final Paint _glitchLegPaint = Paint()
-    ..color = const Color(0xFF475569)
-    ..strokeCap = StrokeCap.round
-    ..style = PaintingStyle.stroke;
-
-  static final Paint _glitchLegTipPaint = Paint()
-    ..color = const Color(0xFF00FFCC);
-
-  static final Paint _glitchCircuitPaint = Paint()
-    ..color = const Color(0xFF00FFCC).withValues(alpha: 0.75)
-    ..strokeCap = StrokeCap.round
-    ..style = PaintingStyle.stroke;
-
-  static final Paint _glitchVisorGlow = Paint()
-    ..color = const Color(0xFF00FFCC).withValues(alpha: 0.4);
-  static final Paint _glitchVisorCore = Paint()
-    ..color = const Color(0xFFFFFFFF);
 
   // Hologram emitter pylons for store checkpoints
   static final Paint _emitterBasePaint = Paint()
@@ -590,84 +556,21 @@ class Obstacle extends Component {
       _shadowOuterPaint,
     );
 
-    final centerY = pos.dy - size * 0.28 - crawlBob;
-    final bodyW = size * 0.85;
-    final bodyH = size * 0.44;
+    // The bug itself is the 🐛 glyph rather than drawn geometry: it reads
+    // instantly as a bug at any size, where the built shape did not.
+    final centerY = pos.dy - size * 0.30 - crawlBob;
+    final glyphScale = (size * 1.15) / _bugPainter.height;
 
-    // 1. Skittering Mechanical Legs (3 pairs)
-    _glitchLegPaint.strokeWidth = 2.4 * scale;
-    for (int leg = 0; leg < 3; leg++) {
-      final legT = (leg - 1) * 0.35;
-      final legPhase = crawlSpeed + leg * 1.2;
-      final legStep = sin(legPhase) * 6 * scale;
-
-      // Left leg
-      final lBase = Offset(pos.dx - bodyW * 0.38 + legT * bodyW * 0.5, centerY);
-      final lKnee =
-          Offset(lBase.dx - 12 * scale, lBase.dy - 6 * scale + legStep * 0.5);
-      final lFoot = Offset(lBase.dx - 16 * scale, pos.dy + legStep);
-      canvas.drawLine(lBase, lKnee, _glitchLegPaint);
-      canvas.drawLine(lKnee, lFoot, _glitchLegPaint);
-      canvas.drawCircle(lFoot, 1.8 * scale, _glitchLegTipPaint);
-
-      // Right leg
-      final rBase = Offset(pos.dx + bodyW * 0.38 - legT * bodyW * 0.5, centerY);
-      final rKnee =
-          Offset(rBase.dx + 12 * scale, rBase.dy - 6 * scale - legStep * 0.5);
-      final rFoot = Offset(rBase.dx + 16 * scale, pos.dy - legStep);
-      canvas.drawLine(rBase, rKnee, _glitchLegPaint);
-      canvas.drawLine(rKnee, rFoot, _glitchLegPaint);
-      canvas.drawCircle(rFoot, 1.8 * scale, _glitchLegTipPaint);
-    }
-
-    // 2. Armored Robotic Carapace Shell
-    final shellRect = Rect.fromCenter(
-      center: Offset(pos.dx, centerY),
-      width: bodyW,
-      height: bodyH,
+    canvas.save();
+    canvas.translate(pos.dx, centerY);
+    // Scuttle: a slight rock in step with the crawl bob.
+    canvas.rotate(sin(crawlSpeed) * 0.10);
+    canvas.scale(glyphScale);
+    _bugPainter.paint(
+      canvas,
+      Offset(-_bugPainter.width / 2, -_bugPainter.height / 2),
     );
-    final shellRRect =
-        RRect.fromRectAndRadius(shellRect, Radius.circular(8 * scale));
-    canvas.drawRRect(shellRRect, _glitchShellPaint);
-
-    // 3. Central Pulsing Power Core Matrix
-    final pulse = 0.85 + 0.15 * sin(crawlSpeed * 3);
-    final coreRect = Rect.fromCenter(
-      center: Offset(pos.dx, centerY),
-      width: bodyW * 0.42 * pulse,
-      height: bodyH * 0.55 * pulse,
-    );
-    canvas.drawRRect(
-      RRect.fromRectAndRadius(coreRect, Radius.circular(4 * scale)),
-      _glitchCorePaint,
-    );
-
-    // 4. Circuit trace lines
-    _glitchCircuitPaint.strokeWidth = 1.2 * scale;
-    canvas.drawLine(
-      Offset(pos.dx - bodyW * 0.45, centerY),
-      Offset(pos.dx - bodyW * 0.22, centerY),
-      _glitchCircuitPaint,
-    );
-    canvas.drawLine(
-      Offset(pos.dx + bodyW * 0.22, centerY),
-      Offset(pos.dx + bodyW * 0.45, centerY),
-      _glitchCircuitPaint,
-    );
-
-    // 5. Front Optical Visor Slit
-    final visorY = centerY - bodyH * 0.25;
-    final visorW = bodyW * 0.48;
-    canvas.drawLine(
-      Offset(pos.dx - visorW * 0.5, visorY),
-      Offset(pos.dx + visorW * 0.5, visorY),
-      _glitchVisorGlow..strokeWidth = 4.0 * scale,
-    );
-    canvas.drawLine(
-      Offset(pos.dx - visorW * 0.5, visorY),
-      Offset(pos.dx + visorW * 0.5, visorY),
-      _glitchVisorCore..strokeWidth = 1.5 * scale,
-    );
+    canvas.restore();
   }
 
   // ── 🚧 Low Merge Barricade (Jumpable) ──────────────────────────────────────
