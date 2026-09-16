@@ -148,24 +148,33 @@ class _EventConfigDialogState extends State<EventConfigDialog> {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          const Row(
-                            children: [
-                              Icon(
-                                Icons.settings_suggest_rounded,
-                                color: AppColors.shorebirdGold,
-                                size: 22,
-                              ),
-                              SizedBox(width: 8),
-                              Text(
-                                'BOOTH EVENT CONFIG',
-                                style: TextStyle(
+                          const Expanded(
+                            child: Row(
+                              children: [
+                                Icon(
+                                  Icons.settings_suggest_rounded,
                                   color: AppColors.shorebirdGold,
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w900,
-                                  letterSpacing: 2,
+                                  size: 22,
                                 ),
-                              ),
-                            ],
+                                SizedBox(width: 8),
+                                // At 14px with 2.0 letter-spacing this title
+                                // does not fit beside the close button on a
+                                // phone, and nothing in the row could shrink.
+                                Flexible(
+                                  child: Text(
+                                    'BOOTH EVENT CONFIG',
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: TextStyle(
+                                      color: AppColors.shorebirdGold,
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.w900,
+                                      letterSpacing: 2,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
                           IconButton(
                             icon: const Icon(

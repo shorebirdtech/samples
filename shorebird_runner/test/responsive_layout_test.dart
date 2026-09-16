@@ -4,11 +4,37 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:shorebird_runner/features/leaderboard/bloc/leaderboard_bloc.dart';
 import 'package:shorebird_runner/features/leaderboard/data/local_leaderboard_repository.dart';
+import 'package:shorebird_runner/features/lead_capture/bloc/lead_capture_bloc.dart';
+import 'package:shorebird_runner/features/lead_capture/data/local_lead_repository.dart';
+import 'package:shorebird_runner/features/lead_capture/widgets/lead_capture_dialog.dart';
 import 'package:shorebird_runner/features/leaderboard/widgets/leaderboard_dialog.dart';
+import 'package:shorebird_runner/features/start_menu/widgets/event_config_dialog.dart';
 import 'package:shorebird_runner/features/start_menu/widgets/game_rules_dialog.dart';
 import 'package:shorebird_runner/features/solo_runner/widgets/game_over_overlay.dart';
+import 'package:shorebird_runner/features/solo_runner/widgets/mobile_touch_bar.dart';
 import 'package:shorebird_runner/features/solo_runner/widgets/pause_overlay.dart';
 import 'package:shorebird_runner/game/utils/game_config.dart';
+
+/// A booth-realistic conference name. Both form dialogs echo the active event
+/// back into a chip or badge, so the long case is the one that overflows.
+const _longEvent = 'FlutterCon Berlin 2026';
+
+/// SharedPreferences mock keys carry the 'flutter.' prefix that the plugin adds.
+void _setActiveEvent(String event) {
+  SharedPreferences.setMockInitialValues({
+    if (event.isNotEmpty) 'flutter.shorebird_runner_booth_event': event,
+  });
+}
+
+/// Both form dialogs read LeadCaptureBloc from context — LeadCaptureDialog in
+/// initState, EventConfigDialog when saving. The local repository needs no
+/// network and the service reads the mocked preferences above.
+Widget _withLeadBloc(Widget child) => BlocProvider(
+      create: (_) => LeadCaptureBloc(
+        leadRepository: const LocalLeadRepository(),
+      ),
+      child: child,
+    );
 
 /// Screen sizes the booth build has to survive: a small phone, a large phone,
 /// a tablet and a desktop window.
@@ -120,6 +146,81 @@ void main() {
           ),
         );
         await tester.pump();
+        expect(tester.takeException(), isNull);
+      });
+    }
+  });
+
+  group('form dialogs lay out without overflowing', () {
+    for (final entry in _sizes.entries) {
+      testWidgets('lead capture on ${entry.key}', (tester) async {
+        _setActiveEvent(_longEvent);
+        await _pumpAt(
+          tester,
+          entry.value,
+          _withLeadBloc(LeadCaptureDialog(onStartGame: (_) {})),
+        );
+        // The bloc resolves the active event asynchronously and the EVENT chip
+        // renders only once it lands. Without these pumps the chip — an
+        // unwrapped Row holding the longest string in the form — never builds,
+        // and the test would pass having never laid it out.
+        await tester.pump();
+        await tester.pump(const Duration(milliseconds: 50));
+        expect(
+          find.textContaining(_longEvent.toUpperCase()),
+          findsOneWidget,
+          reason: 'event chip never rendered, so its layout went untested',
+        );
+        expect(tester.takeException(), isNull);
+      });
+
+      testWidgets('event config on ${entry.key}, event set', (tester) async {
+        _setActiveEvent(_longEvent);
+        await _pumpAt(
+          tester,
+          entry.value,
+          _withLeadBloc(const EventConfigDialog()),
+        );
+        await tester.pump();
+        await tester.pump(const Duration(milliseconds: 50));
+        // Until the async load resolves this dialog is nothing but a spinner,
+        // so assert the real body arrived. CLEAR appears only when an event is
+        // set, which makes this the denser of the two button rows.
+        expect(find.byType(CircularProgressIndicator), findsNothing);
+        expect(find.text('CLEAR'), findsOneWidget);
+        expect(tester.takeException(), isNull);
+      });
+
+      testWidgets('event config on ${entry.key}, no event', (tester) async {
+        _setActiveEvent('');
+        await _pumpAt(
+          tester,
+          entry.value,
+          _withLeadBloc(const EventConfigDialog()),
+        );
+        await tester.pump();
+        await tester.pump(const Duration(milliseconds: 50));
+        expect(find.byType(CircularProgressIndicator), findsNothing);
+        expect(tester.takeException(), isNull);
+      });
+
+      testWidgets('mobile touch bar on ${entry.key}', (tester) async {
+        await _pumpAt(
+          tester,
+          entry.value,
+          Column(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              MobileTouchBar(
+                onLeft: () {},
+                onMid: () {},
+                onRight: () {},
+                onJump: () {},
+                onSlide: () {},
+              ),
+            ],
+          ),
+        );
         expect(tester.takeException(), isNull);
       });
     }
