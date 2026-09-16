@@ -428,8 +428,14 @@ class Hud extends Component {
     }
 
     // ── CENTER: Score ── always drawn; it is the one thing that must be legible.
-    _tpScoreLabel?.paint(canvas, Offset((w - (_tpScoreLabel?.width ?? 0)) / 2, 12));
-    _tpScoreValue?.paint(canvas, Offset((w - (_tpScoreValue?.width ?? 0)) / 2, 28));
+    _tpScoreLabel?.paint(
+      canvas,
+      Offset((w - (_tpScoreLabel?.width ?? 0)) / 2, 12),
+    );
+    _tpScoreValue?.paint(
+      canvas,
+      Offset((w - (_tpScoreValue?.width ?? 0)) / 2, 28),
+    );
   }
 
   void _drawVectorLogo(Canvas canvas, Offset center) {

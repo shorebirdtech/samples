@@ -26,8 +26,9 @@ class PatchRushApp extends StatelessWidget {
           create: (_) => const HighScoreRepository(),
         ),
         RepositoryProvider<ILeadRepository>(
-          create: (_) =>
-              kDebugMode ? const LocalLeadRepository() : SupabaseLeadRepository(),
+          create: (_) => kDebugMode
+              ? const LocalLeadRepository()
+              : SupabaseLeadRepository(),
         ),
         RepositoryProvider<ILeaderboardRepository>(
           create: (_) => kDebugMode

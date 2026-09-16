@@ -352,7 +352,6 @@ class LaneWorld extends Component {
     ).createShader(
       Rect.fromLTRB(_farLeft.dx - 160, cy, _farRight.dx + 160, cy),
     );
-
   }
 
   int _lastShaderLevel = -1;
