@@ -216,6 +216,29 @@ class GameConfig {
   // ── Collision ─────────────────────────────────────────────────────────────
   static double collisionRadius = 28;
 
+  // ── Depth windows ─────────────────────────────────────────────────────────
+  // Objects travel from depth 0 at the horizon to just past 1.0 at the player.
+  // These windows are tuned independently but are not independent of each
+  // other, so they live together where that relationship is visible.
+
+  /// Depth range over which a patch can still be collected.
+  static const double patchCollectNearDepth = 0.82;
+  static const double patchCollectFarDepth = 1.03;
+
+  /// Depth range in which an obstacle counts as having blocked a patch, so
+  /// missing that patch costs nothing.
+  ///
+  /// This window must *contain* the collection window above. If a patch is
+  /// collectable at some depth but a blocking obstacle at that same depth is
+  /// not forgiven, the player loses points and their combo for a patch they
+  /// were never able to reach. `test/gameplay_feel_test.dart` pins this.
+  static const double missForgivenessNearDepth = 0.80;
+  static const double missForgivenessFarDepth = 1.06;
+
+  /// An obstacle nearer than this still has the whole track ahead of it, so
+  /// a patch spawned into its lane now would arrive behind it.
+  static const double patchSpawnBlockDepth = 0.35;
+
   // ── Scoring ───────────────────────────────────────────────────────────────
   static const int patchPoints = 25;
   static const int levelUpBonus = 200;

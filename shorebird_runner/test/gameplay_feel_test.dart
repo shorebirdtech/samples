@@ -56,15 +56,33 @@ void main() {
   });
 
   test('a freshly spawned obstacle is inside the patch-blocking window', () {
-    // The spawn guard treats obstacles below depth 0.35 as blocking their
-    // lane. Obstacles enter play at depth 0, so a patch spawned in the same
-    // tick would otherwise land behind one.
+    // Obstacles enter play at depth 0, so a patch spawned in the same tick
+    // would otherwise land behind one.
     final obstacle = Obstacle(
       lane: 1,
       type: ObstacleType.appStore,
       rng: Random(1),
     );
-    expect(obstacle.depth, lessThan(0.35));
+    expect(obstacle.depth, lessThan(GameConfig.patchSpawnBlockDepth));
+  });
+
+  test('a miss is forgiven everywhere a patch could have been collected', () {
+    // These two windows live in different methods and are tuned by hand. If
+    // the collection window ever grows outside the forgiveness window, a
+    // patch becomes collectable at a depth where a blocking obstacle no
+    // longer excuses the miss — and the player is docked points and their
+    // combo for a patch they had no way to reach. Relating two independently
+    // chosen numbers is the point; neither one alone says anything.
+    expect(
+      GameConfig.missForgivenessNearDepth,
+      lessThanOrEqualTo(GameConfig.patchCollectNearDepth),
+      reason: 'forgiveness must start no later than collection does',
+    );
+    expect(
+      GameConfig.missForgivenessFarDepth,
+      greaterThanOrEqualTo(GameConfig.patchCollectFarDepth),
+      reason: 'forgiveness must end no earlier than collection does',
+    );
   });
 
   group('lane changes move the player before the lane index catches up', () {

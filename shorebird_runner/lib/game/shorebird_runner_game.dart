@@ -290,7 +290,7 @@ class ShorebirdRunnerGame extends FlameGame
   Set<int> _lanesBlockedForSpawn() {
     final blocked = <int>{};
     for (final o in _obstacles) {
-      if (o.depth < 0.35) blocked.add(o.lane);
+      if (o.depth < GameConfig.patchSpawnBlockDepth) blocked.add(o.lane);
     }
     return blocked;
   }
@@ -439,7 +439,10 @@ class ShorebirdRunnerGame extends FlameGame
   }
 
   bool _checkPatchCollision(Patch p) {
-    if (p.depth < 0.82 || p.depth > 1.03) return false;
+    if (p.depth < GameConfig.patchCollectNearDepth ||
+        p.depth > GameConfig.patchCollectFarDepth) {
+      return false;
+    }
     // Same as obstacles: gating on currentLane made a patch in the lane you
     // were moving into uncollectable, which then counted as a miss and cost
     // points and the combo.
@@ -508,7 +511,10 @@ class ShorebirdRunnerGame extends FlameGame
     // points and the combo for it would punish the player for the game's own
     // layout rather than for a mistake.
     final wasBlocked = _obstacles.any(
-      (o) => o.lane == lane && o.depth > 0.80 && o.depth < 1.06,
+      (o) =>
+          o.lane == lane &&
+          o.depth > GameConfig.missForgivenessNearDepth &&
+          o.depth < GameConfig.missForgivenessFarDepth,
     );
     if (wasBlocked) return;
 
