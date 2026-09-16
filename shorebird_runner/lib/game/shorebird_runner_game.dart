@@ -111,9 +111,18 @@ class ShorebirdRunnerGame extends FlameGame
     _lastVignetteRect = null;
   }
 
+  /// Brief freeze on impact. Stopping the world for a few frames is what gives
+  /// a hit its weight — without it a smash passes by unregistered.
+  double _hitStop = 0;
+
   @override
   void update(double dt) {
     if (_isOver) return;
+
+    if (_hitStop > 0) {
+      _hitStop = (_hitStop - dt).clamp(0.0, 1.0);
+      return;
+    }
 
     // Clamp delta time to prevent physics tunneling or large spikes
     final safeDt = dt.clamp(0.001, 0.033);
@@ -205,11 +214,13 @@ class ShorebirdRunnerGame extends FlameGame
       }
     }
 
-    // Screen shake
+    // Screen shake. A sharp kick that decays fast reads as impact, where an
+    // even rattle just reads as noise, so the first frames throw hardest.
     if (_screenShake > 0) {
       _screenShake = (_screenShake - safeDt * 3.5).clamp(0, 10);
-      final shakeX = (_rng.nextDouble() - 0.5) * _screenShake * 12;
-      final shakeY = (_rng.nextDouble() - 0.5) * _screenShake * 12;
+      final punch = _screenShake * _screenShake;
+      final shakeX = (_rng.nextDouble() - 0.5) * punch * 16;
+      final shakeY = (_rng.nextDouble() - 0.5) * punch * 16;
       camera.viewfinder.position = Vector2(shakeX, shakeY);
     } else {
       camera.viewfinder.position = Vector2.zero();
@@ -274,8 +285,28 @@ class ShorebirdRunnerGame extends FlameGame
     }
   }
 
+  /// Lanes with an obstacle still far enough away that a patch spawned now
+  /// would travel behind it.
+  Set<int> _lanesBlockedForSpawn() {
+    final blocked = <int>{};
+    for (final o in _obstacles) {
+      if (o.depth < GameConfig.patchSpawnBlockDepth) blocked.add(o.lane);
+    }
+    return blocked;
+  }
+
   void _spawnPatch() {
-    final lane = _rng.nextInt(GameConfig.laneCount);
+    // Never drop a patch into a lane that an obstacle is already occupying:
+    // missing one costs points and the combo, so an uncollectable patch is a
+    // penalty the player had no way to avoid.
+    final blocked = _lanesBlockedForSpawn();
+    final open = [
+      for (int i = 0; i < GameConfig.laneCount; i++)
+        if (!blocked.contains(i)) i,
+    ];
+    final lane = open.isEmpty
+        ? _rng.nextInt(GameConfig.laneCount)
+        : open[_rng.nextInt(open.length)];
     _patchesSinceLastBooster++;
 
     // Paced powerup delivery:
@@ -295,7 +326,7 @@ class ShorebirdRunnerGame extends FlameGame
       lane: lane,
       rng: _rng,
       isHotReloadBooster: isBooster,
-      onMissed: (pos) => _onPatchMissed(pos),
+      onMissed: (pos, missedLane) => _onPatchMissed(pos, missedLane),
     );
     patch.totalPatches = totalPatches;
     _patches.add(patch);
@@ -304,8 +335,11 @@ class ShorebirdRunnerGame extends FlameGame
 
   bool _checkObstacleInteraction(Obstacle o) {
     if (o.depth < 0.86 || o.depth > 1.03) return false;
-    if (o.lane != _player.currentLane) return false;
-
+    // Deliberately no lane gate: currentLane stays on the lane being *left*
+    // until the tween finishes, so gating on it kept hitting the player with
+    // an obstacle they had visually already dodged. The player's x is tweened,
+    // so proximity below decides it, and the lanes are far enough apart on
+    // screen that a neighbouring one can't register.
     final playerPos = _player.worldPosition;
     final obsPos = o.worldPosition;
     final dx = (playerPos.dx - obsPos.dx).abs();
@@ -325,14 +359,17 @@ class ShorebirdRunnerGame extends FlameGame
     if (o.isJumpable && _player.isJumping) {
       if (!_clearedObstacles.contains(o)) {
         _clearedObstacles.add(o);
-        score += 150;
+        // Clearing at all still works — the safety net is unchanged. Clearing
+        // near the top of the arc is the well-judged version and pays more.
+        final apex = (_player.jumpProgress - 0.5).abs() < 0.18;
+        score += apex ? 250 : 150;
         _hud.score = score;
         AudioService.playStomp();
         _addFloatingText(
-          'LEAP! +150',
+          apex ? 'PERFECT LEAP! +250' : 'LEAP! +150',
           o.worldPosition,
-          const Color(0xFF00E5FF),
-          size: 17,
+          apex ? const Color(0xFFFFD700) : const Color(0xFF00E5FF),
+          size: apex ? 19 : 17,
         );
       }
       return false;
@@ -390,6 +427,8 @@ class ShorebirdRunnerGame extends FlameGame
     _hud.score = score;
     AudioService.playStomp();
     _screenShake = 0.8;
+    // Freeze briefly so the hit lands rather than sliding past.
+    _hitStop = 0.07;
 
     _addFloatingText(
       'SQUASHED! +300',
@@ -400,8 +439,13 @@ class ShorebirdRunnerGame extends FlameGame
   }
 
   bool _checkPatchCollision(Patch p) {
-    if (p.depth < 0.82 || p.depth > 1.03) return false;
-    if (p.lane != _player.currentLane) return false;
+    if (p.depth < GameConfig.patchCollectNearDepth ||
+        p.depth > GameConfig.patchCollectFarDepth) {
+      return false;
+    }
+    // Same as obstacles: gating on currentLane made a patch in the lane you
+    // were moving into uncollectable, which then counted as a miss and cost
+    // points and the combo.
     final playerPos = _player.worldPosition;
     final patchPos = p.worldPosition;
     final dx = (playerPos.dx - patchPos.dx).abs();
@@ -462,7 +506,18 @@ class ShorebirdRunnerGame extends FlameGame
     _hud.totalPatches = totalPatches;
   }
 
-  void _onPatchMissed(Offset pos) {
+  void _onPatchMissed(Offset pos, int lane) {
+    // An obstacle sitting in that lane made the patch unreachable, so taking
+    // points and the combo for it would punish the player for the game's own
+    // layout rather than for a mistake.
+    final wasBlocked = _obstacles.any(
+      (o) =>
+          o.lane == lane &&
+          o.depth > GameConfig.missForgivenessNearDepth &&
+          o.depth < GameConfig.missForgivenessFarDepth,
+    );
+    if (wasBlocked) return;
+
     // Penalty for missing a patch!
     score = max(0, score - GameConfig.missedPatchPenalty);
     _combo = 0; // reset streak

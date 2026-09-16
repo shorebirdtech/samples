@@ -594,18 +594,24 @@ class _LeaderboardRow extends StatelessWidget {
                   overflow: TextOverflow.ellipsis,
                 ),
                 const SizedBox(height: 2),
+                // Organisation and event tag share whatever width the entry
+                // column has left. Neither was flexible, so a long pairing
+                // such as "Shorebird · DROIDCON LONDON" pushed straight past
+                // the row on a phone.
                 Row(
                   children: [
                     if (entry.organization.isNotEmpty) ...[
-                      Text(
-                        entry.organization,
-                        style: const TextStyle(
-                          fontSize: 11,
-                          fontWeight: FontWeight.w500,
-                          color: AppColors.slateMuted,
+                      Flexible(
+                        child: Text(
+                          entry.organization,
+                          style: const TextStyle(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w500,
+                            color: AppColors.slateMuted,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                         ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
                       ),
                       const SizedBox(width: 6),
                       Container(
@@ -619,22 +625,29 @@ class _LeaderboardRow extends StatelessWidget {
                       const SizedBox(width: 6),
                     ],
                     if (entry.event.isNotEmpty)
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 6,
-                          vertical: 1,
-                        ),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFF1E293B),
-                          borderRadius: BorderRadius.circular(4),
-                        ),
-                        child: Text(
-                          entry.event.toUpperCase(),
-                          style: const TextStyle(
-                            fontSize: 9,
-                            fontWeight: FontWeight.w700,
-                            color: Color(0xFF94A3B8),
-                            letterSpacing: 0.4,
+                      // Must give way too: once the organisation has shrunk to
+                      // its ellipsis, a fixed-width chip is what still pushes
+                      // the row over on the narrowest screens.
+                      Flexible(
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 6,
+                            vertical: 1,
+                          ),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFF1E293B),
+                            borderRadius: BorderRadius.circular(4),
+                          ),
+                          child: Text(
+                            entry.event.toUpperCase(),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(
+                              fontSize: 9,
+                              fontWeight: FontWeight.w700,
+                              color: Color(0xFF94A3B8),
+                              letterSpacing: 0.4,
+                            ),
                           ),
                         ),
                       ),

@@ -52,8 +52,11 @@ class GameConfig {
       patchNearSize = (laneSpacing * 0.28).clamp(38.0, 50.0);
       collisionRadius = playerNearSize * 0.52;
     } else {
-      // Desktop / landscape: compact skyline backdrop so game road and action dominate
-      horizonY = height * 0.17; // Only 17% of screen height for sky
+      // Desktop / landscape: the skyline used to get 17% of the height, which
+      // is too thin a band for the rendered buildings — five floors of windows
+      // compress into ~90px and the detail turns to noise. 24% still leaves the
+      // road dominant while giving the city room to read.
+      horizonY = height * 0.24;
       nearY = height * 0.94; // Road extends down to 94%
       final roadWidth =
           min(width * 0.72, height * 1.35); // Generous, immersive road
@@ -137,7 +140,10 @@ class GameConfig {
       emoji: '👑',
       patchThreshold: 36,
       nextThreshold: null,
-      speedMultiplier: 3.00,
+      // Floored so an obstacle stays on screen for at least a second between
+      // appearing at the horizon and reaching the player. At 3.00 that window
+      // was 0.95s, which is less time than it takes to see one and react.
+      speedMultiplier: 2.70,
       obstacleInterval: 0.72,
       patchInterval: 0.85,
       doubleObstacleChance: 0.70,
@@ -212,6 +218,29 @@ class GameConfig {
 
   // ── Collision ─────────────────────────────────────────────────────────────
   static double collisionRadius = 28;
+
+  // ── Depth windows ─────────────────────────────────────────────────────────
+  // Objects travel from depth 0 at the horizon to just past 1.0 at the player.
+  // These windows are tuned independently but are not independent of each
+  // other, so they live together where that relationship is visible.
+
+  /// Depth range over which a patch can still be collected.
+  static const double patchCollectNearDepth = 0.82;
+  static const double patchCollectFarDepth = 1.03;
+
+  /// Depth range in which an obstacle counts as having blocked a patch, so
+  /// missing that patch costs nothing.
+  ///
+  /// This window must *contain* the collection window above. If a patch is
+  /// collectable at some depth but a blocking obstacle at that same depth is
+  /// not forgiven, the player loses points and their combo for a patch they
+  /// were never able to reach. `test/gameplay_feel_test.dart` pins this.
+  static const double missForgivenessNearDepth = 0.80;
+  static const double missForgivenessFarDepth = 1.06;
+
+  /// An obstacle nearer than this still has the whole track ahead of it, so
+  /// a patch spawned into its lane now would arrive behind it.
+  static const double patchSpawnBlockDepth = 0.35;
 
   // ── Scoring ───────────────────────────────────────────────────────────────
   static const int patchPoints = 25;

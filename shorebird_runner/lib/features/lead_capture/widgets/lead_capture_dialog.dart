@@ -167,39 +167,57 @@ class _LeadCaptureDialogState extends State<LeadCaptureDialog> {
                                 mainAxisAlignment:
                                     MainAxisAlignment.spaceBetween,
                                 children: [
-                                  Row(
-                                    children: [
-                                      Transform.scale(
-                                        scale: 0.65,
-                                        alignment: Alignment.centerLeft,
-                                        child: const ShorebirdLogo(),
-                                      ),
-                                      const SizedBox(width: 8),
-                                      const Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: [
-                                          Text(
-                                            'PATCH RUSH',
-                                            style: TextStyle(
-                                              fontSize: 16,
-                                              fontWeight: FontWeight.w900,
-                                              color: AppColors.shorebirdGold,
-                                              letterSpacing: 3,
-                                            ),
+                                  const Expanded(
+                                    child: Row(
+                                      children: [
+                                        // Transform.scale only scales the
+                                        // painting — the logo still claimed its
+                                        // full 140px of layout width, over half
+                                        // of a 360px dialog. FittedBox shrinks
+                                        // the box itself, not just the pixels.
+                                        SizedBox(
+                                          width: 44,
+                                          height: 44,
+                                          child: FittedBox(
+                                            fit: BoxFit.contain,
+                                            child: ShorebirdLogo(),
                                           ),
-                                          Text(
-                                            'DEVELOPER DISPATCH',
-                                            style: TextStyle(
-                                              fontSize: 10,
-                                              fontWeight: FontWeight.w700,
-                                              color: AppColors.slateMuted,
-                                              letterSpacing: 2,
-                                            ),
+                                        ),
+                                        SizedBox(width: 8),
+                                        Flexible(
+                                          child: Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            mainAxisSize: MainAxisSize.min,
+                                            children: [
+                                              Text(
+                                                'PATCH RUSH',
+                                                maxLines: 1,
+                                                overflow: TextOverflow.ellipsis,
+                                                style: TextStyle(
+                                                  fontSize: 16,
+                                                  fontWeight: FontWeight.w900,
+                                                  color:
+                                                      AppColors.shorebirdGold,
+                                                  letterSpacing: 3,
+                                                ),
+                                              ),
+                                              Text(
+                                                'DEVELOPER DISPATCH',
+                                                maxLines: 1,
+                                                overflow: TextOverflow.ellipsis,
+                                                style: TextStyle(
+                                                  fontSize: 10,
+                                                  fontWeight: FontWeight.w700,
+                                                  color: AppColors.slateMuted,
+                                                  letterSpacing: 2,
+                                                ),
+                                              ),
+                                            ],
                                           ),
-                                        ],
-                                      ),
-                                    ],
+                                        ),
+                                      ],
+                                    ),
                                   ),
                                   IconButton(
                                     icon: const Icon(
@@ -261,13 +279,20 @@ class _LeadCaptureDialogState extends State<LeadCaptureDialog> {
                                         color: AppColors.shorebirdGold,
                                       ),
                                       const SizedBox(width: 6),
-                                      Text(
-                                        'EVENT: ${state.event.toUpperCase()}',
-                                        style: const TextStyle(
-                                          color: AppColors.shorebirdGold,
-                                          fontSize: 11,
-                                          fontWeight: FontWeight.w800,
-                                          letterSpacing: 0.8,
+                                      // A real conference name pushes this chip
+                                      // well past a phone's width, so the label
+                                      // has to be allowed to shrink.
+                                      Flexible(
+                                        child: Text(
+                                          'EVENT: ${state.event.toUpperCase()}',
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                          style: const TextStyle(
+                                            color: AppColors.shorebirdGold,
+                                            fontSize: 11,
+                                            fontWeight: FontWeight.w800,
+                                            letterSpacing: 0.8,
+                                          ),
                                         ),
                                       ),
                                     ],
@@ -490,12 +515,16 @@ class _LeadCaptureDialogState extends State<LeadCaptureDialog> {
                                         mainAxisAlignment:
                                             MainAxisAlignment.center,
                                         children: [
-                                          Text(
-                                            'START PATCHING',
-                                            style: TextStyle(
-                                              fontSize: 15,
-                                              fontWeight: FontWeight.w900,
-                                              letterSpacing: 2,
+                                          Flexible(
+                                            child: Text(
+                                              'START PATCHING',
+                                              maxLines: 1,
+                                              overflow: TextOverflow.ellipsis,
+                                              style: TextStyle(
+                                                fontSize: 15,
+                                                fontWeight: FontWeight.w900,
+                                                letterSpacing: 2,
+                                              ),
                                             ),
                                           ),
                                           SizedBox(width: 8),

@@ -40,6 +40,11 @@ class Player extends Component {
   double _invincibleTimer = 0.0;
 
   bool get isJumping => _isJumping;
+
+  /// Progress through the jump arc: 0 at take-off, 1 at landing, 0.5 at the
+  /// top. Lets scoring tell a well-judged leap from a panicked early one.
+  double get jumpProgress =>
+      _isJumping ? (_jumpTime / _jumpDuration).clamp(0.0, 1.0) : 0.0;
   bool get isSliding => _isSliding;
   bool get isInvincible => _invincibleTimer > 0;
 
@@ -166,12 +171,20 @@ class Player extends Component {
     AudioService.playSwitch();
   }
 
+  /// How long before landing a jump press is remembered.
+  static const double _jumpBufferWindow = 0.18;
+  double _bufferedJumpTimer = 0.0;
+
   void jump() {
     if (!_isJumping && !_isSliding) {
       _isJumping = true;
       _jumpTime = 0.0;
       AudioService.playJump();
+      return;
     }
+    // Pressed slightly too early. Remember it and fire on landing rather than
+    // dropping it, which otherwise feels like the game ignored the input.
+    _bufferedJumpTimer = _jumpBufferWindow;
   }
 
   void slide() {
@@ -271,6 +284,16 @@ class Player extends Component {
       if (_slideTime >= _slideDuration) {
         _isSliding = false;
         _slideTime = 0.0;
+      }
+    }
+
+    // A jump pressed just before landing fires as soon as the player is
+    // grounded again, instead of being swallowed.
+    if (_bufferedJumpTimer > 0) {
+      _bufferedJumpTimer = max(0.0, _bufferedJumpTimer - dt);
+      if (!_isJumping && !_isSliding && _bufferedJumpTimer > 0) {
+        _bufferedJumpTimer = 0.0;
+        jump();
       }
     }
 

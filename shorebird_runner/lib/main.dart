@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shorebird_runner/core/core.dart';
@@ -25,10 +26,14 @@ class PatchRushApp extends StatelessWidget {
           create: (_) => const HighScoreRepository(),
         ),
         RepositoryProvider<ILeadRepository>(
-          create: (_) => SupabaseLeadRepository(),
+          create: (_) => kDebugMode
+              ? const LocalLeadRepository()
+              : SupabaseLeadRepository(),
         ),
         RepositoryProvider<ILeaderboardRepository>(
-          create: (_) => SupabaseLeaderboardRepository(),
+          create: (_) => kDebugMode
+              ? const LocalLeaderboardRepository()
+              : SupabaseLeaderboardRepository(),
         ),
       ],
       child: Builder(

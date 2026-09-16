@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shorebird_runner/core/core.dart';
@@ -9,7 +10,7 @@ import 'package:shorebird_runner/features/start_menu/widgets/widgets.dart';
 /// signature Shorebird golden emblem, stages roadmap, and "Start Patching" lead capture.
 /// Includes a secret 3-tap trigger on the Shorebird Logo to configure the active event.
 class StartScreen extends StatefulWidget {
-  final void Function(LeadModel lead) onStartPatching;
+  final void Function(LeadModel? lead) onStartPatching;
 
   const StartScreen({
     super.key,
@@ -75,6 +76,12 @@ class _StartScreenState extends State<StartScreen>
   }
 
   void _onStartPressed() {
+    // Skip the lead-capture form entirely for local development — it's
+    // only there to collect booth attendee info in production builds.
+    if (kDebugMode) {
+      widget.onStartPatching(null);
+      return;
+    }
     LeadCaptureDialog.show(
       context,
       onStartGame: widget.onStartPatching,

@@ -1,7 +1,32 @@
 import 'dart:math';
+import 'dart:ui' as ui;
 import 'package:flame/components.dart';
+import 'package:flame/flame.dart';
 import 'package:flutter/painting.dart';
 import 'package:shorebird_runner/game/utils/utils.dart';
+
+/// A billboard or antenna pinned to the roof of one skyline building.
+class _Rooftop {
+  final int index;
+  final String? label;
+  final Color color;
+  final double width;
+
+  const _Rooftop(this.index, this.label, this.color, this.width);
+}
+
+/// One rendered building placed on the repeating skyline strip, in screen px.
+/// Holds an index rather than the image itself: every building is drawn from
+/// one packed atlas in a single call, so the individual image is never needed
+/// at draw time.
+class _SkylineBuilding {
+  final int imageIndex;
+  final double x;
+  final double width;
+  final double height;
+
+  const _SkylineBuilding(this.imageIndex, this.x, this.width, this.height);
+}
 
 /// 3D Mario / Subway Surfers elevated runway with GTA 5 nighttime skyline,
 /// rolling hills horizon, checkered highway pavers, dynamic runway light bars,
@@ -42,9 +67,6 @@ class LaneWorld extends Component {
   // Pre-baked skyline geometry paths to eliminate hundreds of per-frame drawRect calls
   final Path _mountainPath = Path();
   final Path _skylineBackPath = Path();
-  final Path _skylineBuildingsPath = Path();
-  final Path _verticalRibsPath = Path();
-  final Path _crownGlowPath = Path();
 
   // Reusable paths for zero-allocation rendering loops
   final Path _segmentPath = Path();
@@ -66,13 +88,7 @@ class LaneWorld extends Component {
     ..color = const Color(0xFF64748B)
     ..strokeWidth = 1.5;
   final Paint _skylineBackPaint = Paint()..style = PaintingStyle.fill;
-  final Paint _bldFillPaint = Paint()..style = PaintingStyle.fill;
-  final Paint _ribsPaint = Paint()
-    ..style = PaintingStyle.stroke
-    ..strokeWidth = 1.6;
-  final Paint _crownPaint = Paint()
-    ..style = PaintingStyle.stroke
-    ..strokeWidth = 2.0;
+  final Paint _spritePaint = Paint()..filterQuality = FilterQuality.medium;
   final Paint _tilePaint = Paint()..style = PaintingStyle.fill;
   final Paint _seamPaint = Paint();
   final Paint _dashPaint = Paint()..strokeCap = StrokeCap.round;
@@ -109,6 +125,7 @@ class LaneWorld extends Component {
 
   @override
   Future<void> onLoad() async {
+    await _loadBuildings();
     _initStaticGeometry();
     _initCachedTextPainters();
   }
@@ -119,14 +136,65 @@ class LaneWorld extends Component {
     _initStaticGeometry();
   }
 
+  /// Ever-increasing distance used to slide the skyline layers past.
+  double _skylineScroll = 0.0;
+
+  /// Pre-rendered buildings (CC0 Kenney City Kit, baked in Blender with the
+  /// walls recoloured and the windows lit) used for the near skyline layer.
+  /// The far layer stays procedural: those models are narrow, identical slabs
+  /// that read as a picket fence, and flat silhouettes are cheaper anyway.
+  static const List<String> _buildingAssets = [
+    'large_building_01.png',
+    'large_building_02.png',
+    'large_building_03.png',
+    'large_building_04.png',
+    'large_building_05.png',
+    'large_building_07.png',
+    'skyscraper_01.png',
+    'skyscraper_02.png',
+    'skyscraper_03.png',
+    'skyscraper_04.png',
+    'skyscraper_06.png',
+    'small_building_01.png',
+    'small_building_02.png',
+    'small_building_04.png',
+    'small_building_05.png',
+    'small_building_06.png',
+  ];
+
+  /// Pixels per metre used for every bake, so relative heights survive: a
+  /// skyscraper towers over a shopfront by exactly the ratio it was modelled.
+  static const double _spritePpm = 96.0;
+
+  final List<ui.Image> _buildingImages = [];
+  final List<_SkylineBuilding> _skyline = [];
+
+  /// All 16 buildings packed into one texture. Drawing them individually meant
+  /// ~52 drawImageRect a frame (26 buildings across two wrap passes) hopping
+  /// between 16 textures in random order; from one atlas it is a single
+  /// drawAtlas. Every building shares one scale and never rotates, which is
+  /// exactly the case drawAtlas is for.
+  ui.Image? _atlas;
+  final List<Rect> _atlasSrc = [];
+
+  /// Per-building source rects and transforms, covering both wrap passes.
+  /// Rebuilt only on resize, so a frame just hands these to the canvas.
+  final List<Rect> _atlasRects = [];
+  final List<RSTransform> _atlasTransforms = [];
+
+  /// Which skyline buildings carry a billboard or an antenna on the roof.
+  final List<_Rooftop> _rooftops = [];
+
+  /// Length of the repeating skyline strip. The strip is built past the screen
+  /// edge and repeats on exactly this distance, so it wraps with no seam and
+  /// no overlap.
+  double _skylineSpan = 0;
+
   double _bldScale = 0.45;
 
   void _initStaticGeometry() {
     _mountainPath.reset();
     _skylineBackPath.reset();
-    _skylineBuildingsPath.reset();
-    _verticalRibsPath.reset();
-    _crownGlowPath.reset();
 
     final cy = GameConfig.horizonY;
     final w = GameConfig.designWidth;
@@ -183,40 +251,8 @@ class LaneWorld extends Component {
       _skylineBackPath.close();
     }
 
-    // ── Layer 2: Foreground Tech Headquarters & Architectural Ribs ──────
-    final foreBuildings = [
-      (w * 0.03, 56.0, 95.0 * _bldScale),
-      (w * 0.09, 52.0, 125.0 * _bldScale),
-      (w * 0.16, 64.0, 85.0 * _bldScale),
-      (w * 0.23, 72.0, 142.0 * _bldScale),
-      (w * 0.31, 54.0, 105.0 * _bldScale),
-      (w * 0.67, 58.0, 115.0 * _bldScale),
-      (w * 0.76, 75.0, 150.0 * _bldScale),
-      (w * 0.84, 62.0, 92.0 * _bldScale),
-      (w * 0.91, 68.0, 122.0 * _bldScale),
-      (w * 0.97, 50.0, 85.0 * _bldScale),
-    ];
-
-    for (final b in foreBuildings) {
-      final bx = b.$1;
-      final bw = b.$2;
-      final bh = b.$3;
-
-      _skylineBuildingsPath.addRect(Rect.fromLTWH(bx, cy - bh, bw, bh));
-
-      // Crown illumination perimeter line
-      _crownGlowPath.moveTo(bx, cy - bh);
-      _crownGlowPath.lineTo(bx + bw, cy - bh);
-
-      // Vertical architectural LED light strips (modern cyber-tower aesthetics)
-      final ribCount = (bw / 16).floor().clamp(2, 4);
-      final step = bw / (ribCount + 1);
-      for (int i = 1; i <= ribCount; i++) {
-        final rx = bx + step * i;
-        _verticalRibsPath.moveTo(rx, cy - bh + 4);
-        _verticalRibsPath.lineTo(rx, cy - 6);
-      }
-    }
+    // ── Layer 2: Foreground buildings, from the pre-rendered sprites ──────
+    _layoutSkyline(cy, w);
 
     // Pre-cache landscape and architectural shaders
     _mountainPaint.shader = const LinearGradient(
@@ -229,12 +265,6 @@ class LaneWorld extends Component {
       begin: Alignment.topCenter,
       end: Alignment.bottomCenter,
       colors: [Color(0xFF090F1C), Color(0xFF04070D)],
-    ).createShader(Rect.fromLTWH(0, 0, w, cy));
-
-    _bldFillPaint.shader = const LinearGradient(
-      begin: Alignment.topCenter,
-      end: Alignment.bottomCenter,
-      colors: [Color(0xFF0F172A), Color(0xFF050A12)],
     ).createShader(Rect.fromLTWH(0, 0, w, cy));
 
     _towerPaint.shader = const LinearGradient(
@@ -322,9 +352,6 @@ class LaneWorld extends Component {
     ).createShader(
       Rect.fromLTRB(_farLeft.dx - 160, cy, _farRight.dx + 160, cy),
     );
-
-    _ribsPaint.color = _curAccentColor.withValues(alpha: 0.65);
-    _crownPaint.color = _curAccentColor.withValues(alpha: 0.85);
   }
 
   int _lastShaderLevel = -1;
@@ -383,6 +410,9 @@ class LaneWorld extends Component {
     final speed =
         GameConfig.scrollSpeed(totalPatches, isInvincible: isInvincible);
     _scroll = (_scroll + dt * speed * 0.45) % 1.0;
+    // The skyline needs a distance that keeps increasing: _scroll wraps every
+    // tile and is already consumed by the road.
+    _skylineScroll += dt * speed * 26.0;
     _searchlightAngle += dt * 0.85;
 
     final targetLevel = GameConfig.levelFor(totalPatches);
@@ -410,6 +440,27 @@ class LaneWorld extends Component {
     _drawPlanGantry(canvas);
   }
 
+  /// Draws a baked skyline layer sliding leftward at [factor] of the world
+  /// speed, repeated a screen-width apart so it never runs out.
+  ///
+  /// Far layers take a smaller factor than near ones; that difference in
+  /// apparent speed is what reads as depth.
+  void _drawParallaxLayer(
+    Canvas canvas,
+    Path layer,
+    Paint paint,
+    double factor,
+    double screenWidth,
+  ) {
+    final offset = (_skylineScroll * factor) % screenWidth;
+    canvas.save();
+    canvas.translate(-offset, 0);
+    canvas.drawPath(layer, paint);
+    canvas.translate(screenWidth, 0);
+    canvas.drawPath(layer, paint);
+    canvas.restore();
+  }
+
   void _drawCinematicCityscape(Canvas canvas) {
     final cy = GameConfig.horizonY;
     final w = GameConfig.designWidth;
@@ -425,7 +476,10 @@ class LaneWorld extends Component {
     );
 
     // 3. Layer 1: Distant Background Monolith Silhouettes
-    canvas.drawPath(_skylineBackPath, _skylineBackPaint);
+    // Slid past at a fraction of the road's speed. Baked once and drawn twice,
+    // a screen apart, so the layer wraps without a seam. Without this the
+    // skyline sits frozen while the road rushes underneath it.
+    _drawParallaxLayer(canvas, _skylineBackPath, _skylineBackPaint, 0.12, w);
 
     // 4. Sweeping Searchlight Beams (zero allocations)
     _drawSearchlight(
@@ -443,10 +497,11 @@ class LaneWorld extends Component {
       _searchlightPaintAmber,
     );
 
-    // 5. Layer 2: Foreground Tech Headquarters & Architectural LED Ribs
-    canvas.drawPath(_skylineBuildingsPath, _bldFillPaint);
-    canvas.drawPath(_verticalRibsPath, _ribsPaint);
-    canvas.drawPath(_crownGlowPath, _crownPaint);
+    // 5. Layer 2: Foreground buildings. Nearer, so they slide past faster than
+    // the monoliths behind them — that difference in speed is what reads as
+    // depth. Their windows are baked into the sprite, so nothing can detach
+    // from the building it belongs to.
+    _drawSkylineSprites(canvas);
 
     // 6. Distant Giant Spire Towers (scaled relative to sky height)
     final towerHeight = cy * (isDesktop ? 0.48 : 0.65);
@@ -470,39 +525,38 @@ class LaneWorld extends Component {
     _drawWetRoadReflections(canvas);
   }
 
+  /// Billboards and antennas ride the skyline strip rather than sitting at
+  /// fixed screen positions. Anchored to a building and scrolled with the same
+  /// offset, they stay on the roof they belong to; left static they visibly
+  /// detach and hang in the sky while the city slides away underneath.
   void _drawRooftopElements(Canvas canvas, double cy) {
-    final w = GameConfig.designWidth;
+    if (_skyline.isEmpty || _skylineSpan <= 0) return;
+    final offset = (_skylineScroll * 0.30) % _skylineSpan;
 
-    // Billboards
-    _renderCachedBillboard(
-      canvas,
-      w * 0.08,
-      cy - 120.0 * _bldScale,
-      48,
-      'SHOREBIRD',
-      const Color(0xFFFFC107),
-    );
-    _renderCachedBillboard(
-      canvas,
-      w * 0.75,
-      cy - 145.0 * _bldScale,
-      70,
-      'CODEPUSH',
-      const Color(0xFFFFB300),
-    );
-    _renderCachedBillboard(
-      canvas,
-      w * 0.90,
-      cy - 115.0 * _bldScale,
-      64,
-      'FLUTTER',
-      const Color(0xFF00FFCC),
-    );
-
-    // Blinking radio antennas
-    _drawAntenna(canvas, w * 0.08 + 24, cy - 120.0 * _bldScale, 0);
-    _drawAntenna(canvas, w * 0.22 + 34, cy - 135.0 * _bldScale, 1);
-    _drawAntenna(canvas, w * 0.75 + 35, cy - 145.0 * _bldScale, 2);
+    canvas.save();
+    canvas.translate(-offset, 0);
+    for (int pass = 0; pass < 2; pass++) {
+      for (int i = 0; i < _rooftops.length; i++) {
+        final r = _rooftops[i];
+        if (r.index >= _skyline.length) continue;
+        final b = _skyline[r.index];
+        final roofY = cy - b.height;
+        if (r.label != null) {
+          _renderCachedBillboard(
+            canvas,
+            b.x + (b.width - r.width) / 2,
+            roofY,
+            r.width,
+            r.label!,
+            r.color,
+          );
+        } else {
+          _drawAntenna(canvas, b.x + b.width * 0.5, roofY, i);
+        }
+      }
+      canvas.translate(_skylineSpan, 0);
+    }
+    canvas.restore();
   }
 
   void _renderCachedBillboard(
@@ -850,6 +904,154 @@ class LaneWorld extends Component {
     canvas.translate(midX, boardY);
     canvas.scale((t * 0.95).clamp(0.3, 1.2));
     tp.paint(canvas, Offset(-tp.width / 2, -tp.height / 2));
+    canvas.restore();
+  }
+
+  Future<void> _loadBuildings() async {
+    final images = await Flame.images.loadAll(_buildingAssets);
+    _buildingImages
+      ..clear()
+      ..addAll(images);
+    await _buildAtlas();
+  }
+
+  /// Packs every building into one texture, left to right, recording where
+  /// each one landed.
+  Future<void> _buildAtlas() async {
+    _atlasSrc.clear();
+    if (_buildingImages.isEmpty) return;
+
+    var totalWidth = 0.0;
+    var maxHeight = 0.0;
+    for (final image in _buildingImages) {
+      totalWidth += image.width;
+      maxHeight = max(maxHeight, image.height.toDouble());
+    }
+
+    final recorder = ui.PictureRecorder();
+    final canvas = Canvas(recorder);
+    final paint = Paint();
+    var x = 0.0;
+    for (final image in _buildingImages) {
+      canvas.drawImage(image, Offset(x, 0), paint);
+      _atlasSrc.add(
+        Rect.fromLTWH(x, 0, image.width.toDouble(), image.height.toDouble()),
+      );
+      x += image.width;
+    }
+
+    final picture = recorder.endRecording();
+    _atlas?.dispose();
+    _atlas = await picture.toImage(totalWidth.ceil(), maxHeight.ceil());
+    picture.dispose();
+  }
+
+  /// Lays buildings along a strip that runs past the right edge, then records
+  /// where it ends. Drawing repeats on exactly that distance, so the skyline
+  /// tiles without a gap or a double-drawn building at the seam.
+  void _layoutSkyline(double cy, double w) {
+    _skyline.clear();
+    _skylineSpan = 0;
+    if (_buildingImages.isEmpty || w <= 0) return;
+
+    var tallestMetres = 0.0;
+    for (final image in _buildingImages) {
+      tallestMetres = max(tallestMetres, image.height / _spritePpm);
+    }
+    if (tallestMetres <= 0) return;
+    // Scale from the tallest building, so the skyline fills the sky without
+    // overrunning it whatever the viewport.
+    final pxPerMetre = (cy * 0.82) / tallestMetres;
+
+    // Seeded, so a resize rebuilds the same street instead of reshuffling it.
+    final rng = Random(90210);
+    var x = 0.0;
+    while (x < w) {
+      final index = rng.nextInt(_buildingImages.length);
+      final image = _buildingImages[index];
+      final bw = (image.width / _spritePpm) * pxPerMetre;
+      final bh = (image.height / _spritePpm) * pxPerMetre;
+      _skyline.add(_SkylineBuilding(index, x, bw, bh));
+      x += bw + 4 + rng.nextDouble() * 22;
+    }
+    _skylineSpan = x;
+    _buildAtlasBatch(cy, pxPerMetre / _spritePpm);
+    _layoutRooftops(rng);
+  }
+
+  /// Flattens both wrap passes into one set of transforms so the whole skyline
+  /// is a single draw. Only the scroll offset changes per frame, and that is a
+  /// canvas translate rather than a rebuild of these lists.
+  void _buildAtlasBatch(double cy, double scale) {
+    _atlasRects.clear();
+    _atlasTransforms.clear();
+    if (_atlasSrc.isEmpty) return;
+
+    for (int pass = 0; pass < 2; pass++) {
+      final shift = pass * _skylineSpan;
+      for (final b in _skyline) {
+        if (b.imageIndex >= _atlasSrc.length) continue;
+        _atlasRects.add(_atlasSrc[b.imageIndex]);
+        _atlasTransforms.add(
+          RSTransform.fromComponents(
+            rotation: 0,
+            scale: scale,
+            anchorX: 0,
+            anchorY: 0,
+            translateX: b.x + shift,
+            translateY: cy - b.height,
+          ),
+        );
+      }
+    }
+  }
+
+  /// Spreads the three billboards and a few antennas across the strip, each
+  /// pinned to a specific building so they travel with it.
+  void _layoutRooftops(Random rng) {
+    _rooftops.clear();
+    if (_skyline.length < 4) return;
+
+    const signs = [
+      ('SHOREBIRD', Color(0xFFFFC107), 48.0),
+      ('CODEPUSH', Color(0xFFFFB300), 70.0),
+      ('FLUTTER', Color(0xFF00FFCC), 64.0),
+    ];
+
+    final taken = <int>{};
+    for (int i = 0; i < signs.length; i++) {
+      // Spread them over the strip so two never land side by side.
+      final slot = (_skyline.length * (i + 0.5) / signs.length).floor();
+      final index = slot.clamp(0, _skyline.length - 1);
+      if (!taken.add(index)) continue;
+      _rooftops.add(
+        _Rooftop(index, signs[i].$1, signs[i].$2, signs[i].$3),
+      );
+    }
+
+    for (int i = 0; i < 3; i++) {
+      final index = rng.nextInt(_skyline.length);
+      if (!taken.add(index)) continue;
+      _rooftops.add(_Rooftop(index, null, const Color(0xFF64748B), 0));
+    }
+  }
+
+  void _drawSkylineSprites(Canvas canvas) {
+    final atlas = _atlas;
+    if (atlas == null || _atlasTransforms.isEmpty || _skylineSpan <= 0) return;
+    final offset = (_skylineScroll * 0.30) % _skylineSpan;
+
+    canvas.save();
+    canvas.translate(-offset, 0);
+    canvas.drawAtlas(
+      atlas,
+      _atlasTransforms,
+      _atlasRects,
+      null,
+      null,
+      null,
+      _spritePaint,
+    );
     canvas.restore();
   }
 
