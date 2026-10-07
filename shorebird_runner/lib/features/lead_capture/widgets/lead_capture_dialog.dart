@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shorebird_runner/core/constants/constants.dart';
 import 'package:shorebird_runner/features/lead_capture/bloc/bloc.dart';
@@ -62,6 +63,7 @@ class _LeadCaptureDialogState extends State<LeadCaptureDialog> {
   }
 
   bool _consentGiven = false;
+  bool _submitAttempted = false;
   String? _consentError;
 
   @override
@@ -73,16 +75,25 @@ class _LeadCaptureDialogState extends State<LeadCaptureDialog> {
     super.dispose();
   }
 
+  /// Consent only matters once the player shares contact details. A
+  /// name-only player is just putting a name on the leaderboard, which the
+  /// name field already spells out.
+  bool get _consentRequired =>
+      _emailController.text.trim().isNotEmpty ||
+      _phoneController.text.trim().isNotEmpty ||
+      _orgController.text.trim().isNotEmpty;
+
   void _submit() {
+    final formValid = _formKey.currentState?.validate() ?? false;
+    final consentMissing = _consentRequired && !_consentGiven;
     setState(() {
-      _consentError = !_consentGiven
-          ? 'Please check the box to allow data sharing with Shorebird.'
+      _submitAttempted = true;
+      _consentError = consentMissing
+          ? 'Please check the box to share your contact details, or clear them.'
           : null;
     });
 
-    if (!_consentGiven) return;
-
-    if (_formKey.currentState?.validate() ?? false) {
+    if (formValid && !consentMissing) {
       final bloc = context.read<LeadCaptureBloc>();
       bloc.add(LeadNameChanged(_nameController.text.trim()));
       bloc.add(LeadEmailChanged(_emailController.text.trim()));
@@ -158,384 +169,394 @@ class _LeadCaptureDialogState extends State<LeadCaptureDialog> {
                         padding: const EdgeInsets.fromLTRB(28, 24, 28, 28),
                         child: Form(
                           key: _formKey,
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.stretch,
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              // Top Bar: Logo & Close
-                              Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  const Expanded(
-                                    child: Row(
-                                      children: [
-                                        // Transform.scale only scales the
-                                        // painting — the logo still claimed its
-                                        // full 140px of layout width, over half
-                                        // of a 360px dialog. FittedBox shrinks
-                                        // the box itself, not just the pixels.
-                                        SizedBox(
-                                          width: 44,
-                                          height: 44,
-                                          child: FittedBox(
-                                            fit: BoxFit.contain,
-                                            child: ShorebirdLogo(),
+                          autovalidateMode: _submitAttempted
+                              ? AutovalidateMode.onUserInteraction
+                              : AutovalidateMode.disabled,
+                          child: AutofillGroup(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                // Top Bar: Logo & Close
+                                Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    const Expanded(
+                                      child: Row(
+                                        children: [
+                                          // Transform.scale only scales the
+                                          // painting — the logo still claimed its
+                                          // full 140px of layout width, over half
+                                          // of a 360px dialog. FittedBox shrinks
+                                          // the box itself, not just the pixels.
+                                          SizedBox(
+                                            width: 44,
+                                            height: 44,
+                                            child: FittedBox(
+                                              fit: BoxFit.contain,
+                                              child: ShorebirdLogo(),
+                                            ),
                                           ),
+                                          SizedBox(width: 8),
+                                          Flexible(
+                                            child: Column(
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.start,
+                                              mainAxisSize: MainAxisSize.min,
+                                              children: [
+                                                Text(
+                                                  'PATCH RUSH',
+                                                  maxLines: 1,
+                                                  overflow:
+                                                      TextOverflow.ellipsis,
+                                                  style: TextStyle(
+                                                    fontSize: 16,
+                                                    fontWeight: FontWeight.w900,
+                                                    color:
+                                                        AppColors.shorebirdGold,
+                                                    letterSpacing: 3,
+                                                  ),
+                                                ),
+                                                Text(
+                                                  'DEVELOPER DISPATCH',
+                                                  maxLines: 1,
+                                                  overflow:
+                                                      TextOverflow.ellipsis,
+                                                  style: TextStyle(
+                                                    fontSize: 10,
+                                                    fontWeight: FontWeight.w700,
+                                                    color: AppColors.slateMuted,
+                                                    letterSpacing: 2,
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                    IconButton(
+                                      icon: const Icon(
+                                        Icons.close_rounded,
+                                        color: AppColors.slateMuted,
+                                        size: 20,
+                                      ),
+                                      splashRadius: 20,
+                                      onPressed: () =>
+                                          Navigator.of(context).pop(),
+                                    ),
+                                  ],
+                                ),
+
+                                const SizedBox(height: 20),
+
+                                // Headline
+                                const Text(
+                                  'Join the Patch Run',
+                                  style: TextStyle(
+                                    fontSize: 22,
+                                    fontWeight: FontWeight.w800,
+                                    color: Color(0xFFF1F5F9),
+                                    letterSpacing: 0.5,
+                                  ),
+                                ),
+                                const SizedBox(height: 6),
+                                const Text(
+                                  'Pick a player name for the leaderboard. Everything else is optional, so share contact details only if you want to hear from Shorebird.',
+                                  style: TextStyle(
+                                    fontSize: 13,
+                                    color: AppColors.slateSubtle,
+                                    height: 1.4,
+                                  ),
+                                ),
+
+                                if (state.event.isNotEmpty) ...[
+                                  const SizedBox(height: 14),
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 12,
+                                      vertical: 6,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color: AppColors.shorebirdGold
+                                          .withValues(alpha: 0.12),
+                                      borderRadius: BorderRadius.circular(8),
+                                      border: Border.all(
+                                        color: AppColors.shorebirdGold
+                                            .withValues(alpha: 0.35),
+                                      ),
+                                    ),
+                                    child: Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        const Icon(
+                                          Icons.location_on_rounded,
+                                          size: 14,
+                                          color: AppColors.shorebirdGold,
                                         ),
-                                        SizedBox(width: 8),
+                                        const SizedBox(width: 6),
+                                        // A real conference name pushes this chip
+                                        // well past a phone's width, so the label
+                                        // has to be allowed to shrink.
                                         Flexible(
-                                          child: Column(
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.start,
-                                            mainAxisSize: MainAxisSize.min,
-                                            children: [
-                                              Text(
-                                                'PATCH RUSH',
-                                                maxLines: 1,
-                                                overflow: TextOverflow.ellipsis,
-                                                style: TextStyle(
-                                                  fontSize: 16,
-                                                  fontWeight: FontWeight.w900,
-                                                  color:
-                                                      AppColors.shorebirdGold,
-                                                  letterSpacing: 3,
-                                                ),
-                                              ),
-                                              Text(
-                                                'DEVELOPER DISPATCH',
-                                                maxLines: 1,
-                                                overflow: TextOverflow.ellipsis,
-                                                style: TextStyle(
-                                                  fontSize: 10,
-                                                  fontWeight: FontWeight.w700,
-                                                  color: AppColors.slateMuted,
-                                                  letterSpacing: 2,
-                                                ),
-                                              ),
-                                            ],
+                                          child: Text(
+                                            'EVENT: ${state.event.toUpperCase()}',
+                                            maxLines: 1,
+                                            overflow: TextOverflow.ellipsis,
+                                            style: const TextStyle(
+                                              color: AppColors.shorebirdGold,
+                                              fontSize: 11,
+                                              fontWeight: FontWeight.w800,
+                                              letterSpacing: 0.8,
+                                            ),
                                           ),
                                         ),
                                       ],
                                     ),
                                   ),
-                                  IconButton(
-                                    icon: const Icon(
-                                      Icons.close_rounded,
-                                      color: AppColors.slateMuted,
-                                      size: 20,
+                                ],
+
+                                const SizedBox(height: 24),
+
+                                // Field 1: Name (the only required field)
+                                _buildField(
+                                  controller: _nameController,
+                                  label: 'PLAYER NAME',
+                                  isRequired: true,
+                                  hint: 'e.g. Alex Rivera',
+                                  helper: 'Shown on the leaderboard.',
+                                  icon: Icons.person_outline_rounded,
+                                  autofocus: true,
+                                  textCapitalization: TextCapitalization.words,
+                                  autofillHints: const [AutofillHints.name],
+                                  maxLength: LeadCaptureState.maxNameLength,
+                                  validator: (val) {
+                                    if (LeadCaptureState.nameIsValid(
+                                      val ?? '',
+                                    )) {
+                                      return null;
+                                    }
+                                    return 'Enter a name for the leaderboard '
+                                        '(${LeadCaptureState.minNameLength}+ characters)';
+                                  },
+                                ),
+
+                                const SizedBox(height: 16),
+
+                                // Field 2: Email
+                                _buildField(
+                                  controller: _emailController,
+                                  label: 'EMAIL',
+                                  hint: 'e.g. alex@company.com',
+                                  icon: Icons.alternate_email_rounded,
+                                  keyboardType: TextInputType.emailAddress,
+                                  autofillHints: const [AutofillHints.email],
+                                  validator: (val) => LeadCaptureState
+                                          .emailIsValid(val ?? '')
+                                      ? null
+                                      : 'Enter a valid email or leave blank',
+                                ),
+
+                                const SizedBox(height: 16),
+
+                                // Field 3: Phone (Optional)
+                                _buildField(
+                                  controller: _phoneController,
+                                  label: 'PHONE',
+                                  hint: 'e.g. +1 (555) 019-2834',
+                                  icon: Icons.phone_outlined,
+                                  keyboardType: TextInputType.phone,
+                                  autofillHints: const [
+                                    AutofillHints.telephoneNumber,
+                                  ],
+                                  validator: (val) => LeadCaptureState
+                                          .phoneIsValid(val ?? '')
+                                      ? null
+                                      : 'Enter a valid phone number or leave blank',
+                                ),
+
+                                const SizedBox(height: 16),
+
+                                // Field 4: Organization
+                                _buildField(
+                                  controller: _orgController,
+                                  label: 'ORGANIZATION / COMPANY',
+                                  hint: 'e.g. Acme Corp or Independent',
+                                  icon: Icons.apartment_rounded,
+                                  textCapitalization: TextCapitalization.words,
+                                  autofillHints: const [
+                                    AutofillHints.organizationName,
+                                  ],
+                                  textInputAction: TextInputAction.done,
+                                  onFieldSubmitted: (_) =>
+                                      isSubmitting ? null : _submit(),
+                                ),
+
+                                if (state.errorMessage != null) ...[
+                                  const SizedBox(height: 14),
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 12,
+                                      vertical: 8,
                                     ),
-                                    splashRadius: 20,
-                                    onPressed: () =>
-                                        Navigator.of(context).pop(),
+                                    decoration: BoxDecoration(
+                                      color: const Color(0xFFEF4444)
+                                          .withValues(alpha: 0.1),
+                                      borderRadius: BorderRadius.circular(8),
+                                      border: Border.all(
+                                        color: const Color(0xFFEF4444)
+                                            .withValues(alpha: 0.3),
+                                      ),
+                                    ),
+                                    child: Text(
+                                      state.errorMessage!,
+                                      style: const TextStyle(
+                                        color: Color(0xFFFCA5A5),
+                                        fontSize: 12,
+                                      ),
+                                    ),
                                   ),
                                 ],
-                              ),
 
-                              const SizedBox(height: 20),
+                                const SizedBox(height: 20),
 
-                              // Headline
-                              const Text(
-                                'Join the Patch Run',
-                                style: TextStyle(
-                                  fontSize: 22,
-                                  fontWeight: FontWeight.w800,
-                                  color: Color(0xFFF1F5F9),
-                                  letterSpacing: 0.5,
-                                ),
-                              ),
-                              const SizedBox(height: 6),
-                              const Text(
-                                'Provide your developer details to record your telemetry, climb the leaderboard, and unlock real-time OTA hot patches.',
-                                style: TextStyle(
-                                  fontSize: 13,
-                                  color: AppColors.slateSubtle,
-                                  height: 1.4,
-                                ),
-                              ),
-
-                              if (state.event.isNotEmpty) ...[
-                                const SizedBox(height: 14),
-                                Container(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 12,
-                                    vertical: 6,
-                                  ),
-                                  decoration: BoxDecoration(
-                                    color: AppColors.shorebirdGold
-                                        .withValues(alpha: 0.12),
-                                    borderRadius: BorderRadius.circular(8),
-                                    border: Border.all(
-                                      color: AppColors.shorebirdGold
-                                          .withValues(alpha: 0.35),
-                                    ),
-                                  ),
+                                // Consent Checkbox Row
+                                GestureDetector(
+                                  behavior: HitTestBehavior.opaque,
+                                  onTap: () {
+                                    setState(() {
+                                      _consentGiven = !_consentGiven;
+                                      if (_consentGiven) _consentError = null;
+                                    });
+                                  },
                                   child: Row(
-                                    mainAxisSize: MainAxisSize.min,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
                                     children: [
-                                      const Icon(
-                                        Icons.location_on_rounded,
-                                        size: 14,
-                                        color: AppColors.shorebirdGold,
-                                      ),
-                                      const SizedBox(width: 6),
-                                      // A real conference name pushes this chip
-                                      // well past a phone's width, so the label
-                                      // has to be allowed to shrink.
-                                      Flexible(
-                                        child: Text(
-                                          'EVENT: ${state.event.toUpperCase()}',
-                                          maxLines: 1,
-                                          overflow: TextOverflow.ellipsis,
-                                          style: const TextStyle(
-                                            color: AppColors.shorebirdGold,
-                                            fontSize: 11,
-                                            fontWeight: FontWeight.w800,
-                                            letterSpacing: 0.8,
+                                      SizedBox(
+                                        height: 20,
+                                        width: 20,
+                                        child: Checkbox(
+                                          value: _consentGiven,
+                                          activeColor: AppColors.shorebirdGold,
+                                          checkColor: const Color(0xFF0F172A),
+                                          side: BorderSide(
+                                            color: _consentError != null
+                                                ? const Color(0xFFEF4444)
+                                                : const Color(0xFF475569),
+                                            width: 1.5,
                                           ),
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius:
+                                                BorderRadius.circular(4),
+                                          ),
+                                          onChanged: (val) {
+                                            setState(() {
+                                              _consentGiven = val ?? false;
+                                              if (_consentGiven) {
+                                                _consentError = null;
+                                              }
+                                            });
+                                          },
+                                        ),
+                                      ),
+                                      const SizedBox(width: 10),
+                                      Expanded(
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            const Text(
+                                              'I agree to share my contact details with Shorebird.',
+                                              style: TextStyle(
+                                                color: Color(0xFFE2E8F0),
+                                                fontSize: 12,
+                                                fontWeight: FontWeight.w600,
+                                                height: 1.3,
+                                              ),
+                                            ),
+                                            const SizedBox(height: 3),
+                                            const Text(
+                                              'Only needed if you fill in email, phone, or organization. We use them solely for developer outreach and contacting game/booth winners.',
+                                              style: TextStyle(
+                                                color: AppColors.slateMuted,
+                                                fontSize: 11,
+                                                height: 1.35,
+                                              ),
+                                            ),
+                                            if (_consentError != null) ...[
+                                              const SizedBox(height: 4),
+                                              Text(
+                                                _consentError!,
+                                                style: const TextStyle(
+                                                  color: Color(0xFFF87171),
+                                                  fontSize: 11,
+                                                  fontWeight: FontWeight.w600,
+                                                ),
+                                              ),
+                                            ],
+                                          ],
                                         ),
                                       ),
                                     ],
                                   ),
                                 ),
-                              ],
 
-                              const SizedBox(height: 24),
+                                const SizedBox(height: 24),
 
-                              // Field 1: Full Name
-                              _buildField(
-                                controller: _nameController,
-                                label: 'FULL NAME',
-                                hint: 'e.g. Alex Rivera',
-                                icon: Icons.person_outline_rounded,
-                                validator: (val) {
-                                  if (val == null || val.trim().length < 2) {
-                                    return 'Please enter your full name';
-                                  }
-                                  return null;
-                                },
-                              ),
-
-                              const SizedBox(height: 16),
-
-                              // Field 2: Email
-                              _buildField(
-                                controller: _emailController,
-                                label: 'WORK / DEV EMAIL',
-                                hint: 'e.g. alex@company.com',
-                                icon: Icons.alternate_email_rounded,
-                                keyboardType: TextInputType.emailAddress,
-                                validator: (val) {
-                                  if (val == null ||
-                                      !val.contains('@') ||
-                                      !val.contains('.')) {
-                                    return 'Please enter a valid work email';
-                                  }
-                                  return null;
-                                },
-                              ),
-
-                              const SizedBox(height: 16),
-
-                              // Field 3: Phone (Optional)
-                              _buildField(
-                                controller: _phoneController,
-                                label: 'CONTACT NUMBER (OPTIONAL)',
-                                hint: 'e.g. +1 (555) 019-2834',
-                                icon: Icons.phone_outlined,
-                                keyboardType: TextInputType.phone,
-                                validator: (val) {
-                                  if (val == null || val.trim().isEmpty) {
-                                    return null;
-                                  }
-                                  if (val
-                                          .trim()
-                                          .replaceAll(RegExp(r'[^0-9]'), '')
-                                          .length <
-                                      6) {
-                                    return 'Please enter a valid phone number or leave blank';
-                                  }
-                                  return null;
-                                },
-                              ),
-
-                              const SizedBox(height: 16),
-
-                              // Field 4: Organization
-                              _buildField(
-                                controller: _orgController,
-                                label: 'ORGANIZATION / COMPANY',
-                                hint: 'e.g. Acme Corp or Independent',
-                                icon: Icons.apartment_rounded,
-                                validator: (val) {
-                                  if (val == null || val.trim().isEmpty) {
-                                    return 'Please enter your company or organization';
-                                  }
-                                  return null;
-                                },
-                              ),
-
-                              if (state.errorMessage != null) ...[
-                                const SizedBox(height: 14),
-                                Container(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 12,
-                                    vertical: 8,
-                                  ),
-                                  decoration: BoxDecoration(
-                                    color: const Color(0xFFEF4444)
-                                        .withValues(alpha: 0.1),
-                                    borderRadius: BorderRadius.circular(8),
-                                    border: Border.all(
-                                      color: const Color(0xFFEF4444)
-                                          .withValues(alpha: 0.3),
+                                // Primary Submit CTA Button
+                                ElevatedButton(
+                                  onPressed: isSubmitting ? null : _submit,
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: AppColors.shorebirdGold,
+                                    foregroundColor: const Color(0xFF0F172A),
+                                    elevation: 0,
+                                    padding: const EdgeInsets.symmetric(
+                                      vertical: 16,
+                                    ),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(14),
                                     ),
                                   ),
-                                  child: Text(
-                                    state.errorMessage!,
-                                    style: const TextStyle(
-                                      color: Color(0xFFFCA5A5),
-                                      fontSize: 12,
-                                    ),
-                                  ),
-                                ),
-                              ],
-
-                              const SizedBox(height: 20),
-
-                              // Consent Checkbox Row
-                              GestureDetector(
-                                behavior: HitTestBehavior.opaque,
-                                onTap: () {
-                                  setState(() {
-                                    _consentGiven = !_consentGiven;
-                                    if (_consentGiven) _consentError = null;
-                                  });
-                                },
-                                child: Row(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    SizedBox(
-                                      height: 20,
-                                      width: 20,
-                                      child: Checkbox(
-                                        value: _consentGiven,
-                                        activeColor: AppColors.shorebirdGold,
-                                        checkColor: const Color(0xFF0F172A),
-                                        side: BorderSide(
-                                          color: _consentError != null
-                                              ? const Color(0xFFEF4444)
-                                              : const Color(0xFF475569),
-                                          width: 1.5,
-                                        ),
-                                        shape: RoundedRectangleBorder(
-                                          borderRadius:
-                                              BorderRadius.circular(4),
-                                        ),
-                                        onChanged: (val) {
-                                          setState(() {
-                                            _consentGiven = val ?? false;
-                                            if (_consentGiven) {
-                                              _consentError = null;
-                                            }
-                                          });
-                                        },
-                                      ),
-                                    ),
-                                    const SizedBox(width: 10),
-                                    Expanded(
-                                      child: Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: [
-                                          const Text(
-                                            'I agree to share my information with Shorebird.',
-                                            style: TextStyle(
-                                              color: Color(0xFFE2E8F0),
-                                              fontSize: 12,
-                                              fontWeight: FontWeight.w600,
-                                              height: 1.3,
+                                  child: isSubmitting
+                                      ? const SizedBox(
+                                          height: 20,
+                                          width: 20,
+                                          child: CircularProgressIndicator(
+                                            strokeWidth: 2.5,
+                                            valueColor:
+                                                AlwaysStoppedAnimation<Color>(
+                                              Color(0xFF0F172A),
                                             ),
                                           ),
-                                          const SizedBox(height: 3),
-                                          const Text(
-                                            'We capture this data solely for developer leads and determining game/booth winners.',
-                                            style: TextStyle(
-                                              color: AppColors.slateMuted,
-                                              fontSize: 11,
-                                              height: 1.35,
-                                            ),
-                                          ),
-                                          if (_consentError != null) ...[
-                                            const SizedBox(height: 4),
-                                            Text(
-                                              _consentError!,
-                                              style: const TextStyle(
-                                                color: Color(0xFFF87171),
-                                                fontSize: 11,
-                                                fontWeight: FontWeight.w600,
+                                        )
+                                      : const Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.center,
+                                          children: [
+                                            Flexible(
+                                              child: Text(
+                                                'START PATCHING',
+                                                maxLines: 1,
+                                                overflow: TextOverflow.ellipsis,
+                                                style: TextStyle(
+                                                  fontSize: 15,
+                                                  fontWeight: FontWeight.w900,
+                                                  letterSpacing: 2,
+                                                ),
                                               ),
+                                            ),
+                                            SizedBox(width: 8),
+                                            Icon(
+                                              Icons.arrow_forward_rounded,
+                                              size: 18,
                                             ),
                                           ],
-                                        ],
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-
-                              const SizedBox(height: 24),
-
-                              // Primary Submit CTA Button
-                              ElevatedButton(
-                                onPressed: isSubmitting ? null : _submit,
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: AppColors.shorebirdGold,
-                                  foregroundColor: const Color(0xFF0F172A),
-                                  elevation: 0,
-                                  padding:
-                                      const EdgeInsets.symmetric(vertical: 16),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(14),
-                                  ),
-                                ),
-                                child: isSubmitting
-                                    ? const SizedBox(
-                                        height: 20,
-                                        width: 20,
-                                        child: CircularProgressIndicator(
-                                          strokeWidth: 2.5,
-                                          valueColor:
-                                              AlwaysStoppedAnimation<Color>(
-                                            Color(0xFF0F172A),
-                                          ),
                                         ),
-                                      )
-                                    : const Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.center,
-                                        children: [
-                                          Flexible(
-                                            child: Text(
-                                              'START PATCHING',
-                                              maxLines: 1,
-                                              overflow: TextOverflow.ellipsis,
-                                              style: TextStyle(
-                                                fontSize: 15,
-                                                fontWeight: FontWeight.w900,
-                                                letterSpacing: 2,
-                                              ),
-                                            ),
-                                          ),
-                                          SizedBox(width: 8),
-                                          Icon(
-                                            Icons.arrow_forward_rounded,
-                                            size: 18,
-                                          ),
-                                        ],
-                                      ),
-                              ),
-                            ],
+                                ),
+                              ],
+                            ),
                           ),
                         ),
                       ),
@@ -555,25 +576,64 @@ class _LeadCaptureDialogState extends State<LeadCaptureDialog> {
     required String label,
     required String hint,
     required IconData icon,
+    bool isRequired = false,
+    String? helper,
+    bool autofocus = false,
     TextInputType? keyboardType,
+    TextCapitalization textCapitalization = TextCapitalization.none,
+    Iterable<String>? autofillHints,
+    int? maxLength,
+    TextInputAction textInputAction = TextInputAction.next,
+    ValueChanged<String>? onFieldSubmitted,
     String? Function(String?)? validator,
   }) {
+    const labelStyle = TextStyle(
+      color: AppColors.slateMuted,
+      fontSize: 11,
+      fontWeight: FontWeight.w700,
+      letterSpacing: 1.2,
+    );
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          label,
-          style: const TextStyle(
-            color: AppColors.slateMuted,
-            fontSize: 11,
-            fontWeight: FontWeight.w700,
-            letterSpacing: 1.2,
+        Text.rich(
+          TextSpan(
+            text: label,
+            children: [
+              if (isRequired)
+                const TextSpan(
+                  text: ' *',
+                  style: TextStyle(color: AppColors.shorebirdGold),
+                )
+              else
+                const TextSpan(
+                  text: '  (OPTIONAL)',
+                  style: TextStyle(
+                    color: Color(0xFF475569),
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+            ],
           ),
+          style: labelStyle,
         ),
         const SizedBox(height: 6),
         TextFormField(
           controller: controller,
+          autofocus: autofocus,
           keyboardType: keyboardType,
+          textCapitalization: textCapitalization,
+          autofillHints: autofillHints,
+          textInputAction: textInputAction,
+          onFieldSubmitted: onFieldSubmitted,
+          // Enforce the cap without the default "12/24" counter cluttering
+          // the dialog.
+          inputFormatters: maxLength != null
+              ? [LengthLimitingTextInputFormatter(maxLength)]
+              : null,
+          // Re-render so the consent checkbox can react to optional fields
+          // being filled or cleared.
+          onChanged: (_) => setState(() {}),
           style: const TextStyle(
             color: Color(0xFFF1F5F9),
             fontSize: 14,
@@ -586,6 +646,11 @@ class _LeadCaptureDialogState extends State<LeadCaptureDialog> {
             hintStyle: const TextStyle(
               color: Color(0xFF475569),
               fontSize: 13,
+            ),
+            helperText: helper,
+            helperStyle: const TextStyle(
+              color: AppColors.slateSubtle,
+              fontSize: 11,
             ),
             prefixIcon: Icon(
               icon,

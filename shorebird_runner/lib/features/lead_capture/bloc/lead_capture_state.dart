@@ -24,16 +24,40 @@ class LeadCaptureState extends Equatable {
     this.submittedLead,
   });
 
-  bool get isNameValid => name.trim().length >= 2;
-  bool get isEmailValid =>
-      RegExp(r'^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$')
-          .hasMatch(email.trim());
-  bool get isPhoneValid =>
-      phone.trim().isEmpty ||
-      phone.trim().replaceAll(RegExp(r'[^0-9]'), '').length >= 6;
-  bool get isOrgValid => organization.trim().isNotEmpty;
+  /// Shortest and longest names accepted. The name is the only required
+  /// field because it is what shows up on the leaderboard, and the cap keeps
+  /// it from overflowing leaderboard rows and the HUD.
+  static const minNameLength = 2;
+  static const maxNameLength = 24;
 
-  bool get isValid => isNameValid && isEmailValid && isPhoneValid && isOrgValid;
+  static final _emailPattern =
+      RegExp(r'^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$');
+
+  static bool nameIsValid(String value) {
+    final length = value.trim().length;
+    return length >= minNameLength && length <= maxNameLength;
+  }
+
+  /// Optional: blank is valid, anything typed must look like an email.
+  static bool emailIsValid(String value) =>
+      value.trim().isEmpty || _emailPattern.hasMatch(value.trim());
+
+  /// Optional: blank is valid, anything typed needs at least 6 digits.
+  static bool phoneIsValid(String value) =>
+      value.trim().isEmpty ||
+      value.replaceAll(RegExp(r'[^0-9]'), '').length >= 6;
+
+  bool get isNameValid => nameIsValid(name);
+  bool get isEmailValid => emailIsValid(email);
+  bool get isPhoneValid => phoneIsValid(phone);
+
+  /// Whether the player shared anything beyond their leaderboard name.
+  bool get hasContactDetails =>
+      email.trim().isNotEmpty ||
+      phone.trim().isNotEmpty ||
+      organization.trim().isNotEmpty;
+
+  bool get isValid => isNameValid && isEmailValid && isPhoneValid;
 
   LeadCaptureState copyWith({
     String? name,

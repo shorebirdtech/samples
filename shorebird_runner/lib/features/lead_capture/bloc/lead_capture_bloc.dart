@@ -91,7 +91,8 @@ class LeadCaptureBloc extends Bloc<LeadCaptureEvent, LeadCaptureState> {
       emit(
         state.copyWith(
           status: LeadSubmissionStatus.failure,
-          errorMessage: 'Please fill in all fields with valid information.',
+          errorMessage:
+              'Please enter a player name and check any optional details.',
         ),
       );
       return;

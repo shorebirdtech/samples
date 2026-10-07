@@ -1,3 +1,5 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:shorebird_runner/features/lead_capture/lead_capture.dart';
@@ -182,6 +184,128 @@ void main() {
           ),
         ),
       );
+    });
+    test('submits with only a name, all other fields optional', () async {
+      bloc.add(const LeadNameChanged('Ada Lovelace'));
+
+      await expectLater(
+        bloc.stream,
+        emitsThrough(predicate<LeadCaptureState>((state) => state.isValid)),
+      );
+      expect(bloc.state.hasContactDetails, isFalse);
+
+      bloc.add(const LeadSubmitted());
+
+      await expectLater(
+        bloc.stream,
+        emitsThrough(
+          predicate<LeadCaptureState>(
+            (state) =>
+                state.status == LeadSubmissionStatus.success &&
+                state.submittedLead?.name == 'Ada Lovelace' &&
+                state.submittedLead?.email == '' &&
+                state.submittedLead?.organization == '',
+          ),
+        ),
+      );
+    });
+
+    test('rejects a missing name or malformed optional fields', () {
+      expect(const LeadCaptureState().isValid, isFalse);
+      expect(const LeadCaptureState(name: 'A').isValid, isFalse);
+      expect(
+        LeadCaptureState(
+          name: 'A' * (LeadCaptureState.maxNameLength + 1),
+        ).isValid,
+        isFalse,
+      );
+      expect(
+        const LeadCaptureState(name: 'Ada', email: 'not-an-email').isValid,
+        isFalse,
+      );
+      expect(
+        const LeadCaptureState(name: 'Ada', phone: '12').isValid,
+        isFalse,
+      );
+      expect(
+        const LeadCaptureState(name: 'Ada', email: 'ada@lovelace.org').isValid,
+        isTrue,
+      );
+    });
+  });
+
+  group('LeadCaptureDialog', () {
+    setUp(() {
+      SharedPreferences.setMockInitialValues({});
+    });
+
+    Future<List<LeadModel>> pumpDialog(WidgetTester tester) async {
+      // Tall enough that the whole form, CTA included, is on screen.
+      tester.view.physicalSize = const Size(800, 1400);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.reset);
+
+      final started = <LeadModel>[];
+      await tester.pumpWidget(
+        BlocProvider(
+          create: (_) =>
+              LeadCaptureBloc(leadRepository: const LocalLeadRepository()),
+          child: MaterialApp(
+            home: Builder(
+              builder: (context) => Scaffold(
+                body: TextButton(
+                  onPressed: () =>
+                      LeadCaptureDialog.show(context, onStartGame: started.add),
+                  child: const Text('open'),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.tap(find.text('open'));
+      await tester.pumpAndSettle();
+      return started;
+    }
+
+    Finder field(String hint) => find.widgetWithText(TextFormField, hint);
+
+    testWidgets('starts the game with just a name, no consent needed',
+        (tester) async {
+      final started = await pumpDialog(tester);
+      expect(find.text('Shown on the leaderboard.'), findsOneWidget);
+
+      await tester.enterText(field('e.g. Alex Rivera'), 'Ada');
+      await tester.tap(find.text('START PATCHING'));
+      await tester.pumpAndSettle();
+
+      expect(started.single.name, 'Ada');
+    });
+
+    testWidgets('requires a name', (tester) async {
+      final started = await pumpDialog(tester);
+
+      await tester.tap(find.text('START PATCHING'));
+      await tester.pumpAndSettle();
+
+      expect(started, isEmpty);
+      expect(find.textContaining('Enter a name'), findsOneWidget);
+    });
+
+    testWidgets('asks for consent once contact details are shared',
+        (tester) async {
+      final started = await pumpDialog(tester);
+
+      await tester.enterText(field('e.g. Alex Rivera'), 'Ada');
+      await tester.enterText(field('e.g. alex@company.com'), 'ada@x.org');
+      await tester.tap(find.text('START PATCHING'));
+      await tester.pumpAndSettle();
+      expect(started, isEmpty);
+
+      await tester.tap(find.byType(Checkbox));
+      await tester.tap(find.text('START PATCHING'));
+      await tester.pumpAndSettle();
+      expect(started.single.email, 'ada@x.org');
     });
   });
 }
