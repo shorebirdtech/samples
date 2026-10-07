@@ -96,6 +96,52 @@ void main() {
       expect(leads.first.organization, 'US Navy');
       expect(leads.first.event, 'Grace Hopper Celebration');
     });
+
+    test('overwrites the existing lead when the same player returns',
+        () async {
+      const repo = LocalLeadRepository();
+      await repo.submitLead(
+        LeadModel(
+          name: 'Grace Hopper',
+          email: 'grace@navy.mil',
+          phone: '987654321',
+          organization: 'US Navy',
+          event: 'FlutterCon',
+          createdAt: DateTime(2026, 10, 7, 9),
+        ),
+      );
+      await repo.submitLead(
+        LeadModel(
+          name: '  grace   hopper ',
+          email: '',
+          phone: '',
+          organization: 'Yale',
+          event: 'fluttercon',
+          createdAt: DateTime(2026, 10, 7, 10),
+        ),
+      );
+      await repo.submitLead(
+        LeadModel(
+          name: 'Grace Hopper',
+          email: '',
+          phone: '',
+          organization: '',
+          event: 'Droidcon London',
+          createdAt: DateTime(2026, 10, 7, 11),
+        ),
+      );
+
+      final leads = await repo.getLeads();
+
+      expect(leads.length, 2);
+      final flutterCon = leads.first;
+      expect(flutterCon.name, 'grace   hopper');
+      expect(flutterCon.organization, 'Yale');
+      // Blank optional fields keep the earlier values.
+      expect(flutterCon.email, 'grace@navy.mil');
+      expect(flutterCon.phone, '987654321');
+      expect(leads.last.event, 'Droidcon London');
+    });
   });
 
   group('LeadCaptureBloc', () {

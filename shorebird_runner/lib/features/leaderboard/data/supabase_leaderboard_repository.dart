@@ -108,22 +108,40 @@ class SupabaseLeaderboardRepository implements ILeaderboardRepository {
       final sanitizedUrl = supabaseUrl.endsWith('/')
           ? supabaseUrl.substring(0, supabaseUrl.length - 1)
           : supabaseUrl;
-      final uri = Uri.parse('$sanitizedUrl/rest/v1/leaderboard');
-
+      final headers = {
+        'apikey': supabaseAnonKey,
+        'Authorization': 'Bearer $supabaseAnonKey',
+        'Content-Type': 'application/json',
+        'Prefer': 'return=minimal',
+      };
       final payload = entry.toJson()..remove('id');
 
-      final response = await _httpClient
+      // `submit_score` keeps one row per player per event and only replaces
+      // it when the new score is higher (see README for the SQL).
+      var response = await _httpClient
           .post(
-            uri,
-            headers: {
-              'apikey': supabaseAnonKey,
-              'Authorization': 'Bearer $supabaseAnonKey',
-              'Content-Type': 'application/json',
-              'Prefer': 'return=minimal',
-            },
-            body: jsonEncode(payload),
+            Uri.parse('$sanitizedUrl/rest/v1/rpc/submit_score'),
+            headers: headers,
+            body: jsonEncode({
+              for (final e in payload.entries) 'p_${e.key}': e.value,
+            }),
           )
           .timeout(const Duration(seconds: 10));
+
+      if (response.statusCode == 404) {
+        debugPrint(
+          '[SupabaseLeaderboardRepository] submit_score RPC not found; '
+          'falling back to a plain insert. Run the README SQL to stop '
+          'duplicate leaderboard rows.',
+        );
+        response = await _httpClient
+            .post(
+              Uri.parse('$sanitizedUrl/rest/v1/leaderboard'),
+              headers: headers,
+              body: jsonEncode(payload),
+            )
+            .timeout(const Duration(seconds: 10));
+      }
 
       if (response.statusCode >= 200 && response.statusCode < 300) {
         debugPrint(

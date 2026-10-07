@@ -8,7 +8,11 @@ import 'package:shorebird_runner/features/lead_capture/models/lead_model.dart';
 /// Supabase REST API implementation for Lead Capture.
 ///
 /// Uses standard Supabase PostgREST table endpoint:
-///   `POST https://<project-ref>.supabase.co/rest/v1/leads`
+///   `POST https://<project-ref>.supabase.co/rest/v1/rpc/upsert_lead`
+///
+/// which overwrites a returning player's lead (same name + event) rather
+/// than inserting a duplicate. Falls back to `POST /rest/v1/leads` when the
+/// function has not been created yet.
 ///
 /// Secrets are injected securely via compile-time `--dart-define`:
 ///   --dart-define=SUPABASE_URL=https://xyz.supabase.co
@@ -61,20 +65,39 @@ class SupabaseLeadRepository implements ILeadRepository {
       final sanitizedUrl = supabaseUrl.endsWith('/')
           ? supabaseUrl.substring(0, supabaseUrl.length - 1)
           : supabaseUrl;
-      final uri = Uri.parse('$sanitizedUrl/rest/v1/leads');
+      final headers = {
+        'apikey': supabaseAnonKey,
+        'Authorization': 'Bearer $supabaseAnonKey',
+        'Content-Type': 'application/json',
+        'Prefer': 'return=minimal',
+      };
+      final json = lead.toJson();
 
-      final response = await _httpClient
+      // `upsert_lead` overwrites the existing lead for the same player and
+      // event instead of inserting a duplicate (see README for the SQL).
+      var response = await _httpClient
           .post(
-            uri,
-            headers: {
-              'apikey': supabaseAnonKey,
-              'Authorization': 'Bearer $supabaseAnonKey',
-              'Content-Type': 'application/json',
-              'Prefer': 'return=minimal',
-            },
-            body: jsonEncode(lead.toJson()),
+            Uri.parse('$sanitizedUrl/rest/v1/rpc/upsert_lead'),
+            headers: headers,
+            body: jsonEncode({
+              for (final e in json.entries) 'p_${e.key}': e.value,
+            }),
           )
           .timeout(const Duration(seconds: 10));
+
+      if (response.statusCode == 404) {
+        debugPrint(
+          '[SupabaseLeadRepository] upsert_lead RPC not found; falling back '
+          'to a plain insert. Run the README SQL to stop duplicate leads.',
+        );
+        response = await _httpClient
+            .post(
+              Uri.parse('$sanitizedUrl/rest/v1/leads'),
+              headers: headers,
+              body: jsonEncode(json),
+            )
+            .timeout(const Duration(seconds: 10));
+      }
 
       if (response.statusCode >= 200 && response.statusCode < 300) {
         debugPrint(

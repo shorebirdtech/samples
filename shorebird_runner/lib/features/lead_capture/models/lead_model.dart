@@ -42,6 +42,24 @@ class LeadModel extends Equatable {
     );
   }
 
+  /// Identifies the same player at the same event across replays, so a
+  /// returning player updates their lead instead of creating a duplicate.
+  String get identityKey => playerIdentityKey(name: name, event: event);
+
+  /// Returns this lead with any blank optional field filled in from
+  /// [previous], so replaying without re-entering details keeps them.
+  LeadModel mergedOnto(LeadModel previous) {
+    String pick(String next, String old) => next.trim().isEmpty ? old : next;
+    return LeadModel(
+      event: event,
+      name: name,
+      email: pick(email, previous.email),
+      phone: pick(phone, previous.phone),
+      organization: pick(organization, previous.organization),
+      createdAt: createdAt,
+    );
+  }
+
   /// Formatted player tag to show in game HUD, e.g. "Abhishek @ Shorebird"
   String get playerTag {
     if (name.isEmpty) return 'DEVELOPER';
@@ -61,4 +79,11 @@ class LeadModel extends Equatable {
         organization,
         createdAt,
       ];
+}
+
+/// Case- and whitespace-insensitive key for a player at an event.
+String playerIdentityKey({required String name, required String event}) {
+  String normalize(String v) =>
+      v.trim().toLowerCase().replaceAll(RegExp(r'\s+'), ' ');
+  return '${normalize(event)}|${normalize(name)}';
 }
