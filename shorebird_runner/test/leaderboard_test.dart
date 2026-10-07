@@ -81,6 +81,33 @@ void main() {
       expect(scores.first.score, 99999);
     });
 
+    test('keeps one row per player per event with their best score',
+        () async {
+      const repo = LocalLeaderboardRepository();
+      LeaderboardEntryModel run(int score) => LeaderboardEntryModel(
+            playerName: 'Repeat Runner',
+            score: score,
+            organization: 'Shorebird',
+            event: 'FlutterCon',
+            createdAt: DateTime.now(),
+          );
+
+      await repo.submitScore(run(1200));
+      await repo.submitScore(run(800));
+      var mine = (await repo.getScores())
+          .where((e) => e.playerName == 'Repeat Runner')
+          .toList();
+      expect(mine.length, 1);
+      expect(mine.single.score, 1200);
+
+      await repo.submitScore(run(1500));
+      mine = (await repo.getScores())
+          .where((e) => e.playerName == 'Repeat Runner')
+          .toList();
+      expect(mine.length, 1);
+      expect(mine.single.score, 1500);
+    });
+
     test('extracts distinct events', () async {
       const repo = LocalLeaderboardRepository();
       final events = await repo.getEvents();

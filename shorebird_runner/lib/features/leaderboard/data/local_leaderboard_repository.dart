@@ -50,7 +50,27 @@ class LocalLeaderboardRepository implements ILeaderboardRepository {
     try {
       final prefs = await SharedPreferences.getInstance();
       final current = await getScores();
-      final updated = List<LeaderboardEntryModel>.from(current)..add(entry);
+      final updated = List<LeaderboardEntryModel>.from(current);
+      // One row per player per event: a replay replaces the existing row
+      // only when it beats that player's best score.
+      final index = updated.indexWhere(
+        (e) => e.identityKey == entry.identityKey,
+      );
+      if (index == -1) {
+        updated.add(entry);
+      } else if (entry.score > updated[index].score) {
+        updated[index] = LeaderboardEntryModel(
+          id: updated[index].id,
+          playerName: entry.playerName,
+          score: entry.score,
+          patches: entry.patches,
+          organization: entry.organization,
+          event: entry.event,
+          createdAt: entry.createdAt,
+        );
+      } else {
+        return;
+      }
       updated.sort((a, b) => b.score.compareTo(a.score));
       // Keep top 100
       final capped = updated.take(100).toList();

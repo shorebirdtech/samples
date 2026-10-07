@@ -99,6 +99,69 @@ TO anon
 WITH CHECK (true);
 ```
 
+#### One Entry Per Player
+A player who plays again (same name, same event, ignoring case and extra spaces) updates their existing rows instead of adding new ones. Their lead is overwritten, and any optional field left blank keeps its earlier value. Their leaderboard row is only replaced when the new score beats their best. The app calls two `SECURITY DEFINER` functions for this, so `anon` still needs no `SELECT` or `UPDATE` access to `leads`:
+
+```sql
+CREATE OR REPLACE FUNCTION upsert_lead(
+  p_event TEXT, p_name TEXT, p_email TEXT, p_phone TEXT,
+  p_organization TEXT, p_created_at TIMESTAMPTZ
+) RETURNS VOID
+LANGUAGE plpgsql SECURITY DEFINER SET search_path = public AS $$
+BEGIN
+  UPDATE leads SET
+    name = p_name,
+    email = COALESCE(NULLIF(p_email, ''), email),
+    phone = COALESCE(NULLIF(p_phone, ''), phone),
+    organization = COALESCE(NULLIF(p_organization, ''), organization),
+    created_at = p_created_at
+  WHERE regexp_replace(lower(trim(name)), '\s+', ' ', 'g')
+          = regexp_replace(lower(trim(p_name)), '\s+', ' ', 'g')
+    AND regexp_replace(lower(trim(COALESCE(event, ''))), '\s+', ' ', 'g')
+          = regexp_replace(lower(trim(COALESCE(p_event, ''))), '\s+', ' ', 'g');
+
+  IF NOT FOUND THEN
+    INSERT INTO leads (event, name, email, phone, organization, created_at)
+    VALUES (p_event, p_name, p_email, p_phone, p_organization, p_created_at);
+  END IF;
+END;
+$$;
+
+CREATE OR REPLACE FUNCTION submit_score(
+  p_player_name TEXT, p_score INT, p_patches INT,
+  p_organization TEXT, p_event TEXT, p_created_at TIMESTAMPTZ
+) RETURNS VOID
+LANGUAGE plpgsql SECURITY DEFINER SET search_path = public AS $$
+DECLARE
+  best INT;
+BEGIN
+  SELECT MAX(score) INTO best FROM leaderboard
+  WHERE regexp_replace(lower(trim(player_name)), '\s+', ' ', 'g')
+          = regexp_replace(lower(trim(p_player_name)), '\s+', ' ', 'g')
+    AND regexp_replace(lower(trim(COALESCE(event, ''))), '\s+', ' ', 'g')
+          = regexp_replace(lower(trim(COALESCE(p_event, ''))), '\s+', ' ', 'g');
+
+  IF best IS NULL THEN
+    INSERT INTO leaderboard (player_name, score, patches, organization, event, created_at)
+    VALUES (p_player_name, p_score, p_patches, p_organization, p_event, p_created_at);
+  ELSIF p_score > best THEN
+    UPDATE leaderboard SET
+      player_name = p_player_name, score = p_score, patches = p_patches,
+      organization = p_organization, created_at = p_created_at
+    WHERE regexp_replace(lower(trim(player_name)), '\s+', ' ', 'g')
+            = regexp_replace(lower(trim(p_player_name)), '\s+', ' ', 'g')
+      AND regexp_replace(lower(trim(COALESCE(event, ''))), '\s+', ' ', 'g')
+            = regexp_replace(lower(trim(COALESCE(p_event, ''))), '\s+', ' ', 'g');
+  END IF;
+END;
+$$;
+
+GRANT EXECUTE ON FUNCTION upsert_lead TO anon;
+GRANT EXECUTE ON FUNCTION submit_score TO anon;
+```
+
+Until these functions exist, the app falls back to plain inserts, which creates duplicates.
+
 > **Security Note:** Secrets are never committed into git. The app uses compile-time environment defines (`SUPABASE_URL` and `SUPABASE_ANON_KEY`) with anonymous insert-only permissions. If credentials are empty or the network drops, it gracefully saves to `LocalLeadRepository`.
 
 ---

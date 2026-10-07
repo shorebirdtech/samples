@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import 'package:shorebird_runner/features/lead_capture/models/lead_model.dart';
 
 /// Represents a single recorded score entry on the leaderboard.
 class LeaderboardEntryModel extends Equatable {
@@ -49,6 +50,9 @@ class LeaderboardEntryModel extends Equatable {
           : DateTime.now(),
     );
   }
+
+  /// Identifies the same player at the same event across replays.
+  String get identityKey => playerIdentityKey(name: playerName, event: event);
 
   @override
   List<Object?> get props => [

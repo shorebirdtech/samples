@@ -13,9 +13,24 @@ class LocalLeadRepository implements ILeadRepository {
   Future<void> submitLead(LeadModel lead) async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      final currentList = prefs.getStringList(_storageKey) ?? [];
-      currentList.add(jsonEncode(lead.toJson()));
-      await prefs.setStringList(_storageKey, currentList);
+      final leads = (prefs.getStringList(_storageKey) ?? [])
+          .map(
+            (item) =>
+                LeadModel.fromJson(jsonDecode(item) as Map<String, dynamic>),
+          )
+          .toList();
+      // A returning player overwrites their earlier lead instead of adding
+      // a duplicate row.
+      final index = leads.indexWhere((l) => l.identityKey == lead.identityKey);
+      if (index == -1) {
+        leads.add(lead);
+      } else {
+        leads[index] = lead.mergedOnto(leads[index]);
+      }
+      await prefs.setStringList(
+        _storageKey,
+        leads.map((l) => jsonEncode(l.toJson())).toList(),
+      );
       debugPrint('[LocalLeadRepository] Saved lead locally: ${lead.name}');
     } catch (e) {
       debugPrint('[LocalLeadRepository] Error saving lead locally: $e');
