@@ -60,7 +60,7 @@ Because this is an open-source project, you can run the game immediately without
 flutter run -d chrome
 ```
 
-Leads entered in the "Start Patching" modal will automatically save to local storage (`LocalLeadRepository` using `SharedPreferences`).
+Leads entered in the "Start Patching" modal will automatically save to local storage (`LocalLeadRepository` using `SharedPreferences`). Only the player name is required (it is what appears on the leaderboard); email, phone, and organization are optional, and the consent checkbox is only required when one of them is filled in.
 
 ---
 
@@ -81,7 +81,7 @@ In your Supabase SQL Editor, run this script to create the `leads` table and Row
 CREATE TABLE leads (
   event TEXT,
   name TEXT NOT NULL,
-  email TEXT NOT NULL,
+  email TEXT,
   phone TEXT,
   organization TEXT,
   created_at TIMESTAMPTZ DEFAULT NOW(),

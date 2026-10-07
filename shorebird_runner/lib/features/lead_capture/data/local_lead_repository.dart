@@ -16,7 +16,7 @@ class LocalLeadRepository implements ILeadRepository {
       final currentList = prefs.getStringList(_storageKey) ?? [];
       currentList.add(jsonEncode(lead.toJson()));
       await prefs.setStringList(_storageKey, currentList);
-      debugPrint('[LocalLeadRepository] Saved lead locally: ${lead.email}');
+      debugPrint('[LocalLeadRepository] Saved lead locally: ${lead.name}');
     } catch (e) {
       debugPrint('[LocalLeadRepository] Error saving lead locally: $e');
     }

@@ -78,7 +78,7 @@ class SupabaseLeadRepository implements ILeadRepository {
 
       if (response.statusCode >= 200 && response.statusCode < 300) {
         debugPrint(
-          '[SupabaseLeadRepository] Lead recorded successfully on Supabase (${response.statusCode}): ${lead.email}',
+          '[SupabaseLeadRepository] Lead recorded successfully on Supabase (${response.statusCode}): ${lead.name}',
         );
       } else {
         debugPrint(
