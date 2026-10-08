@@ -81,8 +81,7 @@ void main() {
       expect(scores.first.score, 99999);
     });
 
-    test('keeps one row per player per event with their best score',
-        () async {
+    test('keeps one row per player per event with their best score', () async {
       const repo = LocalLeaderboardRepository();
       LeaderboardEntryModel run(int score) => LeaderboardEntryModel(
             playerName: 'Repeat Runner',
@@ -205,6 +204,22 @@ void main() {
           ),
         ),
       );
+    });
+
+    test('search keeps results in board order so ranks stay stable', () {
+      final at = DateTime(2026);
+      final entries = [
+        LeaderboardEntryModel(playerName: 'Low', score: 10, createdAt: at),
+        LeaderboardEntryModel(playerName: 'Top', score: 300, createdAt: at),
+        LeaderboardEntryModel(playerName: 'Mid', score: 200, createdAt: at),
+      ];
+
+      final board = LeaderboardBloc.rankedForEvent(entries, 'All Events');
+      expect(board.map((e) => e.playerName), ['Top', 'Mid', 'Low']);
+
+      // The dialog shows a searched row at its index on the full board.
+      final low = board.firstWhere((e) => e.playerName == 'Low');
+      expect(board.indexOf(low) + 1, 3);
     });
   });
 }

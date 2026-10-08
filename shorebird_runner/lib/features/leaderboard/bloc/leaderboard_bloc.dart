@@ -148,25 +148,33 @@ class LeaderboardBloc extends Bloc<LeaderboardEvent, LeaderboardState> {
     required String event,
     required String query,
   }) {
+    final ranked = rankedForEvent(entries, event);
+    if (query.trim().isEmpty) return ranked;
+
+    // Filtering after sorting keeps the result a subsequence of the ranked
+    // board, so rows can still be shown with their board rank.
+    final q = query.trim().toLowerCase();
+    return ranked.where((e) {
+      final matchName = e.playerName.toLowerCase().contains(q);
+      final matchOrg = e.organization.toLowerCase().contains(q);
+      final matchEvent = e.event.toLowerCase().contains(q);
+      return matchName || matchOrg || matchEvent;
+    }).toList();
+  }
+
+  /// The board for [event] (or every event for 'All Events'), highest score
+  /// first. A row's rank is its position here, independent of any search.
+  static List<LeaderboardEntryModel> rankedForEvent(
+    List<LeaderboardEntryModel> entries,
+    String event,
+  ) {
     var result = List<LeaderboardEntryModel>.from(entries);
 
-    // 1. Event filter
     if (event != 'All Events' && event.trim().isNotEmpty) {
       final normalized = event.trim().toLowerCase();
       result = result
           .where((e) => e.event.trim().toLowerCase() == normalized)
           .toList();
-    }
-
-    // 2. Search query filter
-    if (query.trim().isNotEmpty) {
-      final q = query.trim().toLowerCase();
-      result = result.where((e) {
-        final matchName = e.playerName.toLowerCase().contains(q);
-        final matchOrg = e.organization.toLowerCase().contains(q);
-        final matchEvent = e.event.toLowerCase().contains(q);
-        return matchName || matchOrg || matchEvent;
-      }).toList();
     }
 
     result.sort((a, b) => b.score.compareTo(a.score));
