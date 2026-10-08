@@ -97,8 +97,7 @@ void main() {
       expect(leads.first.event, 'Grace Hopper Celebration');
     });
 
-    test('overwrites the existing lead when the same player returns',
-        () async {
+    test('overwrites the existing lead when the same player returns', () async {
       const repo = LocalLeadRepository();
       await repo.submitLead(
         LeadModel(

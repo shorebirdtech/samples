@@ -81,8 +81,7 @@ void main() {
       expect(scores.first.score, 99999);
     });
 
-    test('keeps one row per player per event with their best score',
-        () async {
+    test('keeps one row per player per event with their best score', () async {
       const repo = LocalLeaderboardRepository();
       LeaderboardEntryModel run(int score) => LeaderboardEntryModel(
             playerName: 'Repeat Runner',

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:shorebird_runner/core/constants/app_strings.dart';
 import 'package:shorebird_runner/features/leaderboard/bloc/leaderboard_bloc.dart';
 import 'package:shorebird_runner/features/leaderboard/data/local_leaderboard_repository.dart';
 import 'package:shorebird_runner/features/lead_capture/bloc/lead_capture_bloc.dart';
@@ -119,6 +120,25 @@ void main() {
             onMenu: () {},
           ),
         );
+        expect(tester.takeException(), isNull);
+      });
+
+      testWidgets('game over overlay offline on ${entry.key}', (tester) async {
+        await _pumpAt(
+          tester,
+          entry.value,
+          GameOverOverlay(
+            score: 12345,
+            highScore: 12345,
+            totalPatches: 210,
+            level: GameConfig.levels.last,
+            onRestart: () {},
+            onMenu: () {},
+            scoreSyncStatus: ScoreSyncStatus.failed,
+            onRetryScoreSync: () {},
+          ),
+        );
+        expect(find.text(AppStrings.retryPostScore), findsOneWidget);
         expect(tester.takeException(), isNull);
       });
     }

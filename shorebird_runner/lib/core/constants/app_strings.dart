@@ -13,6 +13,12 @@ class AppStrings {
   // Navigation & Menus
   static const String menu = 'MENU';
   static const String backToMenu = 'BACK TO MENU';
+  static const String scoreNotPosted =
+      "You're offline, so your score isn't on the leaderboard yet. "
+      "Connect to the internet — it's saved and will post automatically, "
+      'or tap retry.';
+  static const String retryPostScore = 'RETRY POSTING SCORE';
+  static const String postingScore = 'POSTING SCORE…';
   static const String leaveRoom = 'LEAVE ROOM';
   static const String quit = 'QUIT';
   static const String soloSprint = 'SOLO SPRINT';

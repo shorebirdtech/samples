@@ -44,6 +44,16 @@ class RecordScore extends LeaderboardEvent {
   List<Object?> get props => [entry];
 }
 
+/// Re-posts the score that previously failed to reach the leaderboard.
+class RetryScoreSync extends LeaderboardEvent {
+  const RetryScoreSync();
+}
+
+/// Posts scores queued while offline; fired on startup and periodically.
+class SyncPendingScores extends LeaderboardEvent {
+  const SyncPendingScores();
+}
+
 class RefreshLeaderboard extends LeaderboardEvent {
   const RefreshLeaderboard();
 }
