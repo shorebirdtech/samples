@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shorebird_runner/features/leaderboard/bloc/leaderboard_event.dart';
 import 'package:shorebird_runner/features/leaderboard/bloc/leaderboard_state.dart';
@@ -10,13 +12,65 @@ export 'leaderboard_state.dart';
 class LeaderboardBloc extends Bloc<LeaderboardEvent, LeaderboardState> {
   final ILeaderboardRepository repository;
 
+  /// How often queued offline scores are retried while any are waiting.
+  static const pendingSyncInterval = Duration(seconds: 30);
+
+  Timer? _pendingSyncTimer;
+
   LeaderboardBloc({required this.repository})
       : super(const LeaderboardState()) {
     on<FetchLeaderboard>(_onFetchLeaderboard);
     on<FilterLeaderboardByEvent>(_onFilterByEvent);
     on<SearchLeaderboard>(_onSearchLeaderboard);
     on<RecordScore>(_onRecordScore);
+    on<RetryScoreSync>(_onRetryScoreSync);
+    on<SyncPendingScores>(_onSyncPendingScores);
     on<RefreshLeaderboard>(_onRefreshLeaderboard);
+
+    add(const SyncPendingScores());
+  }
+
+  @override
+  Future<void> close() {
+    _pendingSyncTimer?.cancel();
+    return super.close();
+  }
+
+  Future<void> _onSyncPendingScores(
+    SyncPendingScores event,
+    Emitter<LeaderboardState> emit,
+  ) async {
+    final int remaining;
+    try {
+      remaining = await repository.syncPendingScores();
+    } catch (_) {
+      _schedulePendingSync();
+      return;
+    }
+    if (remaining > 0) {
+      _schedulePendingSync();
+      return;
+    }
+    _pendingSyncTimer?.cancel();
+    _pendingSyncTimer = null;
+    if (state.scoreSyncStatus == ScoreSyncStatus.failed) {
+      emit(
+        state.copyWith(
+          scoreSyncStatus: ScoreSyncStatus.synced,
+          pendingScore: () => null,
+        ),
+      );
+      add(const RefreshLeaderboard());
+    }
+  }
+
+  void _schedulePendingSync() {
+    if (isClosed) return;
+    _pendingSyncTimer?.cancel();
+    _pendingSyncTimer = Timer(
+      pendingSyncInterval,
+      () => isClosed ? null : add(const SyncPendingScores()),
+    );
   }
 
   Future<void> _onFetchLeaderboard(
@@ -106,11 +160,43 @@ class LeaderboardBloc extends Bloc<LeaderboardEvent, LeaderboardState> {
   Future<void> _onRecordScore(
     RecordScore event,
     Emitter<LeaderboardState> emit,
+  ) =>
+      _syncScore(event.entry, emit);
+
+  Future<void> _onRetryScoreSync(
+    RetryScoreSync event,
+    Emitter<LeaderboardState> emit,
   ) async {
+    final pending = state.pendingScore;
+    if (pending == null) return;
+    await _syncScore(pending, emit);
+  }
+
+  Future<void> _syncScore(
+    LeaderboardEntryModel entry,
+    Emitter<LeaderboardState> emit,
+  ) async {
+    emit(
+      state.copyWith(
+        scoreSyncStatus: ScoreSyncStatus.syncing,
+        pendingScore: () => entry,
+      ),
+    );
     try {
-      await repository.submitScore(event.entry);
-      add(const RefreshLeaderboard());
-    } catch (_) {}
+      await repository.submitScore(entry);
+      emit(
+        state.copyWith(
+          scoreSyncStatus: ScoreSyncStatus.synced,
+          pendingScore: () => null,
+        ),
+      );
+    } catch (_) {
+      // The repository keeps it queued and it is retried in the background;
+      // the banner lets the player reconnect and retry right away.
+      emit(state.copyWith(scoreSyncStatus: ScoreSyncStatus.failed));
+      _schedulePendingSync();
+    }
+    add(const RefreshLeaderboard());
   }
 
   Future<void> _onRefreshLeaderboard(
