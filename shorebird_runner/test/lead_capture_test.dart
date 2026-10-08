@@ -352,5 +352,23 @@ void main() {
       await tester.pumpAndSettle();
       expect(started.single.email, 'ada@x.org');
     });
+
+    testWidgets('opens blank for the next player after a submit',
+        (tester) async {
+      final started = await pumpDialog(tester);
+
+      await tester.enterText(field('e.g. Alex Rivera'), 'Ada');
+      await tester.enterText(field('e.g. alex@company.com'), 'ada@x.org');
+      await tester.tap(find.byType(Checkbox));
+      await tester.tap(find.text('START PATCHING'));
+      await tester.pumpAndSettle();
+      expect(started.single.name, 'Ada');
+
+      await tester.tap(find.text('open'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Ada'), findsNothing);
+      expect(find.text('ada@x.org'), findsNothing);
+    });
   });
 }
