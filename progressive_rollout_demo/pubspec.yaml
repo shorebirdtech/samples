@@ -13,7 +13,7 @@ dependencies:
   firebase_core: ^4.15.0
   flutter:
     sdk: flutter
-  package_info_plus: ^10.2.1
+  package_info_plus: ^10.2.2
   shared_preferences: ^2.3.3
   shorebird_code_push: ^2.0.7
 

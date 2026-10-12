@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:shorebird_runner/features/leaderboard/data/i_leaderboard_repository.dart';
 import 'package:shorebird_runner/features/leaderboard/data/local_leaderboard_repository.dart';
 import 'package:shorebird_runner/features/leaderboard/models/leaderboard_entry_model.dart';
@@ -17,7 +18,9 @@ class SupabaseLeaderboardRepository implements ILeaderboardRepository {
     String? supabaseAnonKey,
     http.Client? httpClient,
     LocalLeaderboardRepository? localFallback,
-  })  : supabaseUrl = supabaseUrl ??
+    @visibleForTesting bool enabledInDebug = false,
+  })  : _enabledInDebug = enabledInDebug,
+        supabaseUrl = supabaseUrl ??
             const String.fromEnvironment(
               'SUPABASE_URL',
               defaultValue: '',
@@ -30,8 +33,12 @@ class SupabaseLeaderboardRepository implements ILeaderboardRepository {
         _httpClient = httpClient ?? http.Client(),
         _localFallback = localFallback ?? const LocalLeaderboardRepository();
 
+  final bool _enabledInDebug;
+
   bool get isConfigured =>
-      !kDebugMode && supabaseUrl.isNotEmpty && supabaseAnonKey.isNotEmpty;
+      (!kDebugMode || _enabledInDebug) &&
+      supabaseUrl.isNotEmpty &&
+      supabaseAnonKey.isNotEmpty;
 
   @override
   Future<List<LeaderboardEntryModel>> getScores({String? event}) async {
@@ -104,6 +111,73 @@ class SupabaseLeaderboardRepository implements ILeaderboardRepository {
 
     if (!isConfigured) return;
 
+    // Queue first so the score survives a failed post (or the app closing)
+    // and is retried automatically once the device is back online.
+    final prefs = await SharedPreferences.getInstance();
+    await _savePending(prefs, _mergeBest([..._loadPending(prefs), entry]));
+
+    await syncPendingScores();
+
+    final stillPending = _loadPending(
+      prefs,
+    ).any((e) => e.identityKey == entry.identityKey && e.score >= entry.score);
+    if (stillPending) {
+      throw const ScoreSyncException(
+        'Score saved locally; it will be posted once back online.',
+      );
+    }
+  }
+
+  Future<int>? _syncInFlight;
+
+  @override
+  Future<int> syncPendingScores() {
+    if (!isConfigured) return Future.value(0);
+    // Concurrent callers (startup, periodic retry, a new run) share one flush
+    // so the same score isn't posted twice.
+    return _syncInFlight ??=
+        _flushPending().whenComplete(() => _syncInFlight = null);
+  }
+
+  Future<int> _flushPending() async {
+    final prefs = await SharedPreferences.getInstance();
+    await _backfillLocalScores(prefs);
+
+    final pending = _loadPending(prefs);
+    if (pending.isEmpty) return 0;
+
+    final remaining = <LeaderboardEntryModel>[];
+    var offline = false;
+    for (final entry in pending) {
+      if (offline) {
+        remaining.add(entry);
+        continue;
+      }
+      switch (await _postScore(entry)) {
+        case _PostResult.posted:
+          debugPrint(
+            '[SupabaseLeaderboardRepository] Score recorded on Supabase: ${entry.playerName} -> ${entry.score}',
+          );
+        case _PostResult.rejected:
+          // Retrying a request Supabase refuses would never succeed and would
+          // block the rest of the queue, so drop it.
+          break;
+        case _PostResult.retryLater:
+          // Most likely offline: stop hammering and keep the rest queued.
+          offline = true;
+          remaining.add(entry);
+      }
+    }
+
+    // A run may have been queued while this flush was posting; keep it.
+    final queuedMeanwhile =
+        _loadPending(prefs).where((e) => !pending.contains(e));
+    final updated = _mergeBest([...remaining, ...queuedMeanwhile]);
+    await _savePending(prefs, updated);
+    return updated.length;
+  }
+
+  Future<_PostResult> _postScore(LeaderboardEntryModel entry) async {
     try {
       final sanitizedUrl = supabaseUrl.endsWith('/')
           ? supabaseUrl.substring(0, supabaseUrl.length - 1)
@@ -143,18 +217,71 @@ class SupabaseLeaderboardRepository implements ILeaderboardRepository {
             .timeout(const Duration(seconds: 10));
       }
 
-      if (response.statusCode >= 200 && response.statusCode < 300) {
-        debugPrint(
-          '[SupabaseLeaderboardRepository] Score recorded on Supabase: ${entry.playerName} -> ${entry.score}',
-        );
-      } else {
-        debugPrint(
-          '[SupabaseLeaderboardRepository] Error ${response.statusCode}: ${response.body}',
-        );
-      }
+      final status = response.statusCode;
+      if (status >= 200 && status < 300) return _PostResult.posted;
+
+      debugPrint(
+        '[SupabaseLeaderboardRepository] Error $status: ${response.body}',
+      );
+      final transient = status >= 500 || status == 408 || status == 429;
+      return transient ? _PostResult.retryLater : _PostResult.rejected;
     } catch (e) {
       debugPrint('[SupabaseLeaderboardRepository] Network exception: $e');
+      return _PostResult.retryLater;
     }
+  }
+
+  /// Scores recorded before the outbox existed were only kept locally when
+  /// the post failed. Queue the real (non-seed) ones once; `submit_score`
+  /// keeps the best per player, so re-posting a synced score is harmless.
+  Future<void> _backfillLocalScores(SharedPreferences prefs) async {
+    if (prefs.getBool(_backfillDoneKey) ?? false) return;
+    final local = await _localFallback.getScores();
+    // Seeded benchmark rows carry ids; scores from real runs never do.
+    final played = local.where((e) => e.id == null);
+    await _savePending(
+      prefs,
+      _mergeBest([..._loadPending(prefs), ...played]),
+    );
+    await prefs.setBool(_backfillDoneKey, true);
+  }
+
+  static const _pendingKey = 'shorebird_runner_pending_scores_v1';
+  static const _backfillDoneKey = 'shorebird_runner_pending_backfill_done_v1';
+
+  List<LeaderboardEntryModel> _loadPending(SharedPreferences prefs) {
+    final raw = prefs.getString(_pendingKey);
+    if (raw == null || raw.isEmpty) return [];
+    try {
+      return (jsonDecode(raw) as List<dynamic>)
+          .map(
+            (e) => LeaderboardEntryModel.fromJson(e as Map<String, dynamic>),
+          )
+          .toList();
+    } catch (_) {
+      return [];
+    }
+  }
+
+  Future<void> _savePending(
+    SharedPreferences prefs,
+    List<LeaderboardEntryModel> entries,
+  ) =>
+      prefs.setString(
+        _pendingKey,
+        jsonEncode(entries.map((e) => e.toJson()).toList()),
+      );
+
+  /// Keeps only each player's best score per event, mirroring `submit_score`.
+  static List<LeaderboardEntryModel> _mergeBest(
+    Iterable<LeaderboardEntryModel> entries,
+  ) {
+    final best = <String, LeaderboardEntryModel>{};
+    for (final e in entries) {
+      final current = best[e.identityKey];
+      if (current == null || e.score > current.score) best[e.identityKey] = e;
+    }
+    return best.values.toList();
   }
 
   @override
@@ -173,3 +300,5 @@ class SupabaseLeaderboardRepository implements ILeaderboardRepository {
     return events.toList()..sort();
   }
 }
+
+enum _PostResult { posted, rejected, retryLater }
