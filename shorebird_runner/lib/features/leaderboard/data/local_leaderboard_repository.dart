@@ -78,6 +78,10 @@ class LocalLeaderboardRepository implements ILeaderboardRepository {
     } catch (_) {}
   }
 
+  /// Nothing to sync: local storage is the only destination.
+  @override
+  Future<int> syncPendingScores() async => 0;
+
   @override
   Future<List<String>> getEvents() async {
     final scores = await getScores();
