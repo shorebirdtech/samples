@@ -210,13 +210,24 @@ class _SoloRunnerScreenState extends State<SoloRunnerScreen> {
 
                       // Game Over Overlay
                       if (state.status == SoloGameStatus.gameOver)
-                        GameOverOverlay(
-                          score: state.score,
-                          highScore: state.highScore,
-                          totalPatches: state.patches,
-                          level: state.level,
-                          onRestart: _restartGame,
-                          onMenu: widget.onBackToMenu,
+                        BlocBuilder<LeaderboardBloc, LeaderboardState>(
+                          buildWhen: (prev, next) =>
+                              prev.scoreSyncStatus != next.scoreSyncStatus ||
+                              prev.pendingScore != next.pendingScore,
+                          builder: (context, leaderboard) => GameOverOverlay(
+                            score: state.score,
+                            highScore: state.highScore,
+                            totalPatches: state.patches,
+                            level: state.level,
+                            onRestart: _restartGame,
+                            onMenu: widget.onBackToMenu,
+                            scoreSyncStatus: leaderboard.scoreSyncStatus,
+                            onRetryScoreSync: leaderboard.pendingScore == null
+                                ? null
+                                : () => context
+                                    .read<LeaderboardBloc>()
+                                    .add(const RetryScoreSync()),
+                          ),
                         ),
                     ],
                   );

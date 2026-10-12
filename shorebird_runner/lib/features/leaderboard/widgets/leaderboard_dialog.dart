@@ -413,14 +413,24 @@ class _LeaderboardDialogState extends State<LeaderboardDialog> {
                       }
 
                       var entries = state.filteredEntries;
+                      // Ranks come from the unsearched board so searching
+                      // for a player shows their real position.
+                      var board = LeaderboardBloc.rankedForEvent(
+                        state.allEntries,
+                        state.selectedEvent,
+                      );
                       if (_todayOnly) {
                         final now = DateTime.now();
                         final startOfToday =
                             DateTime(now.year, now.month, now.day);
-                        entries = entries
-                            .where((e) => e.createdAt.isAfter(startOfToday))
-                            .toList();
+                        bool isToday(LeaderboardEntryModel e) =>
+                            e.createdAt.isAfter(startOfToday);
+                        entries = entries.where(isToday).toList();
+                        board = board.where(isToday).toList();
                       }
+                      final ranks = {
+                        for (final (i, e) in board.indexed) e: i + 1,
+                      };
 
                       if (entries.isEmpty) {
                         return Center(
@@ -470,7 +480,7 @@ class _LeaderboardDialogState extends State<LeaderboardDialog> {
                             const SizedBox(height: 6),
                         itemBuilder: (context, index) {
                           final entry = entries[index];
-                          final rank = index + 1;
+                          final rank = ranks[entry] ?? index + 1;
                           return _LeaderboardRow(rank: rank, entry: entry);
                         },
                       );

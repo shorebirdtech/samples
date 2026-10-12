@@ -12,6 +12,10 @@ class GameOverOverlay extends StatelessWidget {
   final VoidCallback onRestart;
   final VoidCallback onMenu;
 
+  /// Whether this run's score reached the online leaderboard.
+  final ScoreSyncStatus scoreSyncStatus;
+  final VoidCallback? onRetryScoreSync;
+
   const GameOverOverlay({
     super.key,
     required this.score,
@@ -20,6 +24,8 @@ class GameOverOverlay extends StatelessWidget {
     required this.level,
     required this.onRestart,
     required this.onMenu,
+    this.scoreSyncStatus = ScoreSyncStatus.idle,
+    this.onRetryScoreSync,
   });
 
   @override
@@ -141,6 +147,15 @@ class GameOverOverlay extends StatelessWidget {
                   value: '${level.name} · ${level.planQuota}',
                   color: accentColor,
                 ),
+                if (scoreSyncStatus == ScoreSyncStatus.failed ||
+                    (scoreSyncStatus == ScoreSyncStatus.syncing &&
+                        onRetryScoreSync != null)) ...[
+                  const SizedBox(height: 14),
+                  _ScoreSyncBanner(
+                    syncing: scoreSyncStatus == ScoreSyncStatus.syncing,
+                    onRetry: onRetryScoreSync,
+                  ),
+                ],
                 const SizedBox(height: 24),
                 ElevatedButton(
                   onPressed: () {
@@ -236,6 +251,95 @@ class GameOverOverlay extends StatelessWidget {
             ),
           ),
         ),
+      ),
+    );
+  }
+}
+
+/// Asks the player to reconnect when their score couldn't be posted to the
+/// online leaderboard, so a big run isn't silently lost.
+class _ScoreSyncBanner extends StatelessWidget {
+  final bool syncing;
+  final VoidCallback? onRetry;
+
+  const _ScoreSyncBanner({required this.syncing, required this.onRetry});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: AppColors.errorRed.withValues(alpha: 0.12),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: AppColors.errorRed.withValues(alpha: 0.5),
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          const Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Icon(
+                Icons.wifi_off_rounded,
+                color: AppColors.errorRed,
+                size: 18,
+              ),
+              SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  AppStrings.scoreNotPosted,
+                  style: TextStyle(
+                    color: AppColors.textPrimary,
+                    fontSize: 12.5,
+                    fontWeight: FontWeight.w600,
+                    height: 1.35,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 10),
+          OutlinedButton.icon(
+            onPressed: syncing || onRetry == null
+                ? null
+                : () {
+                    AudioService.playSelect();
+                    onRetry!();
+                  },
+            icon: syncing
+                ? const SizedBox(
+                    width: 14,
+                    height: 14,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      color: AppColors.shorebirdGold,
+                    ),
+                  )
+                : const Icon(Icons.refresh_rounded, size: 18),
+            label: Text(
+              syncing ? AppStrings.postingScore : AppStrings.retryPostScore,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(
+                fontSize: 12.5,
+                fontWeight: FontWeight.w800,
+                letterSpacing: 1.2,
+              ),
+            ),
+            style: OutlinedButton.styleFrom(
+              foregroundColor: AppColors.shorebirdGold,
+              side: BorderSide(
+                color: AppColors.shorebirdGold.withValues(alpha: 0.5),
+              ),
+              minimumSize: const Size.fromHeight(40),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

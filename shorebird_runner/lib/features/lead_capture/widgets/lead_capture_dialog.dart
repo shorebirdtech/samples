@@ -109,8 +109,12 @@ class _LeadCaptureDialogState extends State<LeadCaptureDialog> {
       listener: (context, state) {
         if (state.status == LeadSubmissionStatus.success &&
             state.submittedLead != null) {
+          final bloc = context.read<LeadCaptureBloc>();
           Navigator.of(context).pop();
           widget.onStartGame(state.submittedLead!);
+          // Clear this player's details so the next player starts with a
+          // blank form. The active event is kept.
+          bloc.add(const LeadCaptureReset());
         }
       },
       builder: (context, state) {
