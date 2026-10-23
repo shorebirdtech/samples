@@ -5,39 +5,41 @@ require "json"
 require "shellwords"
 require "yaml"
 
-PROJECT_ROOT = File.expand_path("../..", __dir__)
-
-# The highest iOS build number Shorebird has a release for in this version, or
-# 0 if there is none.
-def latest_shorebird_build_number(version)
-  # Progress goes to stderr and stdout is a JSON result, which also explains
-  # any failure, so read it instead of letting `sh` fail on the exit status.
-  output = sh(
-    "cd #{Shellwords.escape(PROJECT_ROOT)} && shorebird releases list --platform=ios --json 2>/dev/null",
-    log: false,
-    error_callback: ->(_output) {}
-  )
-  result = begin
-    JSON.parse(output.to_s)
-  rescue JSON::ParserError
-    # No JSON at all, e.g. shorebird isn't installed.
-    UI.user_error!("Couldn't list Shorebird releases (is the shorebird CLI installed?): #{output}")
-  end
-  unless result["status"] == "success"
-    UI.user_error!("Couldn't list Shorebird releases: #{result.dig('error', 'message')}")
-  end
-  Array(result.dig("data", "releases"))
-    .map { |release| release["version"].to_s }
-    .select { |release_version| release_version.start_with?("#{version}+") }
-    .map { |release_version| release_version.split("+").last.to_i }
-    .max || 0
-end
-
-# Xcode 15.3+ name for App Store distribution (formerly "app-store").
-EXPORT_METHOD = "app-store-connect"
+# Don't regenerate fastlane/README.md on every run; the lanes are described in
+# the sample's README.
+skip_docs
 
 platform :ios do
   bundle_id = "dev.shorebird.fastlane-demo"
+  project_root = File.expand_path("../..", __dir__)
+  # Xcode 15.3+ name for App Store distribution (formerly "app-store").
+  export_method = "app-store-connect"
+
+  # The highest iOS build number Shorebird has a release for in this version,
+  # or 0 if there is none.
+  latest_shorebird_build_number = lambda do |version|
+    # Progress goes to stderr and stdout is a JSON result, which also explains
+    # any failure, so read it instead of letting `sh` fail on the exit status.
+    output = sh(
+      "cd #{Shellwords.escape(project_root)} && shorebird releases list --platform=ios --json 2>/dev/null",
+      log: false,
+      error_callback: ->(_output) {}
+    )
+    result = begin
+      JSON.parse(output.to_s)
+    rescue JSON::ParserError
+      # No JSON at all, e.g. shorebird isn't installed.
+      UI.user_error!("Couldn't list Shorebird releases (is the shorebird CLI installed?): #{output}")
+    end
+    unless result["status"] == "success"
+      UI.user_error!("Couldn't list Shorebird releases: #{result.dig('error', 'message')}")
+    end
+    Array(result.dig("data", "releases"))
+      .map { |release| release["version"].to_s }
+      .select { |release_version| release_version.start_with?("#{version}+") }
+      .map { |release_version| release_version.split("+").last.to_i }
+      .max || 0
+  end
 
   desc "Get certificates"
   lane :certificates do
@@ -67,19 +69,23 @@ platform :ios do
   desc "create new release with shorebird"
   lane :release_shorebird do
     setup_ci
-    # Load the API key first so missing credentials fail before anything is
-    # built or released.
-    app_store_connect_api_key(
-      is_key_content_base64: true,
-      in_house: false, # if it is enterprise or not
-    )
+    # On CI, load the API key first so missing credentials fail before
+    # anything is built or released. Locally, without the key, fastlane uses
+    # your Apple ID login instead.
+    if FastlaneCore::Helper.ci? || ENV["APP_STORE_CONNECT_API_KEY_KEY_ID"]
+      app_store_connect_api_key(
+        is_key_content_base64: true,
+        in_house: false, # if it is enterprise or not
+      )
+    end
     sync_appstore_signing
     # Each release of a version needs a new build number: one past both the
     # latest TestFlight build and the latest Shorebird release of the pubspec
     # version (a release whose upload failed is only in Shorebird), and never
     # lower than the pubspec's own.
-    pubspec = YAML.load_file(File.join(PROJECT_ROOT, "pubspec.yaml"))
-    version, pubspec_build_number = pubspec["version"].split("+")
+    pubspec_version = YAML.load_file(File.join(project_root, "pubspec.yaml"))["version"]
+    UI.user_error!("pubspec.yaml has no version, e.g. `version: 1.0.0+1`") unless pubspec_version
+    version, pubspec_build_number = pubspec_version.to_s.split("+")
     build_number = [
       # to_i because App Store Connect can report build numbers as strings.
       latest_testflight_build_number(
@@ -87,14 +93,14 @@ platform :ios do
         version: version,
         initial_build_number: 0
       ).to_i + 1,
-      latest_shorebird_build_number(version) + 1,
+      latest_shorebird_build_number.call(version) + 1,
       pubspec_build_number.to_i
     ].max
     # This step replaces the build_app step
     shorebird_release(
       platform: "ios",
       args: "--build-number=#{build_number}",
-      export_options: { method: EXPORT_METHOD }
+      export_options: { method: export_method }
     )
     # Upload the binary to TestFlight. Submitting it to the App Store is left
     # to App Store Connect, since this sample has no store metadata.
@@ -104,13 +110,17 @@ platform :ios do
     )
   end
 
-  desc "patch with shorebird (release_version: defaults to the most recently updated release)"
+  desc "patch with shorebird (release_version: the release to patch, e.g. 1.0.0+11)"
   lane :patch_shorebird do |options|
-    # "latest" is the most recently updated release, which may not be the one
-    # in the App Store. Pass release_version:1.0.0+11 to patch that one.
-    # Shorebird builds the patch with the target release's version and build
-    # number, so the pubspec's don't need to match it.
-    release_version = options[:release_version] || "latest"
+    # Name the release to patch, normally the one in the App Store, so a
+    # release that never shipped can't be patched by default. `latest` (the
+    # most recently updated release) also works. Shorebird builds the patch
+    # with the target release's version and build number, so the pubspec's
+    # don't need to match it.
+    release_version = options[:release_version]
+    unless release_version
+      UI.user_error!("Pass the release to patch, e.g. `fastlane ios patch_shorebird release_version:1.0.0+11`")
+    end
     setup_ci
     sync_appstore_signing
     # shorebird_patch doesn't generate export options the way
@@ -118,7 +128,7 @@ platform :ios do
     # the match profiles with manual signing, and Xcode kept from changing the
     # build number.
     export_options_plist = Fastlane::Helper::ExportOptionsPlist.generate_export_options_plist(
-      { method: EXPORT_METHOD },
+      { method: export_method },
       lane_context[SharedValues::MATCH_PROVISIONING_PROFILE_MAPPING]
     )
     shorebird_patch(

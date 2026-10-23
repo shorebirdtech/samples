@@ -184,6 +184,7 @@ jobs:
         run: >-
           bundle exec ruby ../../.github/scripts/dry_run_fastfile.rb fastlane/Fastfile
           patch_shorebird release_version=1.0.0+11
+          patch_shorebird release_version=latest
 
   required:
     name: required

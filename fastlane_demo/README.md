@@ -31,16 +31,26 @@ replace Shorebird's values with your own in:
   `PROVISIONING_PROFILE_SPECIFIER[sdk=iphoneos*]` in each build configuration,
   and the RunnerTests target's `PRODUCT_BUNDLE_IDENTIFIER`.
 
-`release_shorebird` sets the build number to one past both the latest TestFlight
-build and the latest Shorebird release of the pubspec version (or the pubspec's
-build number, if higher), so a release whose upload failed can simply be run
-again. It then uploads the build to TestFlight; submit it for review from App
-Store Connect. A rerun creates a new release, so delete the one whose upload
-failed with `shorebird releases delete` to keep it from being patched.
+## Lanes
 
-`patch_shorebird` patches the most recently updated release, which may not be
-the one in the App Store. To patch a specific one, run
-`bundle exec fastlane ios patch_shorebird release_version:1.0.0+11`.
+Run these from `ios/` with `bundle exec fastlane ios <lane>`. They read
+credentials from `ios/fastlane/.env.default` (see
+[`.env.default.sample`](./ios/fastlane/.env.default.sample)).
+
+- `certificates`: fetches the development and App Store signing certificates
+  and profiles with match, read-only.
+- `generate_new_certificates`: creates them with match if needed.
+- `release_shorebird`: creates a Shorebird release and uploads it to
+  TestFlight; submit it for review from App Store Connect. The build number is
+  one past both the latest TestFlight build and the latest Shorebird release of
+  the pubspec version (or the pubspec's build number, if higher), so a release
+  whose upload failed can simply be run again. A rerun creates a new release,
+  so delete the one whose upload failed with `shorebird releases delete` to
+  keep it from being patched. On CI it uses the App Store Connect API key;
+  locally, without one, fastlane uses your Apple ID login.
+- `patch_shorebird`: patches the release you name, normally the one in the App
+  Store: `bundle exec fastlane ios patch_shorebird release_version:1.0.0+11`.
+  `release_version:latest` patches the most recently updated release instead.
 
 A step-by-step log of me (bryanoltman) creating this demo is viewable in
 [setup_log.md](./setup_log.md).

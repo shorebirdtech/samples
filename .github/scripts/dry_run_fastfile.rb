@@ -9,10 +9,12 @@
 # Usage, from the directory with the Gemfile:
 #   bundle exec ruby dry_run_fastfile.rb fastlane/Fastfile [lane key=value,...]
 #
-# Every public lane runs once with no options. Each extra `lane key=value,...`
-# argument runs that lane again with those options, to cover their branches.
+# Every public lane runs with no options, except lanes given as extra
+# `lane key=value,...` arguments, which run with those options instead (once
+# per argument), for lanes that need options or to cover their branches.
 
 require "fastlane"
+require "json"
 
 module DryRun
   # Actions that only read state, so they are safe and needed to run for real.
@@ -20,7 +22,8 @@ module DryRun
 
   # Mirrors Fastlane::Runner#execute_action up to the point where the action
   # would run, then skips it.
-  def execute_action(method_sym, class_ref, arguments, custom_dir: nil, from_action: false)
+  # Extra keywords a newer fastlane may pass are accepted and ignored.
+  def execute_action(method_sym, class_ref, arguments, custom_dir: nil, from_action: false, **)
     return super if PASSTHROUGH.include?(method_sym)
 
     if from_action
@@ -72,11 +75,17 @@ end
 Fastlane::Runner.prepend(DryRun)
 
 # `sh` doesn't go through the action runner, so skip shell commands here. They
-# return what `shorebird ... --json` prints when it succeeds with no results.
+# return what `shorebird releases list --json` prints, with a few releases, so
+# the code that reads it runs too.
 module DryRunShell
+  SHOREBIRD_RELEASES = {
+    status: "success",
+    data: { releases: [{ version: "1.0.0+11" }, { version: "1.0.0+12" }, { version: "1.0.1+3" }] }
+  }.to_json.freeze
+
   def sh(*command, **)
     puts("  sh #{command.join(' ')}")
-    '{"status":"success","data":{"releases":[]}}'
+    SHOREBIRD_RELEASES
   end
 end
 Fastlane::FastFile.singleton_class.prepend(DryRunShell)
@@ -87,9 +96,12 @@ Fastlane.plugin_manager.load_plugins
 fastfile = Fastlane::FastFile.new(fastfile_path)
 
 runs = []
+lanes_with_options = ARGV.drop(1).each_slice(2).map(&:first)
 fastfile.runner.lanes.each do |platform, lanes|
   lanes.each_value do |lane|
-    runs << [platform, lane.name, {}] unless lane.is_private
+    next if lane.is_private || lanes_with_options.include?(lane.name.to_s)
+
+    runs << [platform, lane.name, {}]
   end
 end
 ARGV.drop(1).each_slice(2) do |name, options|
