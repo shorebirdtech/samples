@@ -14,10 +14,20 @@ skip_docs
 platform :ios do
   bundle_id = "dev.shorebird.fastlane-demo"
   project_root = File.expand_path("../..", __dir__)
-  # The plugin's export options helper writes each plist to a new
-  # shorebird* temporary directory.
-  export_options_dirs = lambda do
-    Dir.glob(File.join(Dir.tmpdir, "shorebird*", "ExportOptions.plist")).map { |plist| File.dirname(plist) }
+  # Runs the block with TMPDIR pointing at a new directory, then removes it.
+  # The plugin's export options helper writes its plist (which names the
+  # provisioning profiles) under Dir.tmpdir, so this cleans it up without
+  # touching anything another run has there.
+  with_own_tmpdir = lambda do |&block|
+    dir = Dir.mktmpdir("fastlane_demo")
+    original = ENV.fetch("TMPDIR", nil)
+    ENV["TMPDIR"] = dir
+    begin
+      block.call
+    ensure
+      ENV["TMPDIR"] = original
+      FileUtils.rm_rf(dir)
+    end
   end
   # Xcode 15.3+ name for App Store distribution (formerly "app-store").
   export_method = "app-store-connect"
@@ -111,16 +121,12 @@ platform :ios do
       pubspec_build_number.to_i
     ].max
     # This step replaces the build_app step
-    existing_export_options_dirs = export_options_dirs.call
-    begin
+    with_own_tmpdir.call do
       shorebird_release(
         platform: "ios",
         args: "--build-number=#{build_number}",
         export_options: { method: export_method }
       )
-    ensure
-      # Remove the export options plist the plugin wrote for this release.
-      (export_options_dirs.call - existing_export_options_dirs).each { |dir| FileUtils.rm_rf(dir) }
     end
     # Upload the binary to TestFlight. Submitting it to the App Store is left
     # to App Store Connect, since this sample has no store metadata.
@@ -147,11 +153,11 @@ platform :ios do
     # shorebird_release does, so use the plugin's helper for the same plist:
     # the match profiles with manual signing, and Xcode kept from changing the
     # build number.
-    export_options_plist = Fastlane::Helper::ExportOptionsPlist.generate_export_options_plist(
-      { method: export_method },
-      lane_context[SharedValues::MATCH_PROVISIONING_PROFILE_MAPPING]
-    )
-    begin
+    with_own_tmpdir.call do
+      export_options_plist = Fastlane::Helper::ExportOptionsPlist.generate_export_options_plist(
+        { method: export_method },
+        lane_context[SharedValues::MATCH_PROVISIONING_PROFILE_MAPPING]
+      )
       shorebird_patch(
         platform: "ios",
         args: [
@@ -159,9 +165,6 @@ platform :ios do
           "--export-options-plist=#{Shellwords.escape(export_options_plist)}"
         ].join(" ")
       )
-    ensure
-      # The helper writes the plist to a new temporary directory.
-      FileUtils.rm_rf(File.dirname(export_options_plist))
     end
   end
 

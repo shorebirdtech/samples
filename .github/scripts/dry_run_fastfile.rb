@@ -39,6 +39,13 @@ CONFIG_FILES = {
   "scan" => "Scanfile"
 }.freeze
 
+# What the skipped actions return, for those whose results the Fastfile uses.
+# Values are shaped like the real ones; App Store Connect build numbers can be
+# strings.
+FAKE_RETURN_VALUES = {
+  "latest_testflight_build_number" => "12"
+}.freeze
+
 # Replaces an action's `run`, which fastlane calls after parsing its options.
 module DryRunAction
   def run(params)
@@ -46,15 +53,17 @@ module DryRunAction
     # A required option must get a value from the call, its environment
     # variable, a config file or its default, looked up as fastlane does but
     # without prompting. CI sets the sample's documented variables.
+    # Options whose default is worked out at runtime (default_value_dynamic)
+    # may only get a value inside `run`, so they aren't checked.
     missing = Array(available_options).compact.select do |option|
-      !option.optional && params.fetch(option.key, ask: false).nil?
+      !option.optional && !option.default_value_dynamic && params.fetch(option.key, ask: false).nil?
     end
     unless missing.empty?
       FastlaneCore::UI.user_error!("#{action_name} is missing required options: #{missing.map(&:key).join(', ')}")
     end
     puts("  #{action_name}")
     fake_results(params)
-    nil
+    FAKE_RETURN_VALUES[action_name]
   end
 
   # Leaves what the skipped action would have left in lane_context, so the
@@ -83,11 +92,17 @@ end
 # canned output; any other command fails, so that nothing runs for real and no
 # lane gets output it didn't expect.
 SHELL_OUTPUTS = {
-  # What `shorebird releases list --json` prints, with a few releases, so the
-  # code that reads it runs too.
+  # What `shorebird releases list --json` prints (a success envelope around
+  # Release.toJson from shorebird_code_push_protocol), with a few releases, so
+  # the code that reads it runs too.
   /\bshorebird releases list\b.*--json/ => {
     status: "success",
-    data: { releases: [{ version: "1.0.0+11" }, { version: "1.0.0+12" }, { version: "1.0.1+3" }] }
+    data: {
+      releases: [["1.0.0+11", 1], ["1.0.0+12", 2], ["1.0.1+3", 3]].map do |version, id|
+        { id: id, app_id: "dry-run", version: version, flutter_revision: "dry-run", platform_statuses: { ios: "active" } }
+      end
+    },
+    meta: { version: "dry-run", command: "releases list" }
   }.to_json
 }.freeze
 module DryRunShell

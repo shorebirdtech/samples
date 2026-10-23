@@ -46,7 +46,9 @@ credentials from `ios/fastlane/.env.default` (see
   the pubspec version (or the pubspec's build number, if higher), so a release
   whose upload failed can simply be run again. A rerun creates a new release,
   so delete the one whose upload failed with `shorebird releases delete` to
-  keep it from being patched. On CI it uses the App Store Connect API key;
+  keep it from being patched. On CI it uses the App Store Connect API key, so
+  set the `APP_STORE_CONNECT_API_KEY_*` variables there (patching doesn't need
+  them);
   locally, without one, fastlane signs in with the Apple ID in `FASTLANE_USER`
   and uploads with the app-specific password in
   `FASTLANE_APPLE_APPLICATION_SPECIFIC_PASSWORD` (or asks for them).
