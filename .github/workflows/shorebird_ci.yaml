@@ -21,6 +21,8 @@ jobs:
       shorebird_fintech_wallet: ${{ steps.filter.outputs.shorebird_fintech_wallet }}
       clear_skies: ${{ steps.filter.outputs.clear_skies }}
       shorebird_runner: ${{ steps.filter.outputs.shorebird_runner }}
+      fastlane_demo: ${{ steps.filter.outputs.fastlane_demo }}
+      fastlane_demo_ios: ${{ steps.filter.outputs.fastlane_demo_ios }}
     steps:
       - uses: actions/checkout@v7
         with:
@@ -48,6 +50,14 @@ jobs:
               - clear_skies/**
             shorebird_runner:
               - shorebird_runner/**
+            fastlane_demo:
+              - fastlane_demo/**
+            fastlane_demo_ios:
+              - fastlane_demo/ios/**
+              # The dry run reads the version from pubspec.yaml.
+              - fastlane_demo/pubspec.yaml
+              - .github/scripts/dry_run_fastfile.rb
+              - .github/workflows/shorebird_ci.yaml
 
   flavors:
     needs: changes
@@ -140,6 +150,56 @@ jobs:
       flutter_version: ""
       has_integration_tests: false
 
+  fastlane_demo:
+    needs: changes
+    if: needs.changes.outputs.fastlane_demo == 'true'
+    uses: ./.github/workflows/_shorebird_ci_flutter.yaml
+    with:
+      package_name: fastlane_demo
+      package_path: fastlane_demo
+      has_bloc_lint: false
+      has_unit_tests: true
+      subpackages: ""
+      flutter_version: ""
+      has_integration_tests: false
+
+  # Hand-written, not generated: checks fastlane_demo's Ruby/fastlane setup.
+  fastlane_demo_fastlane:
+    needs: changes
+    if: needs.changes.outputs.fastlane_demo_ios == 'true'
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: fastlane_demo/ios
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: "3.3"
+          bundler-cache: true
+          working-directory: fastlane_demo/ios
+
+      # Run every lane with its actions validated but skipped.
+      - name: Dry-run the lanes
+        # Placeholders for the variables .env.default.sample documents, so
+        # required options that come from them count as set. The API key is
+        # CI-only and the Apple ID login local-only, so each dry-run pass
+        # unsets the other's.
+        env:
+          MATCH_PASSWORD: dry-run
+          FASTLANE_USER: dry-run@example.com
+          FASTLANE_APPLE_APPLICATION_SPECIFIC_PASSWORD: dry-run
+          APP_STORE_CONNECT_API_KEY_KEY_ID: dry-run
+          APP_STORE_CONNECT_API_KEY_ISSUER_ID: dry-run
+          APP_STORE_CONNECT_API_KEY_KEY: ZHJ5LXJ1bg==
+          DRY_RUN_CI_ONLY_ENV: >-
+            APP_STORE_CONNECT_API_KEY_KEY_ID,APP_STORE_CONNECT_API_KEY_ISSUER_ID,APP_STORE_CONNECT_API_KEY_KEY
+          DRY_RUN_LOCAL_ONLY_ENV: FASTLANE_USER,FASTLANE_APPLE_APPLICATION_SPECIFIC_PASSWORD
+        run: >-
+          bundle exec ruby ../../.github/scripts/dry_run_fastfile.rb fastlane/Fastfile
+          patch_shorebird release_version=1.0.0+11
+
   required:
     name: required
     if: ${{ always() }}
@@ -152,6 +212,8 @@ jobs:
       - shorebird_fintech_wallet
       - clear_skies
       - shorebird_runner
+      - fastlane_demo
+      - fastlane_demo_fastlane
     runs-on: ubuntu-latest
     steps:
       - name: Check required jobs

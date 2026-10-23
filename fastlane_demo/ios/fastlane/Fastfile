@@ -1,0 +1,194 @@
+# This Fastfile is largely based on
+# https://medium.com/revelo-tech/setting-up-automatic-ios-release-with-fastlane-and-match-on-ci-cd-server-16c3f1d79bc5
+
+require "fileutils"
+require "json"
+require "shellwords"
+require "yaml"
+
+# Don't regenerate fastlane/README.md on every run; the lanes are described in
+# the sample's README.
+skip_docs
+
+platform :ios do
+  bundle_id = "dev.shorebird.fastlane-demo"
+  project_root = File.expand_path("../..", __dir__)
+  # Xcode 15.3+ name for App Store distribution (formerly "app-store").
+  export_method = "app-store-connect"
+
+  # Every Shorebird release of the app, on any platform, as the hashes
+  # `shorebird releases list --json` prints (`version`, `platform_statuses`,
+  # `updated_at`, ...).
+  shorebird_releases = lambda do
+    # The command prints one line of JSON, which also explains any failure, so
+    # read it instead of letting `sh` fail on the exit status. Progress and
+    # notices come out around it. `sh` in a Fastfile runs from ios/fastlane,
+    # so run it from the project root. It needs Shorebird credentials
+    # (`shorebird login`, or SHOREBIRD_TOKEN on CI).
+    output = sh(
+      "cd #{Shellwords.escape(project_root)} && shorebird releases list --json",
+      log: false,
+      error_callback: ->(_output) {}
+    ).to_s
+    # Find the result even if a notice ends up on the same line before it.
+    json_text = output.scan(/\{"status".*\}/).last
+    result = begin
+      JSON.parse(json_text.to_s)
+    rescue JSON::ParserError
+      # No JSON at all, e.g. shorebird isn't installed or is too old.
+      UI.user_error!("Couldn't list Shorebird releases (is a current shorebird CLI installed?):\n#{output}")
+    end
+    unless result.is_a?(Hash) && result["status"] == "success"
+      message = result.is_a?(Hash) ? result.dig("error", "message") : "unexpected output"
+      UI.user_error!("Couldn't list Shorebird releases: #{message}\n#{output}")
+    end
+    releases = Array(result.dig("data", "releases"))
+    unless releases.all? { |release| release.is_a?(Hash) && release["version"].is_a?(String) }
+      UI.user_error!("Unexpected releases from shorebird releases list: #{releases.inspect}")
+    end
+    releases
+  end
+
+  # This sample uses whole-number build numbers, so "the next one" is simply
+  # one more. Dotted ones (such as 12.1) would need App Store ordering rules.
+  whole_build_number = lambda do |value, source|
+    unless value.to_s.match?(/\A\d+\z/)
+      UI.user_error!("Build numbers must be whole numbers, but #{source} has #{value.inspect}")
+    end
+    value.to_s.to_i
+  end
+
+  # The highest build number Shorebird has a release for in this version, or
+  # 0 if there is none. Release versions are shared across platforms, so
+  # releases for any platform count.
+  latest_shorebird_build_number = lambda do |version|
+    shorebird_releases.call
+      .map { |release| release["version"] }
+      .select { |release_version| release_version.start_with?("#{version}+") }
+      .map { |release_version| whole_build_number.call(release_version.split("+", 2).last, "Shorebird release #{release_version}") }
+      .max || 0
+  end
+
+  desc "Get certificates"
+  lane :certificates do
+    sync_code_signing(
+      type: "development",
+      app_identifier: bundle_id,
+      readonly: true
+    )
+    sync_appstore_signing
+  end
+
+  desc "Generate new certificates"
+  lane :generate_new_certificates do
+    sync_code_signing(
+      type: "development",
+      app_identifier: bundle_id,
+      force_for_new_devices: true,
+      readonly: false
+    )
+    sync_code_signing(
+      type: "appstore",
+      app_identifier: bundle_id,
+      readonly: false
+    )
+  end
+
+  desc "create new release with shorebird"
+  lane :release_shorebird do
+    setup_ci
+    # Each release of a version needs a new build number: one past both the
+    # latest TestFlight build and the latest Shorebird release of the pubspec
+    # version (a release whose upload failed is only in Shorebird), and never
+    # lower than the pubspec's own. Check the pubspec and Shorebird first,
+    # since they fail fastest.
+    pubspec_version = YAML.load_file(File.join(project_root, "pubspec.yaml"))["version"]
+    UI.user_error!("pubspec.yaml has no version, e.g. `version: 1.0.0+1`") unless pubspec_version
+    version, pubspec_build_number = pubspec_version.to_s.split("+", 2)
+    # Like Flutter, treat a version with no +build as build 0 here; the other
+    # sources still set the floor.
+    pubspec_build_number = whole_build_number.call(pubspec_build_number || "0", "pubspec.yaml")
+    shorebird_build_number = latest_shorebird_build_number.call(version)
+    # On CI, load the API key before anything slow so missing credentials fail
+    # early. Locally, without the key, fastlane uses your Apple ID login.
+    if FastlaneCore::Helper.ci? || !ENV["APP_STORE_CONNECT_API_KEY_KEY_ID"].to_s.empty?
+      app_store_connect_api_key(
+        is_key_content_base64: true,
+        in_house: false, # if it is enterprise or not
+      )
+    end
+    testflight_build_number = latest_testflight_build_number(
+      app_identifier: bundle_id,
+      version: version,
+      initial_build_number: 0
+    )
+    build_number = [
+      whole_build_number.call(testflight_build_number, "TestFlight") + 1,
+      shorebird_build_number + 1,
+      pubspec_build_number
+    ].max
+    sync_appstore_signing
+    # This step replaces the build_app step
+    shorebird_release(
+      platform: "ios",
+      args: "--build-number=#{build_number}",
+      export_options: { method: export_method }
+    )
+    # Upload the binary to TestFlight. Submitting it to the App Store is left
+    # to App Store Connect, since this sample has no store metadata.
+    upload_to_testflight(
+      app_identifier: bundle_id,
+      skip_waiting_for_build_processing: true
+    )
+  end
+
+  desc "patch with shorebird (release_version: the release to patch, e.g. 1.0.0+11)"
+  lane :patch_shorebird do |options|
+    # Name the release to patch, normally the one in the App Store, so a
+    # release that never shipped can't be patched by mistake.
+    release_version = options[:release_version].to_s.strip
+    unless release_version.match?(/\A[^+\s]+\+\d+\z/)
+      UI.user_error!("Pass the release to patch as version+build, e.g. " \
+                     "`fastlane ios patch_shorebird release_version:1.0.0+11` (got #{release_version.inspect})")
+    end
+    build_name, build_number = release_version.split("+", 2)
+    setup_ci
+    sync_appstore_signing
+    # shorebird_patch doesn't generate export options the way
+    # shorebird_release does, so use the plugin's helper for the same plist:
+    # the match profiles with manual signing, and Xcode kept from changing the
+    # build number.
+    export_options_plist = Fastlane::Helper::ExportOptionsPlist.generate_export_options_plist(
+      { method: export_method },
+      lane_context[SharedValues::MATCH_PROVISIONING_PROFILE_MAPPING]
+    )
+    begin
+      # Build the patch with the release's own version and build number, not
+      # the pubspec's. shorebird patch means to do this from --release-version
+      # (buildNameAndNumberArgsFromReleaseVersion), but skips it whenever
+      # --build-number is among argResults.options, and package:args lists
+      # options with defaults there, which --build-number has.
+      shorebird_patch(
+        platform: "ios",
+        args: [
+          "--release-version=#{Shellwords.escape(release_version)}",
+          "--build-name=#{Shellwords.escape(build_name)}",
+          "--build-number=#{Shellwords.escape(build_number)}",
+          "--export-options-plist=#{Shellwords.escape(export_options_plist)}"
+        ].join(" ")
+      )
+    ensure
+      # The helper writes the plist, which names the provisioning profiles, to
+      # a new temporary directory.
+      FileUtils.rm_rf(File.dirname(export_options_plist))
+    end
+  end
+
+  private_lane :sync_appstore_signing do
+    sync_code_signing(
+      type: "appstore",
+      app_identifier: bundle_id,
+      readonly: true
+    )
+  end
+end
