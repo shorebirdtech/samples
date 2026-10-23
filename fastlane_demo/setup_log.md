@@ -11,8 +11,8 @@ that we don't see the same issues they do because we let Xcode manage our app
 signing, which is a much less common setup among professional app development
 teams. I'm going to try setting up signing using fastlane's
 [match](https://docs.fastlane.tools/actions/match/) and see what the pain points
-are. The resulting app will live in
-https://github.com/shorebirdtech/fastlane_demo.
+are. The resulting app now lives in
+https://github.com/shorebirdtech/samples/tree/main/fastlane_demo.
 
 # Log
 

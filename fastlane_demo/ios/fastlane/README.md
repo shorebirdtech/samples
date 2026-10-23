@@ -31,21 +31,13 @@ Get certificates
 
 Generate new certificates
 
-### ios deploy
-
-```sh
-[bundle exec] fastlane ios deploy
-```
-
-deploy without shorebird
-
 ### ios release_shorebird
 
 ```sh
 [bundle exec] fastlane ios release_shorebird
 ```
 
-deploy with shorebird
+create new release with shorebird
 
 ### ios patch_shorebird
 

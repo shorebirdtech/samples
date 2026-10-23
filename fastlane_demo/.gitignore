@@ -50,3 +50,6 @@ app.*.map.json
 **/ios/Runner.app.dSYM.zip
 **/ios/Runner.ipa
 **/fastlane/report.xml
+**/fastlane/test_output
+**/fastlane/screenshots
+*.xcarchive
