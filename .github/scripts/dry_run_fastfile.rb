@@ -74,6 +74,10 @@ module DryRunAction
   # Leaves what the skipped action would have left in lane_context, so the
   # code that reads it runs too.
   def fake_results(params)
+    # The plugin records the IPA it built, which upload_to_testflight reads.
+    if action_name == "shorebird_release"
+      Fastlane::Actions.lane_context[Fastlane::Actions::SharedValues::IPA_OUTPUT_PATH] = "build/ios/ipa/dry_run.ipa"
+    end
     # `match` is the same action under another name.
     return unless self <= Fastlane::Actions::SyncCodeSigningAction
 
@@ -101,7 +105,7 @@ SHELL_OUTPUTS = {
   # What `shorebird releases list --json` prints (a success envelope around
   # Release.toJson from shorebird_code_push_protocol), with a few releases, so
   # the code that reads it runs too.
-  /\bshorebird releases list\b.*--json/ => {
+  /\Ashorebird releases list --json\z/ => {
     status: "success",
     data: {
       releases: [["1.0.0+11", 1], ["1.0.0+12", 2], ["1.0.1+3", 3]].map do |version, id|

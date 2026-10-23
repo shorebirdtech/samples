@@ -4,7 +4,6 @@
 require "fileutils"
 require "json"
 require "shellwords"
-require "tmpdir"
 require "yaml"
 
 # Don't regenerate fastlane/README.md on every run; the lanes are described in
@@ -48,15 +47,23 @@ platform :ios do
     releases
   end
 
+  # This sample uses whole-number build numbers, so "the next one" is simply
+  # one more. Dotted ones (such as 12.1) would need App Store ordering rules.
+  whole_build_number = lambda do |value, source|
+    unless value.to_s.match?(/\A\d+\z/)
+      UI.user_error!("Build numbers must be whole numbers, but #{source} has #{value.inspect}")
+    end
+    value.to_s.to_i
+  end
+
   # The highest build number Shorebird has a release for in this version, or
   # 0 if there is none. Release versions are shared across platforms, so
   # releases for any platform count.
   latest_shorebird_build_number = lambda do |version|
-    # to_i takes the leading number of a dotted build number such as 12.1.
     shorebird_releases.call
       .map { |release| release["version"] }
       .select { |release_version| release_version.start_with?("#{version}+") }
-      .map { |release_version| release_version.split("+", 2).last.to_i }
+      .map { |release_version| whole_build_number.call(release_version.split("+", 2).last, "Shorebird release #{release_version}") }
       .max || 0
   end
 
@@ -104,34 +111,23 @@ platform :ios do
     # lower than the pubspec's own.
     pubspec_version = YAML.load_file(File.join(project_root, "pubspec.yaml"))["version"]
     UI.user_error!("pubspec.yaml has no version, e.g. `version: 1.0.0+1`") unless pubspec_version
-    version, pubspec_build_number = pubspec_version.to_s.split("+")
+    version, pubspec_build_number = pubspec_version.to_s.split("+", 2)
+    testflight_build_number = latest_testflight_build_number(
+      app_identifier: bundle_id,
+      version: version,
+      initial_build_number: 0
+    )
     build_number = [
-      # to_i because App Store Connect can report build numbers as strings.
-      latest_testflight_build_number(
-        app_identifier: bundle_id,
-        version: version,
-        initial_build_number: 0
-      ).to_i + 1,
+      whole_build_number.call(testflight_build_number, "TestFlight") + 1,
       latest_shorebird_build_number.call(version) + 1,
-      pubspec_build_number.to_i
+      whole_build_number.call(pubspec_build_number, "pubspec.yaml")
     ].max
     # This step replaces the build_app step
-    # The plugin writes its export options plist (which names the
-    # provisioning profiles) under Dir.tmpdir and doesn't say where, so point
-    # TMPDIR at a directory of our own for the release and remove it after.
-    release_tmpdir = Dir.mktmpdir("fastlane_demo")
-    original_tmpdir = ENV.fetch("TMPDIR", nil)
-    ENV["TMPDIR"] = release_tmpdir
-    begin
-      shorebird_release(
-        platform: "ios",
-        args: "--build-number=#{build_number}",
-        export_options: { method: export_method }
-      )
-    ensure
-      ENV["TMPDIR"] = original_tmpdir
-      FileUtils.rm_rf(release_tmpdir)
-    end
+    shorebird_release(
+      platform: "ios",
+      args: "--build-number=#{build_number}",
+      export_options: { method: export_method }
+    )
     # Upload the binary to TestFlight. Submitting it to the App Store is left
     # to App Store Connect, since this sample has no store metadata.
     upload_to_testflight(
@@ -143,23 +139,13 @@ platform :ios do
   desc "patch with shorebird (release_version: the release to patch, e.g. 1.0.0+11)"
   lane :patch_shorebird do |options|
     # Name the release to patch, normally the one in the App Store, so a
-    # release that never shipped can't be patched by default. `latest` (the
-    # most recently updated iOS release) also works.
+    # release that never shipped can't be patched by mistake.
     release_version = options[:release_version].to_s.strip
-    if release_version.empty?
-      UI.user_error!("Pass the release to patch, e.g. `fastlane ios patch_shorebird release_version:1.0.0+11`")
-    end
-    if release_version == "latest"
-      latest = shorebird_releases.call
-               .select { |release| release.fetch("platform_statuses", {}).key?("ios") }
-               .max_by { |release| release["updated_at"].to_s }
-      UI.user_error!("Shorebird has no iOS release to patch") unless latest
-      release_version = latest["version"]
+    unless release_version.match?(/\A[^+\s]+\+\d+\z/)
+      UI.user_error!("Pass the release to patch as version+build, e.g. " \
+                     "`fastlane ios patch_shorebird release_version:1.0.0+11` (got #{release_version.inspect})")
     end
     build_name, build_number = release_version.split("+", 2)
-    unless build_number
-      UI.user_error!("release_version must look like 1.0.0+11, got #{release_version}")
-    end
     setup_ci
     sync_appstore_signing
     # shorebird_patch doesn't generate export options the way
