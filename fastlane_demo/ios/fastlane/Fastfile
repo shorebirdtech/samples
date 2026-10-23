@@ -1,0 +1,70 @@
+# This Fastfile is largely based on
+# https://medium.com/revelo-tech/setting-up-automatic-ios-release-with-fastlane-and-match-on-ci-cd-server-16c3f1d79bc5
+
+platform :ios do
+  bundle_id = "dev.shorebird.fastlane-demo"
+
+  desc "Get certificates"
+  lane :certificates do
+    sync_code_signing(
+      type: "development",
+      app_identifier: [bundle_id],
+      force_for_new_devices: true,
+      readonly: true
+    )
+
+    sync_code_signing(
+      type: "appstore",
+      app_identifier: bundle_id,
+      readonly: true
+    )
+  end
+
+  desc "Generate new certificates"
+  lane :generate_new_certificates do
+    sync_code_signing(
+      type: "development",
+      app_identifier: [bundle_id],
+      force_for_new_devices: true,
+      readonly: false
+    )
+    sync_code_signing(
+      type: "appstore",
+      app_identifier: bundle_id,
+      force_for_new_devices: true,
+      readonly: false
+    )
+  end
+
+  desc "create new release with shorebird"
+  lane :release_shorebird do
+    setup_ci
+    sync_code_signing(
+      type: "appstore",
+      app_identifier: bundle_id,
+      readonly: true
+    )
+    # This step replaces the build_app step
+    shorebird_release(platform: "ios")
+    app_store_connect_api_key(
+      is_key_content_base64: true,
+      in_house: false, # if it is enterprise or not
+    )
+    upload_to_app_store(
+      app_identifier: bundle_id,
+      force: false,
+      precheck_include_in_app_purchases: false,
+      run_precheck_before_submit: true,
+      submit_for_review: false
+    )
+  end
+
+  desc "patch with shorebird"
+  lane :patch_shorebird do
+    setup_ci
+    shorebird_patch(
+      platform: "ios",
+      args: "--release-version=latest"
+    )
+  end
+end

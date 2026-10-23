@@ -12,6 +12,11 @@ updates:
 
 
   - package-ecosystem: "pub"
+    directory: "/fastlane_demo"
+    schedule:
+      interval: "weekly"
+
+  - package-ecosystem: "pub"
     directory: "/flavors"
     schedule:
       interval: "weekly"
