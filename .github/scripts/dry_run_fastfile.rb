@@ -101,11 +101,13 @@ module DryRunShell
 end
 Fastlane::Actions.singleton_class.prepend(DryRunShell)
 
-# Lets each run choose whether fastlane thinks it's on CI. The local runs also
-# unset the variables named in DRY_RUN_CI_ONLY_ENV (comma-separated), which
-# only CI sets, so the local branches run as they would on a developer's
-# machine.
-CI_ONLY_ENV = ENV.fetch("DRY_RUN_CI_ONLY_ENV", "").split(",").map(&:strip).reject(&:empty?).freeze
+# Lets each run choose whether fastlane thinks it's on CI. The CI runs unset
+# the variables named in DRY_RUN_LOCAL_ONLY_ENV and the local runs unset those
+# in DRY_RUN_CI_ONLY_ENV (both comma-separated), so each runs with only the
+# credentials it would really have.
+env_list = ->(name) { ENV.fetch(name, "").split(",").map(&:strip).reject(&:empty?) }
+CI_ONLY_ENV = env_list.call("DRY_RUN_CI_ONLY_ENV").freeze
+LOCAL_ONLY_ENV = env_list.call("DRY_RUN_LOCAL_ONLY_ENV").freeze
 module DryRunCI
   attr_accessor :dry_run_ci
 
@@ -141,9 +143,11 @@ lane_arguments.each_slice(2) do |name, options|
 end
 
 ci_env = CI_ONLY_ENV.to_h { |name| [name, ENV.fetch(name, nil)] }
+local_env = LOCAL_ONLY_ENV.to_h { |name| [name, ENV.fetch(name, nil)] }
 [true, false].each do |ci|
   FastlaneCore::Helper.dry_run_ci = ci
   ci_env.each { |name, value| ENV[name] = ci ? value : nil }
+  local_env.each { |name, value| ENV[name] = ci ? nil : value }
   runs.each do |platform, name, options|
     # Start each run as fastlane would, with nothing left by the previous one.
     Fastlane::Actions.lane_context.clear

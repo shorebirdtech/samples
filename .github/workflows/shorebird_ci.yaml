@@ -163,6 +163,7 @@ jobs:
       flutter_version: ""
       has_integration_tests: false
 
+  # Hand-written, not generated: checks fastlane_demo's Ruby/fastlane setup.
   fastlane_demo_fastlane:
     needs: changes
     if: needs.changes.outputs.fastlane_demo_ios == 'true'
@@ -183,7 +184,8 @@ jobs:
       - name: Dry-run the lanes
         # Placeholders for the variables .env.default.sample documents, so
         # required options that come from them count as set. The API key is
-        # CI-only, so the dry run's local pass unsets it.
+        # CI-only and the Apple ID login local-only, so each dry-run pass
+        # unsets the other's.
         env:
           MATCH_PASSWORD: dry-run
           FASTLANE_USER: dry-run@example.com
@@ -193,6 +195,7 @@ jobs:
           APP_STORE_CONNECT_API_KEY_KEY: ZHJ5LXJ1bg==
           DRY_RUN_CI_ONLY_ENV: >-
             APP_STORE_CONNECT_API_KEY_KEY_ID,APP_STORE_CONNECT_API_KEY_ISSUER_ID,APP_STORE_CONNECT_API_KEY_KEY
+          DRY_RUN_LOCAL_ONLY_ENV: FASTLANE_USER,FASTLANE_APPLE_APPLICATION_SPECIFIC_PASSWORD
         run: >-
           bundle exec ruby ../../.github/scripts/dry_run_fastfile.rb fastlane/Fastfile
           patch_shorebird release_version=1.0.0+11

@@ -4,6 +4,7 @@
 require "fileutils"
 require "json"
 require "shellwords"
+require "tmpdir"
 require "yaml"
 
 # Don't regenerate fastlane/README.md on every run; the lanes are described in
@@ -13,6 +14,11 @@ skip_docs
 platform :ios do
   bundle_id = "dev.shorebird.fastlane-demo"
   project_root = File.expand_path("../..", __dir__)
+  # The plugin's export options helper writes each plist to a new
+  # shorebird* temporary directory.
+  export_options_dirs = lambda do
+    Dir.glob(File.join(Dir.tmpdir, "shorebird*", "ExportOptions.plist")).map { |plist| File.dirname(plist) }
+  end
   # Xcode 15.3+ name for App Store distribution (formerly "app-store").
   export_method = "app-store-connect"
 
@@ -21,9 +27,10 @@ platform :ios do
   latest_shorebird_build_number = lambda do |version|
     # The command prints one line of JSON, which also explains any failure, so
     # read it instead of letting `sh` fail on the exit status. Progress and
-    # notices come out around it.
+    # notices come out around it. Like the plugin's commands, it runs from
+    # ios/ and finds the project above it.
     output = sh(
-      "cd #{Shellwords.escape(project_root)} && shorebird releases list --platform=ios --json",
+      "shorebird releases list --platform=ios --json",
       log: false,
       error_callback: ->(_output) {}
     ).to_s
@@ -104,11 +111,17 @@ platform :ios do
       pubspec_build_number.to_i
     ].max
     # This step replaces the build_app step
-    shorebird_release(
-      platform: "ios",
-      args: "--build-number=#{build_number}",
-      export_options: { method: export_method }
-    )
+    existing_export_options_dirs = export_options_dirs.call
+    begin
+      shorebird_release(
+        platform: "ios",
+        args: "--build-number=#{build_number}",
+        export_options: { method: export_method }
+      )
+    ensure
+      # Remove the export options plist the plugin wrote for this release.
+      (export_options_dirs.call - existing_export_options_dirs).each { |dir| FileUtils.rm_rf(dir) }
+    end
     # Upload the binary to TestFlight. Submitting it to the App Store is left
     # to App Store Connect, since this sample has no store metadata.
     upload_to_testflight(
