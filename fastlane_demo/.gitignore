@@ -45,7 +45,8 @@ app.*.map.json
 /android/app/release
 
 # Fastlane
-**/fastlane/.env.default
+**/fastlane/.env*
+!**/fastlane/.env.default.sample
 **/fastlane/Preview.html
 **/ios/Runner.app.dSYM.zip
 **/ios/Runner.ipa
