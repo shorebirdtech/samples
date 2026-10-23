@@ -17,7 +17,7 @@ with Shorebird-specific steps added after completing the steps in the guide.
 
 All fastlane files are located in [`ios/fastlane`](./ios/fastlane/).
 
-The lanes are wired to Shorebird's own Apple account. To run them yourself,
+The lanes are wired to Shorebird's own accounts. To run them yourself,
 replace Shorebird's values with your own in:
 
 - `shorebird.yaml`: the `app_id` (run `shorebird init` to create your own app).
