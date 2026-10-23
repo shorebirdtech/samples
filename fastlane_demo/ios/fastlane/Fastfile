@@ -1,6 +1,11 @@
 # This Fastfile is largely based on
 # https://medium.com/revelo-tech/setting-up-automatic-ios-release-with-fastlane-and-match-on-ci-cd-server-16c3f1d79bc5
 
+require "plist"
+require "shellwords"
+require "tmpdir"
+require "yaml"
+
 platform :ios do
   bundle_id = "dev.shorebird.fastlane-demo"
 
@@ -39,9 +44,13 @@ platform :ios do
       in_house: false, # if it is enterprise or not
     )
     sync_appstore_signing
-    # Each App Store upload needs a new build number.
+    # Each upload of a version needs a new build number, so continue from the
+    # latest TestFlight build of the version in pubspec.yaml.
+    pubspec = YAML.load_file(File.expand_path("../../pubspec.yaml", __dir__))
+    version = pubspec["version"].split("+").first
     build_number = latest_testflight_build_number(
       app_identifier: bundle_id,
+      version: version,
       initial_build_number: 0
     ) + 1
     # This step replaces the build_app step
@@ -51,8 +60,11 @@ platform :ios do
     )
     upload_to_app_store(
       app_identifier: bundle_id,
-      force: false,
-      precheck_include_in_app_purchases: false,
+      # Upload the binary only: this sample has no store metadata or
+      # screenshots, and CI can't confirm the HTML preview.
+      skip_metadata: true,
+      skip_screenshots: true,
+      force: true,
       submit_for_review: false
     )
   end
@@ -62,14 +74,20 @@ platform :ios do
     setup_ci
     sync_appstore_signing
     # shorebird_patch doesn't generate export options the way
-    # shorebird_release does, so build them from the match profiles here.
-    export_options_plist = Fastlane::Helper::ExportOptionsPlist.generate_export_options_plist(
-      {},
-      lane_context[SharedValues::MATCH_PROVISIONING_PROFILE_MAPPING]
-    )
+    # shorebird_release does, so write them from the match profiles here.
+    export_options = {
+      method: "app-store",
+      signingStyle: "manual",
+      provisioningProfiles: lane_context[SharedValues::MATCH_PROVISIONING_PROFILE_MAPPING],
+      # Xcode must not change the build number, or the patch won't match its
+      # release.
+      manageAppVersionAndBuildNumber: false
+    }
+    export_options_plist = File.join(Dir.mktmpdir("shorebird"), "ExportOptions.plist")
+    File.write(export_options_plist, export_options.to_plist)
     shorebird_patch(
       platform: "ios",
-      args: "--release-version=latest --export-options-plist=#{export_options_plist}"
+      args: "--release-version=latest --export-options-plist=#{Shellwords.escape(export_options_plist)}"
     )
   end
 

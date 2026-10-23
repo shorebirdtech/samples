@@ -22,6 +22,7 @@ jobs:
       clear_skies: ${{ steps.filter.outputs.clear_skies }}
       shorebird_runner: ${{ steps.filter.outputs.shorebird_runner }}
       fastlane_demo: ${{ steps.filter.outputs.fastlane_demo }}
+      fastlane_demo_ios: ${{ steps.filter.outputs.fastlane_demo_ios }}
     steps:
       - uses: actions/checkout@v7
         with:
@@ -51,6 +52,8 @@ jobs:
               - shorebird_runner/**
             fastlane_demo:
               - fastlane_demo/**
+            fastlane_demo_ios:
+              - fastlane_demo/ios/**
 
   flavors:
     needs: changes
@@ -158,7 +161,7 @@ jobs:
 
   fastlane_demo_fastlane:
     needs: changes
-    if: needs.changes.outputs.fastlane_demo == 'true'
+    if: needs.changes.outputs.fastlane_demo_ios == 'true'
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -174,6 +177,28 @@ jobs:
 
       - name: Load the Fastfile
         run: bundle exec fastlane lanes
+
+      # `fastlane lanes` doesn't run lane bodies, so check that every action
+      # the lanes call still exists (keep this list in sync with the Fastfile).
+      - name: Check the Fastfile's actions exist
+        run: |
+          bundle exec ruby -e '
+            require "fastlane"
+            Fastlane.load_actions
+            Fastlane.plugin_manager.load_plugins
+            actions = %w[
+              setup_ci
+              sync_code_signing
+              app_store_connect_api_key
+              latest_testflight_build_number
+              upload_to_app_store
+              shorebird_release
+              shorebird_patch
+            ]
+            missing = actions.reject { |a| Fastlane::Actions.action_class_ref(a) }
+            abort("Missing fastlane actions: #{missing.join(", ")}") unless missing.empty?
+            puts "All #{actions.size} actions found"
+          '
 
   required:
     name: required
