@@ -1,0 +1,147 @@
+definitions:
+  environment:
+    shared_env: &shared_env
+      flutter: 3.24.1
+      groups:
+        - shorebird
+        - app_store
+        - play_store
+      vars:
+        BUNDLE_ID: dev.shorebird.codemagic-demo
+        FLUTTER_VERSION: 3.24.1
+  scripts:
+    - &shorebird_install
+      name: Install Shorebird
+      script: |
+        # Install Shorebird
+        curl --proto '=https' --tlsv1.2 https://raw.githubusercontent.com/shorebirdtech/install/main/install.sh -sSf | bash
+
+        # Add Shorebird to PATH
+        echo PATH="$HOME/.shorebird/bin:$PATH" >> $CM_ENV
+    - &ios_initialize_keychain
+      name: Set up keychain to be used for codesigning using Codemagic CLI 'keychain' command
+      script: |
+        keychain initialize
+    - &fetch_signing_files
+      name: Fetch signing files
+      script: |
+        app-store-connect fetch-signing-files "$BUNDLE_ID" \
+          --type IOS_APP_STORE --create \
+          --issuer-id "$ISSUER_ID" \
+          --key-id "$KEY_ID" \
+          --private-key="$APP_STORE_CONNECT_PRIVATE_KEY"
+    - &add_certs_to_keychain
+      name: Add certs to keychain
+      script: |
+        keychain add-certificates
+    - &use_profiles
+      name: Set up code signing settings on Xcode project
+      script: |
+        xcode-project use-profiles --custom-export-options={\"manageAppVersionAndBuildNumber\":false}
+    - &fetch_dependencies
+      name: Fetch Dependencies
+      script: |
+        flutter pub get
+    - &analyze_and_test
+      name: Analyze and Test
+      script: |
+        flutter analyze
+        flutter test
+
+workflows:
+  release-android-workflow:
+    name: Release Android
+    instance_type: mac_mini_m1
+    environment:
+      <<: *shared_env
+      android_signing:
+        - android_keystore
+    scripts:
+      - *shorebird_install
+      - *fetch_dependencies
+      - *analyze_and_test
+      - name: Shorebird Release
+        script: |
+          shorebird release android \
+            --flutter-version="$FLUTTER_VERSION"
+    artifacts:
+      - build/**/outputs/**/*.aab
+      - build/**/outputs/**/mapping.txt
+      - flutter_drive.log
+    publishing:
+      google_play:
+        credentials: $GCLOUD_SERVICE_ACCOUNT_CREDENTIALS
+        track: internal
+  release-ios-workflow:
+    name: Release iOS
+    instance_type: mac_mini_m1
+    integrations:
+      app_store_connect: Codemagic
+    environment:
+      <<: *shared_env
+      ios_signing:
+        distribution_type: app_store
+        bundle_identifier: "$BUNDLE_ID"
+    scripts:
+      - *shorebird_install
+      - *fetch_dependencies
+      - *analyze_and_test
+      - *fetch_signing_files
+      - *ios_initialize_keychain
+      - *add_certs_to_keychain
+      - *use_profiles
+      - name: Shorebird Release
+        script: |
+          cat /Users/builder/export_options.plist
+          shorebird release ios \
+            --flutter-version="$FLUTTER_VERSION" \
+            --export-options-plist=/Users/builder/export_options.plist
+    artifacts:
+      - build/ios/ipa/*.ipa
+    publishing:
+      app_store_connect:
+        auth: integration
+        submit_to_testflight: true
+
+  patch-android-workflow:
+    name: Patch Android
+    instance_type: mac_mini_m1
+    environment:
+      <<: *shared_env
+      android_signing:
+        - android_keystore
+    inputs:
+      release_version:
+        description: The release version to patch
+    scripts:
+      - *shorebird_install
+      - *fetch_dependencies
+      - *analyze_and_test
+      - name: Shorebird Patch
+        script: |
+          shorebird patch android \
+            --release-version=${{ inputs.release_version }}
+  patch-ios-workflow:
+    name: Patch iOS
+    instance_type: mac_mini_m1
+    environment:
+      <<: *shared_env
+      ios_signing:
+        distribution_type: app_store
+        bundle_identifier: "$BUNDLE_ID"
+    inputs:
+      release_version:
+        description: The release version to patch
+    scripts:
+      - *shorebird_install
+      - *fetch_dependencies
+      - *analyze_and_test
+      - *fetch_signing_files
+      - *ios_initialize_keychain
+      - *add_certs_to_keychain
+      - *use_profiles
+      - name: Shorebird Patch
+        script: |
+          shorebird patch ios \
+            --release-version=${{ inputs.release_version }} \
+            --export-options-plist=/Users/builder/export_options.plist
