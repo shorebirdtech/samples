@@ -54,7 +54,11 @@ credentials from `ios/fastlane/.env.default` (see
   `FASTLANE_APPLE_APPLICATION_SPECIFIC_PASSWORD` (or asks for them).
 - `patch_shorebird`: patches the release you name, normally the one in the App
   Store: `bundle exec fastlane ios patch_shorebird release_version:1.0.0+11`.
-  `release_version:latest` patches the most recently updated release instead.
+  `release_version:latest` patches the most recently updated iOS release
+  instead. The patch is built with the release's version and build number.
+
+Both Shorebird lanes need Shorebird credentials: `shorebird login` locally, or
+`SHOREBIRD_TOKEN` (from `shorebird login:ci`) on CI.
 
 A step-by-step log of me (bryanoltman) creating this demo is viewable in
 [setup_log.md](./setup_log.md).

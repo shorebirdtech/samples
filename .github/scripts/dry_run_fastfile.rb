@@ -14,6 +14,11 @@
 # `lane key=value,...` arguments, which run with those options instead (once
 # per argument). Values can't contain commas. Each run happens twice: once as
 # on CI and once as on a developer's machine.
+#
+# This hooks into fastlane at a few points: each action class's `run`,
+# `Fastlane::Actions.sh_control_output`, `FastlaneCore::Helper.ci?` and
+# `FastlaneCore::Configuration#fetch`/`#load_configuration_file`. If a fastlane
+# update breaks the script, those are the places to look.
 
 require "fastlane"
 require "json"
@@ -72,8 +77,9 @@ module DryRunAction
     # `match` is the same action under another name.
     return unless self <= Fastlane::Actions::SyncCodeSigningAction
 
-    app_identifiers = params._values[:app_identifier] ||
-                      CredentialsManager::AppfileConfig.try_fetch_value(:app_identifier)
+    # Looked up as match would: the call, its env var, the Matchfile, then
+    # the Appfile default.
+    app_identifiers = params.fetch(:app_identifier, ask: false)
     mapping = (Fastlane::Actions.lane_context[Fastlane::Actions::SharedValues::MATCH_PROVISIONING_PROFILE_MAPPING] ||= {})
     Array(app_identifiers).each do |app_identifier|
       mapping[app_identifier] = "match dry run #{app_identifier}"
@@ -99,7 +105,10 @@ SHELL_OUTPUTS = {
     status: "success",
     data: {
       releases: [["1.0.0+11", 1], ["1.0.0+12", 2], ["1.0.1+3", 3]].map do |version, id|
-        { id: id, app_id: "dry-run", version: version, flutter_revision: "dry-run", platform_statuses: { ios: "active" } }
+        {
+          id: id, app_id: "dry-run", version: version, flutter_revision: "dry-run",
+          platform_statuses: { ios: "active" }, updated_at: "2026-01-0#{id}T00:00:00.000Z"
+        }
       end
     },
     meta: { version: "dry-run", command: "releases list" }

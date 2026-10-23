@@ -14,33 +14,20 @@ skip_docs
 platform :ios do
   bundle_id = "dev.shorebird.fastlane-demo"
   project_root = File.expand_path("../..", __dir__)
-  # Runs the block with TMPDIR pointing at a new directory, then removes it.
-  # The plugin's export options helper writes its plist (which names the
-  # provisioning profiles) under Dir.tmpdir, so this cleans it up without
-  # touching anything another run has there.
-  with_own_tmpdir = lambda do |&block|
-    dir = Dir.mktmpdir("fastlane_demo")
-    original = ENV.fetch("TMPDIR", nil)
-    ENV["TMPDIR"] = dir
-    begin
-      block.call
-    ensure
-      ENV["TMPDIR"] = original
-      FileUtils.rm_rf(dir)
-    end
-  end
   # Xcode 15.3+ name for App Store distribution (formerly "app-store").
   export_method = "app-store-connect"
 
-  # The highest iOS build number Shorebird has a release for in this version,
-  # or 0 if there is none.
-  latest_shorebird_build_number = lambda do |version|
+  # Every Shorebird release of the app, on any platform, as the hashes
+  # `shorebird releases list --json` prints (`version`, `platform_statuses`,
+  # `updated_at`, ...).
+  shorebird_releases = lambda do
     # The command prints one line of JSON, which also explains any failure, so
     # read it instead of letting `sh` fail on the exit status. Progress and
     # notices come out around it. Like the plugin's commands, it runs from
-    # ios/ and finds the project above it.
+    # ios/ and finds the project above it. It needs Shorebird credentials
+    # (`shorebird login`, or SHOREBIRD_TOKEN on CI).
     output = sh(
-      "shorebird releases list --platform=ios --json",
+      "shorebird releases list --json",
       log: false,
       error_callback: ->(_output) {}
     ).to_s
@@ -54,12 +41,20 @@ platform :ios do
     unless result["status"] == "success"
       UI.user_error!("Couldn't list Shorebird releases: #{result.dig('error', 'message')}\n#{output}")
     end
-    release_versions = Array(result.dig("data", "releases")).map { |release| release["version"] }
-    unless release_versions.all?(String)
-      UI.user_error!("Unexpected releases from shorebird releases list: #{result.dig('data', 'releases').inspect}")
+    releases = Array(result.dig("data", "releases"))
+    unless releases.all? { |release| release.is_a?(Hash) && release["version"].is_a?(String) }
+      UI.user_error!("Unexpected releases from shorebird releases list: #{releases.inspect}")
     end
+    releases
+  end
+
+  # The highest build number Shorebird has a release for in this version, or
+  # 0 if there is none. Release versions are shared across platforms, so
+  # releases for any platform count.
+  latest_shorebird_build_number = lambda do |version|
     # to_i takes the leading number of a dotted build number such as 12.1.
-    release_versions
+    shorebird_releases.call
+      .map { |release| release["version"] }
       .select { |release_version| release_version.start_with?("#{version}+") }
       .map { |release_version| release_version.split("+", 2).last.to_i }
       .max || 0
@@ -121,12 +116,21 @@ platform :ios do
       pubspec_build_number.to_i
     ].max
     # This step replaces the build_app step
-    with_own_tmpdir.call do
+    # The plugin writes its export options plist (which names the
+    # provisioning profiles) under Dir.tmpdir and doesn't say where, so point
+    # TMPDIR at a directory of our own for the release and remove it after.
+    release_tmpdir = Dir.mktmpdir("fastlane_demo")
+    original_tmpdir = ENV.fetch("TMPDIR", nil)
+    ENV["TMPDIR"] = release_tmpdir
+    begin
       shorebird_release(
         platform: "ios",
         args: "--build-number=#{build_number}",
         export_options: { method: export_method }
       )
+    ensure
+      ENV["TMPDIR"] = original_tmpdir
+      FileUtils.rm_rf(release_tmpdir)
     end
     # Upload the binary to TestFlight. Submitting it to the App Store is left
     # to App Store Connect, since this sample has no store metadata.
@@ -140,12 +144,21 @@ platform :ios do
   lane :patch_shorebird do |options|
     # Name the release to patch, normally the one in the App Store, so a
     # release that never shipped can't be patched by default. `latest` (the
-    # most recently updated release) also works. Shorebird builds the patch
-    # with the target release's version and build number, so the pubspec's
-    # don't need to match it.
+    # most recently updated iOS release) also works.
     release_version = options[:release_version].to_s.strip
     if release_version.empty?
       UI.user_error!("Pass the release to patch, e.g. `fastlane ios patch_shorebird release_version:1.0.0+11`")
+    end
+    if release_version == "latest"
+      latest = shorebird_releases.call
+               .select { |release| release.fetch("platform_statuses", {}).key?("ios") }
+               .max_by { |release| release["updated_at"].to_s }
+      UI.user_error!("Shorebird has no iOS release to patch") unless latest
+      release_version = latest["version"]
+    end
+    build_name, build_number = release_version.split("+", 2)
+    unless build_number
+      UI.user_error!("release_version must look like 1.0.0+11, got #{release_version}")
     end
     setup_ci
     sync_appstore_signing
@@ -153,18 +166,27 @@ platform :ios do
     # shorebird_release does, so use the plugin's helper for the same plist:
     # the match profiles with manual signing, and Xcode kept from changing the
     # build number.
-    with_own_tmpdir.call do
-      export_options_plist = Fastlane::Helper::ExportOptionsPlist.generate_export_options_plist(
-        { method: export_method },
-        lane_context[SharedValues::MATCH_PROVISIONING_PROFILE_MAPPING]
-      )
+    export_options_plist = Fastlane::Helper::ExportOptionsPlist.generate_export_options_plist(
+      { method: export_method },
+      lane_context[SharedValues::MATCH_PROVISIONING_PROFILE_MAPPING]
+    )
+    begin
+      # Build the patch with the release's own version and build number, not
+      # the pubspec's. shorebird patch doesn't do this itself when given only
+      # --release-version.
       shorebird_patch(
         platform: "ios",
         args: [
           "--release-version=#{Shellwords.escape(release_version)}",
+          "--build-name=#{Shellwords.escape(build_name)}",
+          "--build-number=#{Shellwords.escape(build_number)}",
           "--export-options-plist=#{Shellwords.escape(export_options_plist)}"
         ].join(" ")
       )
+    ensure
+      # The helper writes the plist, which names the provisioning profiles, to
+      # a new temporary directory.
+      FileUtils.rm_rf(File.dirname(export_options_plist))
     end
   end
 
