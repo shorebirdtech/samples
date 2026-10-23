@@ -18,10 +18,15 @@ with Shorebird-specific steps added after completing the steps in the guide.
 
 All fastlane files are located in [`ios/fastlane`](./ios/fastlane/).
 
-The lanes are wired to Shorebird's own Apple account: `Matchfile` points at a
-private certificates repo and `Appfile` (and the Xcode project) use Shorebird's
-team ID. To run them yourself, replace those with your own match repo, team ID
-and bundle identifier.
+The lanes are wired to Shorebird's own Apple account. To run them yourself,
+replace Shorebird's values with your own in:
+
+- `ios/fastlane/Matchfile`: the private certificates repo (`git_url`).
+- `ios/fastlane/Appfile`: the team names and IDs.
+- `ios/fastlane/Fastfile`: `bundle_id`.
+- `ios/Runner.xcodeproj/project.pbxproj`: the Runner target's
+  `PRODUCT_BUNDLE_IDENTIFIER`, `DEVELOPMENT_TEAM[sdk=iphoneos*]` and
+  `PROVISIONING_PROFILE_SPECIFIER[sdk=iphoneos*]` in each build configuration.
 
 A step-by-step log of me (bryanoltman) creating this demo is viewable in
 [setup_log.md](./setup_log.md).
