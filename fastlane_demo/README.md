@@ -8,8 +8,9 @@ fastlane plugin.
 We recommend reading our [official
 docs](https://docs.shorebird.dev/code-push/ci/fastlane/) for context.
 
-This app was created with `flutter create` using Flutter 3.32.2. The Dart code
-has not been modified.
+This app was created with `flutter create` using Flutter 3.32.2, and its iOS
+project was later migrated by Flutter 3.47 (iOS 15 minimum, UIScene lifecycle).
+The Dart code has not been modified.
 
 This app's setup largely follows [this
 guide](https://medium.com/revelo-tech/setting-up-automatic-ios-release-with-fastlane-and-match-on-ci-cd-server-16c3f1d79bc5),
@@ -27,7 +28,11 @@ replace Shorebird's values with your own in:
 - `ios/fastlane/Fastfile`: `bundle_id`.
 - `ios/Runner.xcodeproj/project.pbxproj`: the Runner target's
   `PRODUCT_BUNDLE_IDENTIFIER`, `DEVELOPMENT_TEAM[sdk=iphoneos*]` and
-  `PROVISIONING_PROFILE_SPECIFIER[sdk=iphoneos*]` in each build configuration.
+  `PROVISIONING_PROFILE_SPECIFIER[sdk=iphoneos*]` in each build configuration,
+  and the RunnerTests target's `PRODUCT_BUNDLE_IDENTIFIER`.
+
+`release_shorebird` sets the build number to the latest TestFlight build plus
+one, so each run can be uploaded. `patch_shorebird` patches the latest release.
 
 A step-by-step log of me (bryanoltman) creating this demo is viewable in
 [setup_log.md](./setup_log.md).

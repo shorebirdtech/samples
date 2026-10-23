@@ -8,22 +8,17 @@ platform :ios do
   lane :certificates do
     sync_code_signing(
       type: "development",
-      app_identifier: [bundle_id],
-      readonly: true
-    )
-
-    sync_code_signing(
-      type: "appstore",
       app_identifier: bundle_id,
       readonly: true
     )
+    sync_appstore_signing
   end
 
   desc "Generate new certificates"
   lane :generate_new_certificates do
     sync_code_signing(
       type: "development",
-      app_identifier: [bundle_id],
+      app_identifier: bundle_id,
       force_for_new_devices: true,
       readonly: false
     )
@@ -37,16 +32,22 @@ platform :ios do
   desc "create new release with shorebird"
   lane :release_shorebird do
     setup_ci
-    sync_code_signing(
-      type: "appstore",
-      app_identifier: bundle_id,
-      readonly: true
-    )
-    # This step replaces the build_app step
-    shorebird_release(platform: "ios")
+    # Load the API key first so missing credentials fail before anything is
+    # built or released.
     app_store_connect_api_key(
       is_key_content_base64: true,
       in_house: false, # if it is enterprise or not
+    )
+    sync_appstore_signing
+    # Each App Store upload needs a new build number.
+    build_number = latest_testflight_build_number(
+      app_identifier: bundle_id,
+      initial_build_number: 0
+    ) + 1
+    # This step replaces the build_app step
+    shorebird_release(
+      platform: "ios",
+      args: "--build-number=#{build_number}"
     )
     upload_to_app_store(
       app_identifier: bundle_id,
@@ -59,14 +60,24 @@ platform :ios do
   desc "patch with shorebird"
   lane :patch_shorebird do
     setup_ci
+    sync_appstore_signing
+    # shorebird_patch doesn't generate export options the way
+    # shorebird_release does, so build them from the match profiles here.
+    export_options_plist = Fastlane::Helper::ExportOptionsPlist.generate_export_options_plist(
+      {},
+      lane_context[SharedValues::MATCH_PROVISIONING_PROFILE_MAPPING]
+    )
+    shorebird_patch(
+      platform: "ios",
+      args: "--release-version=latest --export-options-plist=#{export_options_plist}"
+    )
+  end
+
+  private_lane :sync_appstore_signing do
     sync_code_signing(
       type: "appstore",
       app_identifier: bundle_id,
       readonly: true
-    )
-    shorebird_patch(
-      platform: "ios",
-      args: "--release-version=latest"
     )
   end
 end

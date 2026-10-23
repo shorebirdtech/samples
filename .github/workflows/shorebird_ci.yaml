@@ -156,6 +156,25 @@ jobs:
       flutter_version: ""
       has_integration_tests: false
 
+  fastlane_demo_fastlane:
+    needs: changes
+    if: needs.changes.outputs.fastlane_demo == 'true'
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: fastlane_demo/ios
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: "3.3"
+          bundler-cache: true
+          working-directory: fastlane_demo/ios
+
+      - name: Load the Fastfile
+        run: bundle exec fastlane lanes
+
   required:
     name: required
     if: ${{ always() }}
@@ -169,6 +188,7 @@ jobs:
       - clear_skies
       - shorebird_runner
       - fastlane_demo
+      - fastlane_demo_fastlane
     runs-on: ubuntu-latest
     steps:
       - name: Check required jobs
