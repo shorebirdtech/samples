@@ -90,13 +90,19 @@ module DryRunAction
     end
   end
 end
-Fastlane::Actions.constants.each do |name|
-  action = Fastlane::Actions.const_get(name)
-  next unless action.is_a?(Class) && action < Fastlane::Action
-  next if PASSTHROUGH.include?(action)
+# Stubs every action class loaded so far. Called again after the Fastfile
+# loads, since that also loads the project's own actions (fastlane/actions,
+# imports).
+stub_actions = lambda do
+  Fastlane::Actions.constants.each do |name|
+    action = Fastlane::Actions.const_get(name)
+    next unless action.is_a?(Class) && action < Fastlane::Action
+    next if PASSTHROUGH.include?(action) || action.singleton_class < DryRunAction
 
-  action.singleton_class.prepend(DryRunAction)
+    action.singleton_class.prepend(DryRunAction)
+  end
 end
+stub_actions.call
 
 # Every `sh` in a Fastfile ends up here. Commands this script knows return
 # canned output; any other command fails, so that nothing runs for real and no
@@ -146,6 +152,7 @@ end
 FastlaneCore::Helper.singleton_class.prepend(DryRunCI)
 
 fastfile = Fastlane::FastFile.new(fastfile_path)
+stub_actions.call
 
 lane_arguments = ARGV.drop(1)
 abort("Expected `lane key=value,...` pairs, got an odd number of arguments") if lane_arguments.size.odd?

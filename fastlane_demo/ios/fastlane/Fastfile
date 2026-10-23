@@ -30,9 +30,10 @@ platform :ios do
       log: false,
       error_callback: ->(_output) {}
     ).to_s
-    json_line = output.lines.reverse.find { |line| line.lstrip.start_with?("{") }
+    # Find the result even if a notice ends up on the same line before it.
+    json_text = output.scan(/\{"status".*\}/).last
     result = begin
-      JSON.parse(json_line.to_s)
+      JSON.parse(json_text.to_s)
     rescue JSON::ParserError
       # No JSON at all, e.g. shorebird isn't installed or is too old.
       UI.user_error!("Couldn't list Shorebird releases (is a current shorebird CLI installed?):\n#{output}")
@@ -112,6 +113,9 @@ platform :ios do
     pubspec_version = YAML.load_file(File.join(project_root, "pubspec.yaml"))["version"]
     UI.user_error!("pubspec.yaml has no version, e.g. `version: 1.0.0+1`") unless pubspec_version
     version, pubspec_build_number = pubspec_version.to_s.split("+", 2)
+    # Like Flutter, treat a version with no +build as build 0 here; the other
+    # sources still set the floor.
+    pubspec_build_number ||= "0"
     testflight_build_number = latest_testflight_build_number(
       app_identifier: bundle_id,
       version: version,
@@ -158,8 +162,10 @@ platform :ios do
     )
     begin
       # Build the patch with the release's own version and build number, not
-      # the pubspec's. shorebird patch doesn't do this itself when given only
-      # --release-version.
+      # the pubspec's. shorebird patch means to do this from --release-version
+      # (buildNameAndNumberArgsFromReleaseVersion), but skips it whenever
+      # --build-number is among argResults.options, and package:args lists
+      # options with defaults there, which --build-number has.
       shorebird_patch(
         platform: "ios",
         args: [
