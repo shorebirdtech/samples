@@ -51,7 +51,7 @@ our certs and provisioning profiles for the `dev.shorebird.fastlane-demo` app.
 
 - Created an apple API key at https://appstoreconnect.apple.com/access/integrations/api
 - Set up fastlane deploy script
-- Running `fastlane ios deploy`
+- Running `fastlane ios deploy` (this lane was later replaced by `release_shorebird`)
   - Failed, needed to create an App entry in Appstore Connect
   - Created, now failing at `upload_to_app_store` step. "No data"
   - Ran `flutter build ipa --release`, error is "exportArchive "Runner.app" requires a provisioning profile."

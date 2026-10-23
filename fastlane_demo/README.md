@@ -15,7 +15,8 @@ This app's setup largely follows [this
 guide](https://medium.com/revelo-tech/setting-up-automatic-ios-release-with-fastlane-and-match-on-ci-cd-server-16c3f1d79bc5),
 with Shorebird-specific steps added after completing the steps in the guide.
 
-All fastlane files are located in [`ios/fastlane`](./ios/fastlane/).
+All fastlane files are located in [`ios/fastlane`](./ios/fastlane/). The fastlane
+setup covers iOS only; the Android project is the unmodified template.
 
 The lanes are wired to Shorebird's own accounts. To run them yourself,
 replace Shorebird's values with your own in:
