@@ -1,6 +1,7 @@
 # This Fastfile is largely based on
 # https://medium.com/revelo-tech/setting-up-automatic-ios-release-with-fastlane-and-match-on-ci-cd-server-16c3f1d79bc5
 
+require "fileutils"
 require "json"
 require "shellwords"
 require "yaml"
@@ -18,24 +19,29 @@ platform :ios do
   # The highest iOS build number Shorebird has a release for in this version,
   # or 0 if there is none.
   latest_shorebird_build_number = lambda do |version|
-    # Progress goes to stderr and stdout is a JSON result, which also explains
-    # any failure, so read it instead of letting `sh` fail on the exit status.
+    # The command prints one line of JSON, which also explains any failure, so
+    # read it instead of letting `sh` fail on the exit status. Progress and
+    # notices come out around it.
     output = sh(
-      "cd #{Shellwords.escape(project_root)} && shorebird releases list --platform=ios --json 2>/dev/null",
+      "cd #{Shellwords.escape(project_root)} && shorebird releases list --platform=ios --json",
       log: false,
       error_callback: ->(_output) {}
-    )
+    ).to_s
+    json_line = output.lines.reverse.find { |line| line.lstrip.start_with?("{") }
     result = begin
-      JSON.parse(output.to_s)
+      JSON.parse(json_line.to_s)
     rescue JSON::ParserError
-      # No JSON at all, e.g. shorebird isn't installed.
-      UI.user_error!("Couldn't list Shorebird releases (is the shorebird CLI installed?): #{output}")
+      # No JSON at all, e.g. shorebird isn't installed or is too old.
+      UI.user_error!("Couldn't list Shorebird releases (is a current shorebird CLI installed?):\n#{output}")
     end
     unless result["status"] == "success"
-      UI.user_error!("Couldn't list Shorebird releases: #{result.dig('error', 'message')}")
+      UI.user_error!("Couldn't list Shorebird releases: #{result.dig('error', 'message')}\n#{output}")
     end
-    Array(result.dig("data", "releases"))
-      .map { |release| release["version"].to_s }
+    release_versions = Array(result.dig("data", "releases")).map { |release| release["version"] }
+    unless release_versions.all? { |release_version| release_version.to_s.match?(/\A[^+]+\+\d+\z/) }
+      UI.user_error!("Unexpected release versions from shorebird releases list: #{release_versions.inspect}")
+    end
+    release_versions
       .select { |release_version| release_version.start_with?("#{version}+") }
       .map { |release_version| release_version.split("+").last.to_i }
       .max || 0
@@ -117,8 +123,8 @@ platform :ios do
     # most recently updated release) also works. Shorebird builds the patch
     # with the target release's version and build number, so the pubspec's
     # don't need to match it.
-    release_version = options[:release_version]
-    unless release_version
+    release_version = options[:release_version].to_s.strip
+    if release_version.empty?
       UI.user_error!("Pass the release to patch, e.g. `fastlane ios patch_shorebird release_version:1.0.0+11`")
     end
     setup_ci
@@ -131,13 +137,18 @@ platform :ios do
       { method: export_method },
       lane_context[SharedValues::MATCH_PROVISIONING_PROFILE_MAPPING]
     )
-    shorebird_patch(
-      platform: "ios",
-      args: [
-        "--release-version=#{Shellwords.escape(release_version)}",
-        "--export-options-plist=#{Shellwords.escape(export_options_plist)}"
-      ].join(" ")
-    )
+    begin
+      shorebird_patch(
+        platform: "ios",
+        args: [
+          "--release-version=#{Shellwords.escape(release_version)}",
+          "--export-options-plist=#{Shellwords.escape(export_options_plist)}"
+        ].join(" ")
+      )
+    ensure
+      # The helper writes the plist to a new temporary directory.
+      FileUtils.rm_rf(File.dirname(export_options_plist))
+    end
   end
 
   private_lane :sync_appstore_signing do

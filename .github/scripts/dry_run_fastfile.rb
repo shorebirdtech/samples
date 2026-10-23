@@ -1,9 +1,9 @@
 # Runs every lane in a Fastfile without running its actions or shell commands.
 # fastlane dispatches each action call as usual, parsing and validating its
-# options, and only the action's own `run` is skipped. Required options that
-# can't come from a default or an environment variable must also be given. So
-# a missing action, an unknown option, a bad value or a missing option of that
-# kind fails, as does any error in the Ruby around the calls. `fastlane lanes`
+# options, and only the action's own `run` is skipped. Required options with
+# no default must also come from the call, a config file or a set environment
+# variable. So a missing action, an unknown option, a bad value or a missing
+# required option fails, as does any error in the Ruby around the calls. `fastlane lanes`
 # only loads lane definitions, so these mistakes would otherwise surface only
 # when a lane runs for real.
 #
@@ -25,12 +25,30 @@ Fastlane.plugin_manager.load_plugins
 # Actions that only read state, so they are safe and needed to run for real.
 PASSTHROUGH = [Fastlane::Actions::LaneContextAction].freeze
 
+# Config files that actions load at the start of their `run`, which is skipped
+# here, keyed by action name.
+CONFIG_FILES = {
+  "sync_code_signing" => "Matchfile",
+  "match" => "Matchfile",
+  "match_nuke" => "Matchfile",
+  "upload_to_app_store" => "Deliverfile",
+  "deliver" => "Deliverfile",
+  "build_app" => "Gymfile",
+  "gym" => "Gymfile",
+  "run_tests" => "Scanfile",
+  "scan" => "Scanfile"
+}.freeze
+
 # Replaces an action's `run`, which fastlane calls after parsing its options.
 module DryRunAction
   def run(params)
+    params.load_configuration_file(CONFIG_FILES[action_name], nil, true) if CONFIG_FILES.key?(action_name)
+    # A required option with no default must come from the call, a config file
+    # or its environment variable. CI sets the sample's documented variables.
     missing = Array(available_options).compact.select do |option|
-      !option.optional && option.default_value.nil? && option.env_name.to_s.empty? &&
-        !params._values.key?(option.key)
+      !option.optional && option.default_value.nil? &&
+        !params._values.key?(option.key) && !params.config_file_options.key?(option.key) &&
+        ENV[option.env_name.to_s].to_s.empty?
     end
     unless missing.empty?
       FastlaneCore::UI.user_error!("#{action_name} is missing required options: #{missing.map(&:key).join(', ')}")
@@ -43,7 +61,8 @@ module DryRunAction
   # Leaves what the skipped action would have left in lane_context, so the
   # code that reads it runs too.
   def fake_results(params)
-    return unless self == Fastlane::Actions::SyncCodeSigningAction
+    # `match` is the same action under another name.
+    return unless self <= Fastlane::Actions::SyncCodeSigningAction
 
     app_identifiers = params._values[:app_identifier] ||
                       CredentialsManager::AppfileConfig.try_fetch_value(:app_identifier)

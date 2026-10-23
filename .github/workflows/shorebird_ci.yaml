@@ -181,6 +181,13 @@ jobs:
 
       # Run every lane with its actions validated but skipped.
       - name: Dry-run the lanes
+        # Placeholders for the variables .env.default.sample documents, so
+        # required options that come from them count as set.
+        env:
+          MATCH_PASSWORD: dry-run
+          APP_STORE_CONNECT_API_KEY_KEY_ID: dry-run
+          APP_STORE_CONNECT_API_KEY_ISSUER_ID: dry-run
+          APP_STORE_CONNECT_API_KEY_KEY: ZHJ5LXJ1bg==
         run: >-
           bundle exec ruby ../../.github/scripts/dry_run_fastfile.rb fastlane/Fastfile
           patch_shorebird release_version=1.0.0+11
