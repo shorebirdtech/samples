@@ -2,9 +2,7 @@
 # https://medium.com/revelo-tech/setting-up-automatic-ios-release-with-fastlane-and-match-on-ci-cd-server-16c3f1d79bc5
 
 require "json"
-require "plist"
 require "shellwords"
-require "tmpdir"
 require "yaml"
 
 PROJECT_ROOT = File.expand_path("../..", __dir__)
@@ -106,37 +104,30 @@ platform :ios do
     )
   end
 
-  desc "patch with shorebird (release_version: defaults to the latest release)"
+  desc "patch with shorebird (release_version: defaults to the most recently updated release)"
   lane :patch_shorebird do |options|
-    # Pass release_version:1.0.0+11 to patch a specific release, for example
-    # the one in the App Store rather than the newest one created.
+    # "latest" is the most recently updated release, which may not be the one
+    # in the App Store. Pass release_version:1.0.0+11 to patch that one.
+    # Shorebird builds the patch with the target release's version and build
+    # number, so the pubspec's don't need to match it.
     release_version = options[:release_version] || "latest"
     setup_ci
     sync_appstore_signing
     # shorebird_patch doesn't generate export options the way
-    # shorebird_release does, so write them from the match profiles here.
-    export_options = {
-      method: EXPORT_METHOD,
-      # Xcode must not change the build number, or the patch won't match its
-      # release.
-      manageAppVersionAndBuildNumber: false
-    }
-    profiles = lane_context[SharedValues::MATCH_PROVISIONING_PROFILE_MAPPING]
-    if profiles
-      export_options[:provisioningProfiles] = profiles
-      export_options[:signingStyle] = "manual"
-    end
-    Dir.mktmpdir("shorebird") do |dir|
-      export_options_plist = File.join(dir, "ExportOptions.plist")
-      File.write(export_options_plist, export_options.to_plist)
-      shorebird_patch(
-        platform: "ios",
-        args: [
-          "--release-version=#{Shellwords.escape(release_version)}",
-          "--export-options-plist=#{Shellwords.escape(export_options_plist)}"
-        ].join(" ")
-      )
-    end
+    # shorebird_release does, so use the plugin's helper for the same plist:
+    # the match profiles with manual signing, and Xcode kept from changing the
+    # build number.
+    export_options_plist = Fastlane::Helper::ExportOptionsPlist.generate_export_options_plist(
+      { method: EXPORT_METHOD },
+      lane_context[SharedValues::MATCH_PROVISIONING_PROFILE_MAPPING]
+    )
+    shorebird_patch(
+      platform: "ios",
+      args: [
+        "--release-version=#{Shellwords.escape(release_version)}",
+        "--export-options-plist=#{Shellwords.escape(export_options_plist)}"
+      ].join(" ")
+    )
   end
 
   private_lane :sync_appstore_signing do

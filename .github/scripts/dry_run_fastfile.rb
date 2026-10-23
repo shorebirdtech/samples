@@ -1,8 +1,9 @@
 # Runs every lane in a Fastfile without running its actions or shell commands.
 # Each action call still goes through fastlane's own option parsing and
-# validation, and required options must be given, so a missing action, an
-# unknown or missing option or a bad value fails, as does any error in the Ruby
-# around the calls. `fastlane lanes` only loads lane definitions, so these
+# validation, and required options that can't come from a default or an
+# environment variable must be given. So a missing action, an unknown option,
+# a bad value or a missing option of that kind fails, as does any error in the
+# Ruby around the calls. `fastlane lanes` only loads lane definitions, so these
 # mistakes would otherwise surface only when a lane runs for real.
 #
 # Usage, from the directory with the Gemfile:
@@ -96,12 +97,15 @@ ARGV.drop(1).each_slice(2) do |name, options|
                abort("No lane named #{name}")
   options = options.to_s.split(",").to_h do |pair|
     key, value = pair.split("=", 2)
+    abort("Expected key=value for lane #{name}, got #{pair.inspect}") if value.nil? || key.empty?
     [key.to_sym, value]
   end
   runs << [platform, name.to_sym, options]
 end
 
 runs.each do |platform, name, options|
+  # Start each run as fastlane would, with nothing left by the previous one.
+  Fastlane::Actions.lane_context.clear
   puts("#{[platform, name].compact.join(' ')} #{options}:")
   fastfile.runner.execute(name, platform, options)
 end

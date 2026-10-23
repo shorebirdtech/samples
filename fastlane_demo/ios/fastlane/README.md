@@ -45,7 +45,7 @@ create new release with shorebird
 [bundle exec] fastlane ios patch_shorebird
 ```
 
-patch with shorebird (release_version: defaults to the latest release)
+patch with shorebird (release_version: defaults to the most recently updated release)
 
 ----
 

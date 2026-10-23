@@ -179,11 +179,7 @@ jobs:
           bundler-cache: true
           working-directory: fastlane_demo/ios
 
-      - name: Load the Fastfile
-        run: bundle exec fastlane lanes
-
-      # `fastlane lanes` doesn't run lane bodies, so also run every lane with
-      # its actions validated but skipped.
+      # Run every lane with its actions validated but skipped.
       - name: Dry-run the lanes
         run: >-
           bundle exec ruby ../../.github/scripts/dry_run_fastfile.rb fastlane/Fastfile
