@@ -37,7 +37,7 @@ Generate new certificates
 [bundle exec] fastlane ios release_shorebird
 ```
 
-create new release with shorebird
+create new release with shorebird (build_number: defaults to the next free one)
 
 ### ios patch_shorebird
 

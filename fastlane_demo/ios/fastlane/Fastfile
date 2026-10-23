@@ -34,8 +34,8 @@ platform :ios do
     )
   end
 
-  desc "create new release with shorebird"
-  lane :release_shorebird do
+  desc "create new release with shorebird (build_number: defaults to the next free one)"
+  lane :release_shorebird do |options|
     setup_ci
     # Load the API key first so missing credentials fail before anything is
     # built or released.
@@ -44,16 +44,21 @@ platform :ios do
       in_house: false, # if it is enterprise or not
     )
     sync_appstore_signing
-    # Each upload of a version needs a new build number, so continue from the
-    # latest TestFlight build of the version in pubspec.yaml.
+    # Each upload of a version needs a new build number: the one after the
+    # latest TestFlight build of the pubspec version, and never lower than the
+    # pubspec's own. Pass build_number: to choose it, for example when
+    # retrying after a release whose upload failed.
     pubspec = YAML.load_file(File.expand_path("../../pubspec.yaml", __dir__))
-    version = pubspec["version"].split("+").first
-    # to_i because App Store Connect can report build numbers as strings.
-    build_number = latest_testflight_build_number(
-      app_identifier: bundle_id,
-      version: version,
-      initial_build_number: 0
-    ).to_i + 1
+    version, pubspec_build_number = pubspec["version"].split("+")
+    build_number = options[:build_number] || [
+      # to_i because App Store Connect can report build numbers as strings.
+      latest_testflight_build_number(
+        app_identifier: bundle_id,
+        version: version,
+        initial_build_number: 0
+      ).to_i + 1,
+      pubspec_build_number.to_i
+    ].max
     # This step replaces the build_app step
     shorebird_release(
       platform: "ios",
@@ -83,7 +88,7 @@ platform :ios do
       # Xcode must not change the build number, or the patch won't match its
       # release.
       manageAppVersionAndBuildNumber: false
-    }
+    }.compact
     Dir.mktmpdir("shorebird") do |dir|
       export_options_plist = File.join(dir, "ExportOptions.plist")
       File.write(export_options_plist, export_options.to_plist)

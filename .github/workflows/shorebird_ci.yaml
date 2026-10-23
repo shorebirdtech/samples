@@ -54,9 +54,9 @@ jobs:
               - fastlane_demo/**
             fastlane_demo_ios:
               - fastlane_demo/ios/**
-              # The release lane reads the version from pubspec.yaml.
+              # The dry run reads the version from pubspec.yaml.
               - fastlane_demo/pubspec.yaml
-              - .github/scripts/check_fastfile.rb
+              - .github/scripts/dry_run_fastfile.rb
 
   flavors:
     needs: changes
@@ -181,10 +181,10 @@ jobs:
       - name: Load the Fastfile
         run: bundle exec fastlane lanes
 
-      # `fastlane lanes` doesn't run lane bodies, so also check that every
-      # action the lanes call exists and accepts the options it's given.
-      - name: Check the Fastfile's actions and options
-        run: bundle exec ruby ../../.github/scripts/check_fastfile.rb fastlane/Fastfile
+      # `fastlane lanes` doesn't run lane bodies, so also run every lane with
+      # its actions validated but skipped.
+      - name: Dry-run the lanes
+        run: bundle exec ruby ../../.github/scripts/dry_run_fastfile.rb fastlane/Fastfile
 
   required:
     name: required
