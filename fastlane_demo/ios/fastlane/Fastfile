@@ -22,11 +22,11 @@ platform :ios do
   shorebird_releases = lambda do
     # The command prints one line of JSON, which also explains any failure, so
     # read it instead of letting `sh` fail on the exit status. Progress and
-    # notices come out around it. Like the plugin's commands, it runs from
-    # ios/ and finds the project above it. It needs Shorebird credentials
+    # notices come out around it. `sh` in a Fastfile runs from ios/fastlane,
+    # so run it from the project root. It needs Shorebird credentials
     # (`shorebird login`, or SHOREBIRD_TOKEN on CI).
     output = sh(
-      "shorebird releases list --json",
+      "cd #{Shellwords.escape(project_root)} && shorebird releases list --json",
       log: false,
       error_callback: ->(_output) {}
     ).to_s
@@ -38,8 +38,9 @@ platform :ios do
       # No JSON at all, e.g. shorebird isn't installed or is too old.
       UI.user_error!("Couldn't list Shorebird releases (is a current shorebird CLI installed?):\n#{output}")
     end
-    unless result["status"] == "success"
-      UI.user_error!("Couldn't list Shorebird releases: #{result.dig('error', 'message')}\n#{output}")
+    unless result.is_a?(Hash) && result["status"] == "success"
+      message = result.is_a?(Hash) ? result.dig("error", "message") : "unexpected output"
+      UI.user_error!("Couldn't list Shorebird releases: #{message}\n#{output}")
     end
     releases = Array(result.dig("data", "releases"))
     unless releases.all? { |release| release.is_a?(Hash) && release["version"].is_a?(String) }
@@ -96,26 +97,26 @@ platform :ios do
   desc "create new release with shorebird"
   lane :release_shorebird do
     setup_ci
-    # On CI, load the API key first so missing credentials fail before
-    # anything is built or released. Locally, without the key, fastlane uses
-    # your Apple ID login instead.
+    # Each release of a version needs a new build number: one past both the
+    # latest TestFlight build and the latest Shorebird release of the pubspec
+    # version (a release whose upload failed is only in Shorebird), and never
+    # lower than the pubspec's own. Check the pubspec and Shorebird first,
+    # since they fail fastest.
+    pubspec_version = YAML.load_file(File.join(project_root, "pubspec.yaml"))["version"]
+    UI.user_error!("pubspec.yaml has no version, e.g. `version: 1.0.0+1`") unless pubspec_version
+    version, pubspec_build_number = pubspec_version.to_s.split("+", 2)
+    # Like Flutter, treat a version with no +build as build 0 here; the other
+    # sources still set the floor.
+    pubspec_build_number = whole_build_number.call(pubspec_build_number || "0", "pubspec.yaml")
+    shorebird_build_number = latest_shorebird_build_number.call(version)
+    # On CI, load the API key before anything slow so missing credentials fail
+    # early. Locally, without the key, fastlane uses your Apple ID login.
     if FastlaneCore::Helper.ci? || !ENV["APP_STORE_CONNECT_API_KEY_KEY_ID"].to_s.empty?
       app_store_connect_api_key(
         is_key_content_base64: true,
         in_house: false, # if it is enterprise or not
       )
     end
-    sync_appstore_signing
-    # Each release of a version needs a new build number: one past both the
-    # latest TestFlight build and the latest Shorebird release of the pubspec
-    # version (a release whose upload failed is only in Shorebird), and never
-    # lower than the pubspec's own.
-    pubspec_version = YAML.load_file(File.join(project_root, "pubspec.yaml"))["version"]
-    UI.user_error!("pubspec.yaml has no version, e.g. `version: 1.0.0+1`") unless pubspec_version
-    version, pubspec_build_number = pubspec_version.to_s.split("+", 2)
-    # Like Flutter, treat a version with no +build as build 0 here; the other
-    # sources still set the floor.
-    pubspec_build_number ||= "0"
     testflight_build_number = latest_testflight_build_number(
       app_identifier: bundle_id,
       version: version,
@@ -123,9 +124,10 @@ platform :ios do
     )
     build_number = [
       whole_build_number.call(testflight_build_number, "TestFlight") + 1,
-      latest_shorebird_build_number.call(version) + 1,
-      whole_build_number.call(pubspec_build_number, "pubspec.yaml")
+      shorebird_build_number + 1,
+      pubspec_build_number
     ].max
+    sync_appstore_signing
     # This step replaces the build_app step
     shorebird_release(
       platform: "ios",

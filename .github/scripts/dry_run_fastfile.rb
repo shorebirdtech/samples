@@ -111,7 +111,7 @@ SHELL_OUTPUTS = {
   # What `shorebird releases list --json` prints (a success envelope around
   # Release.toJson from shorebird_code_push_protocol), with a few releases, so
   # the code that reads it runs too.
-  /\Ashorebird releases list --json\z/ => {
+  /\Acd \S+ && shorebird releases list --json\z/ => {
     status: "success",
     data: {
       releases: [["1.0.0+11", 1], ["1.0.0+12", 2], ["1.0.1+3", 3]].map do |version, id|
@@ -167,14 +167,15 @@ fastfile.runner.lanes.each do |platform, lanes|
   end
 end
 lane_arguments.each_slice(2) do |name, options|
-  platform, = fastfile.runner.lanes.find { |_, lanes| lanes.key?(name.to_sym) } ||
-               abort("No lane named #{name}")
+  # A lane name can exist on several platforms; run it on each.
+  platforms = fastfile.runner.lanes.select { |_, lanes| lanes.key?(name.to_sym) }.keys
+  abort("No lane named #{name}") if platforms.empty?
   options = options.split(",").to_h do |pair|
     key, value = pair.split("=", 2)
     abort("Expected key=value for lane #{name}, got #{pair.inspect}") if value.nil? || key.empty?
     [key.to_sym, value]
   end
-  runs << [platform, name.to_sym, options]
+  platforms.each { |platform| runs << [platform, name.to_sym, options] }
 end
 
 ci_env = CI_ONLY_ENV.to_h { |name| [name, ENV.fetch(name, nil)] }
