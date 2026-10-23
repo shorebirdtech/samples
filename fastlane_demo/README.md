@@ -35,8 +35,7 @@ replace Shorebird's values with your own in:
 build and the latest Shorebird release of the pubspec version (or the pubspec's
 build number, if higher), so a release whose upload failed can simply be run
 again. It then uploads the build to TestFlight; submit it for review from App
-Store Connect. To choose the number yourself, run
-`bundle exec fastlane ios release_shorebird build_number:12`. `patch_shorebird` patches the latest release, or
+Store Connect. `patch_shorebird` patches the latest release, or
 a specific one with `bundle exec fastlane ios patch_shorebird
 release_version:1.0.0+11`.
 

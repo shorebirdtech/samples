@@ -19,18 +19,16 @@ def latest_shorebird_build_number(version)
     log: false,
     error_callback: ->(_output) {}
   )
-  # The dry run in CI stubs `sh` and gets no output.
-  return 0 if output.to_s.empty?
-
   result = begin
-    JSON.parse(output)
+    JSON.parse(output.to_s)
   rescue JSON::ParserError
-    UI.user_error!("Couldn't list Shorebird releases: #{output}")
+    # No JSON at all, e.g. shorebird isn't installed.
+    UI.user_error!("Couldn't list Shorebird releases (is the shorebird CLI installed?): #{output}")
   end
   unless result["status"] == "success"
     UI.user_error!("Couldn't list Shorebird releases: #{result.dig('error', 'message')}")
   end
-  result.dig("data", "releases")
+  Array(result.dig("data", "releases"))
     .map { |release| release["version"].to_s }
     .select { |release_version| release_version.start_with?("#{version}+") }
     .map { |release_version| release_version.split("+").last.to_i }
@@ -68,8 +66,8 @@ platform :ios do
     )
   end
 
-  desc "create new release with shorebird (build_number: defaults to the next free one)"
-  lane :release_shorebird do |options|
+  desc "create new release with shorebird"
+  lane :release_shorebird do
     setup_ci
     # Load the API key first so missing credentials fail before anything is
     # built or released.
@@ -81,10 +79,10 @@ platform :ios do
     # Each release of a version needs a new build number: one past both the
     # latest TestFlight build and the latest Shorebird release of the pubspec
     # version (a release whose upload failed is only in Shorebird), and never
-    # lower than the pubspec's own. Pass build_number: to choose it yourself.
+    # lower than the pubspec's own.
     pubspec = YAML.load_file(File.join(PROJECT_ROOT, "pubspec.yaml"))
     version, pubspec_build_number = pubspec["version"].split("+")
-    build_number = options[:build_number] || [
+    build_number = [
       # to_i because App Store Connect can report build numbers as strings.
       latest_testflight_build_number(
         app_identifier: bundle_id,

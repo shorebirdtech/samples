@@ -187,7 +187,6 @@ jobs:
       - name: Dry-run the lanes
         run: >-
           bundle exec ruby ../../.github/scripts/dry_run_fastfile.rb fastlane/Fastfile
-          release_shorebird build_number=12
           patch_shorebird release_version=1.0.0+11
 
   required:

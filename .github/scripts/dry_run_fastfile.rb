@@ -15,7 +15,7 @@ require "fastlane"
 
 module DryRun
   # Actions that only read state, so they are safe and needed to run for real.
-  PASSTHROUGH = %i[is_ci lane_context].freeze
+  PASSTHROUGH = %i[lane_context].freeze
 
   # Mirrors Fastlane::Runner#execute_action up to the point where the action
   # would run, then skips it.
@@ -53,16 +53,29 @@ module DryRun
       end
     end
     puts("  #{method_sym}")
+    fake_results(method_sym, arguments.first || {})
     nil
+  end
+
+  # Leaves what the skipped action would have left in lane_context, so the
+  # code that reads it runs too.
+  def fake_results(method_sym, options)
+    return unless method_sym == :sync_code_signing
+
+    Array(options[:app_identifier]).each do |app_identifier|
+      mapping = (Fastlane::Actions.lane_context[Fastlane::Actions::SharedValues::MATCH_PROVISIONING_PROFILE_MAPPING] ||= {})
+      mapping[app_identifier] = "match dry run #{app_identifier}"
+    end
   end
 end
 Fastlane::Runner.prepend(DryRun)
 
-# `sh` doesn't go through the action runner, so skip shell commands here.
+# `sh` doesn't go through the action runner, so skip shell commands here. They
+# return what `shorebird ... --json` prints when it succeeds with no results.
 module DryRunShell
   def sh(*command, **)
     puts("  sh #{command.join(' ')}")
-    ""
+    '{"status":"success","data":{"releases":[]}}'
   end
 end
 Fastlane::FastFile.singleton_class.prepend(DryRunShell)
@@ -79,8 +92,8 @@ fastfile.runner.lanes.each do |platform, lanes|
   end
 end
 ARGV.drop(1).each_slice(2) do |name, options|
-  platform, lane = fastfile.runner.lanes.find { |_, lanes| lanes.key?(name.to_sym) }
-  abort("No lane named #{name}") unless lane
+  platform, = fastfile.runner.lanes.find { |_, lanes| lanes.key?(name.to_sym) } ||
+               abort("No lane named #{name}")
   options = options.to_s.split(",").to_h do |pair|
     key, value = pair.split("=", 2)
     [key.to_sym, value]
