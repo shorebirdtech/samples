@@ -16,6 +16,11 @@ updates:
     schedule:
       interval: "weekly"
 
+  - package-ecosystem: "bundler"
+    directory: "/fastlane_demo/ios"
+    schedule:
+      interval: "weekly"
+
   - package-ecosystem: "pub"
     directory: "/flavors"
     schedule:
