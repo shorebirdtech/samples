@@ -182,12 +182,17 @@ jobs:
       # Run every lane with its actions validated but skipped.
       - name: Dry-run the lanes
         # Placeholders for the variables .env.default.sample documents, so
-        # required options that come from them count as set.
+        # required options that come from them count as set. The API key is
+        # CI-only, so the dry run's local pass unsets it.
         env:
           MATCH_PASSWORD: dry-run
+          FASTLANE_USER: dry-run@example.com
+          FASTLANE_APPLE_APPLICATION_SPECIFIC_PASSWORD: dry-run
           APP_STORE_CONNECT_API_KEY_KEY_ID: dry-run
           APP_STORE_CONNECT_API_KEY_ISSUER_ID: dry-run
           APP_STORE_CONNECT_API_KEY_KEY: ZHJ5LXJ1bg==
+          DRY_RUN_CI_ONLY_ENV: >-
+            APP_STORE_CONNECT_API_KEY_KEY_ID,APP_STORE_CONNECT_API_KEY_ISSUER_ID,APP_STORE_CONNECT_API_KEY_KEY
         run: >-
           bundle exec ruby ../../.github/scripts/dry_run_fastfile.rb fastlane/Fastfile
           patch_shorebird release_version=1.0.0+11

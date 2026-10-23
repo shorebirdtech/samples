@@ -48,7 +48,8 @@ credentials from `ios/fastlane/.env.default` (see
   so delete the one whose upload failed with `shorebird releases delete` to
   keep it from being patched. On CI it uses the App Store Connect API key;
   locally, without one, fastlane signs in with the Apple ID in `FASTLANE_USER`
-  (or asks for it).
+  and uploads with the app-specific password in
+  `FASTLANE_APPLE_APPLICATION_SPECIFIC_PASSWORD` (or asks for them).
 - `patch_shorebird`: patches the release you name, normally the one in the App
   Store: `bundle exec fastlane ios patch_shorebird release_version:1.0.0+11`.
   `release_version:latest` patches the most recently updated release instead.

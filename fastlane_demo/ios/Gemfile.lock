@@ -223,7 +223,6 @@ PLATFORMS
   x86_64-linux
 
 DEPENDENCIES
-  dotenv
   fastlane
   fastlane-plugin-shorebird
 

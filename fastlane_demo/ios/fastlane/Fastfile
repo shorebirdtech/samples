@@ -38,12 +38,13 @@ platform :ios do
       UI.user_error!("Couldn't list Shorebird releases: #{result.dig('error', 'message')}\n#{output}")
     end
     release_versions = Array(result.dig("data", "releases")).map { |release| release["version"] }
-    unless release_versions.all? { |release_version| release_version.to_s.match?(/\A[^+]+\+\d+\z/) }
-      UI.user_error!("Unexpected release versions from shorebird releases list: #{release_versions.inspect}")
+    unless release_versions.all?(String)
+      UI.user_error!("Unexpected releases from shorebird releases list: #{result.dig('data', 'releases').inspect}")
     end
+    # to_i takes the leading number of a dotted build number such as 12.1.
     release_versions
       .select { |release_version| release_version.start_with?("#{version}+") }
-      .map { |release_version| release_version.split("+").last.to_i }
+      .map { |release_version| release_version.split("+", 2).last.to_i }
       .max || 0
   end
 
@@ -78,7 +79,7 @@ platform :ios do
     # On CI, load the API key first so missing credentials fail before
     # anything is built or released. Locally, without the key, fastlane uses
     # your Apple ID login instead.
-    if FastlaneCore::Helper.ci? || ENV["APP_STORE_CONNECT_API_KEY_KEY_ID"]
+    if FastlaneCore::Helper.ci? || !ENV["APP_STORE_CONNECT_API_KEY_KEY_ID"].to_s.empty?
       app_store_connect_api_key(
         is_key_content_base64: true,
         in_house: false, # if it is enterprise or not

@@ -42,13 +42,12 @@ CONFIG_FILES = {
 # Replaces an action's `run`, which fastlane calls after parsing its options.
 module DryRunAction
   def run(params)
-    params.load_configuration_file(CONFIG_FILES[action_name], nil, true) if CONFIG_FILES.key?(action_name)
-    # A required option with no default must come from the call, a config file
-    # or its environment variable. CI sets the sample's documented variables.
+    params.load_configuration_file(CONFIG_FILES[action_name]) if CONFIG_FILES.key?(action_name)
+    # A required option must get a value from the call, its environment
+    # variable, a config file or its default, looked up as fastlane does but
+    # without prompting. CI sets the sample's documented variables.
     missing = Array(available_options).compact.select do |option|
-      !option.optional && option.default_value.nil? &&
-        !params._values.key?(option.key) && !params.config_file_options.key?(option.key) &&
-        ENV[option.env_name.to_s].to_s.empty?
+      !option.optional && params.fetch(option.key, ask: false).nil?
     end
     unless missing.empty?
       FastlaneCore::UI.user_error!("#{action_name} is missing required options: #{missing.map(&:key).join(', ')}")
@@ -102,7 +101,11 @@ module DryRunShell
 end
 Fastlane::Actions.singleton_class.prepend(DryRunShell)
 
-# Lets each run choose whether fastlane thinks it's on CI.
+# Lets each run choose whether fastlane thinks it's on CI. The local runs also
+# unset the variables named in DRY_RUN_CI_ONLY_ENV (comma-separated), which
+# only CI sets, so the local branches run as they would on a developer's
+# machine.
+CI_ONLY_ENV = ENV.fetch("DRY_RUN_CI_ONLY_ENV", "").split(",").map(&:strip).reject(&:empty?).freeze
 module DryRunCI
   attr_accessor :dry_run_ci
 
@@ -137,8 +140,10 @@ lane_arguments.each_slice(2) do |name, options|
   runs << [platform, name.to_sym, options]
 end
 
+ci_env = CI_ONLY_ENV.to_h { |name| [name, ENV.fetch(name, nil)] }
 [true, false].each do |ci|
   FastlaneCore::Helper.dry_run_ci = ci
+  ci_env.each { |name, value| ENV[name] = ci ? value : nil }
   runs.each do |platform, name, options|
     # Start each run as fastlane would, with nothing left by the previous one.
     Fastlane::Actions.lane_context.clear
