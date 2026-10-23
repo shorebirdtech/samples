@@ -57,6 +57,7 @@ jobs:
               # The dry run reads the version from pubspec.yaml.
               - fastlane_demo/pubspec.yaml
               - .github/scripts/dry_run_fastfile.rb
+              - .github/workflows/shorebird_ci.yaml
 
   flavors:
     needs: changes
@@ -184,7 +185,10 @@ jobs:
       # `fastlane lanes` doesn't run lane bodies, so also run every lane with
       # its actions validated but skipped.
       - name: Dry-run the lanes
-        run: bundle exec ruby ../../.github/scripts/dry_run_fastfile.rb fastlane/Fastfile
+        run: >-
+          bundle exec ruby ../../.github/scripts/dry_run_fastfile.rb fastlane/Fastfile
+          release_shorebird build_number=12
+          patch_shorebird release_version=1.0.0+11
 
   required:
     name: required

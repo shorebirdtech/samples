@@ -1,10 +1,44 @@
 # This Fastfile is largely based on
 # https://medium.com/revelo-tech/setting-up-automatic-ios-release-with-fastlane-and-match-on-ci-cd-server-16c3f1d79bc5
 
+require "json"
 require "plist"
 require "shellwords"
 require "tmpdir"
 require "yaml"
+
+PROJECT_ROOT = File.expand_path("../..", __dir__)
+
+# The highest iOS build number Shorebird has a release for in this version, or
+# 0 if there is none.
+def latest_shorebird_build_number(version)
+  # Progress goes to stderr and stdout is a JSON result, which also explains
+  # any failure, so read it instead of letting `sh` fail on the exit status.
+  output = sh(
+    "cd #{Shellwords.escape(PROJECT_ROOT)} && shorebird releases list --platform=ios --json 2>/dev/null",
+    log: false,
+    error_callback: ->(_output) {}
+  )
+  # The dry run in CI stubs `sh` and gets no output.
+  return 0 if output.to_s.empty?
+
+  result = begin
+    JSON.parse(output)
+  rescue JSON::ParserError
+    UI.user_error!("Couldn't list Shorebird releases: #{output}")
+  end
+  unless result["status"] == "success"
+    UI.user_error!("Couldn't list Shorebird releases: #{result.dig('error', 'message')}")
+  end
+  result.dig("data", "releases")
+    .map { |release| release["version"].to_s }
+    .select { |release_version| release_version.start_with?("#{version}+") }
+    .map { |release_version| release_version.split("+").last.to_i }
+    .max || 0
+end
+
+# Xcode 15.3+ name for App Store distribution (formerly "app-store").
+EXPORT_METHOD = "app-store-connect"
 
 platform :ios do
   bundle_id = "dev.shorebird.fastlane-demo"
@@ -44,11 +78,11 @@ platform :ios do
       in_house: false, # if it is enterprise or not
     )
     sync_appstore_signing
-    # Each upload of a version needs a new build number: the one after the
-    # latest TestFlight build of the pubspec version, and never lower than the
-    # pubspec's own. Pass build_number: to choose it, for example when
-    # retrying after a release whose upload failed.
-    pubspec = YAML.load_file(File.expand_path("../../pubspec.yaml", __dir__))
+    # Each release of a version needs a new build number: one past both the
+    # latest TestFlight build and the latest Shorebird release of the pubspec
+    # version (a release whose upload failed is only in Shorebird), and never
+    # lower than the pubspec's own. Pass build_number: to choose it yourself.
+    pubspec = YAML.load_file(File.join(PROJECT_ROOT, "pubspec.yaml"))
     version, pubspec_build_number = pubspec["version"].split("+")
     build_number = options[:build_number] || [
       # to_i because App Store Connect can report build numbers as strings.
@@ -57,12 +91,14 @@ platform :ios do
         version: version,
         initial_build_number: 0
       ).to_i + 1,
+      latest_shorebird_build_number(version) + 1,
       pubspec_build_number.to_i
     ].max
     # This step replaces the build_app step
     shorebird_release(
       platform: "ios",
-      args: "--build-number=#{build_number}"
+      args: "--build-number=#{build_number}",
+      export_options: { method: EXPORT_METHOD }
     )
     # Upload the binary to TestFlight. Submitting it to the App Store is left
     # to App Store Connect, since this sample has no store metadata.
@@ -82,13 +118,16 @@ platform :ios do
     # shorebird_patch doesn't generate export options the way
     # shorebird_release does, so write them from the match profiles here.
     export_options = {
-      method: "app-store",
-      signingStyle: "manual",
-      provisioningProfiles: lane_context[SharedValues::MATCH_PROVISIONING_PROFILE_MAPPING],
+      method: EXPORT_METHOD,
       # Xcode must not change the build number, or the patch won't match its
       # release.
       manageAppVersionAndBuildNumber: false
-    }.compact
+    }
+    profiles = lane_context[SharedValues::MATCH_PROVISIONING_PROFILE_MAPPING]
+    if profiles
+      export_options[:provisioningProfiles] = profiles
+      export_options[:signingStyle] = "manual"
+    end
     Dir.mktmpdir("shorebird") do |dir|
       export_options_plist = File.join(dir, "ExportOptions.plist")
       File.write(export_options_plist, export_options.to_plist)
