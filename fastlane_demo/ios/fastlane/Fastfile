@@ -48,29 +48,30 @@ platform :ios do
     # latest TestFlight build of the version in pubspec.yaml.
     pubspec = YAML.load_file(File.expand_path("../../pubspec.yaml", __dir__))
     version = pubspec["version"].split("+").first
+    # to_i because App Store Connect can report build numbers as strings.
     build_number = latest_testflight_build_number(
       app_identifier: bundle_id,
       version: version,
       initial_build_number: 0
-    ) + 1
+    ).to_i + 1
     # This step replaces the build_app step
     shorebird_release(
       platform: "ios",
       args: "--build-number=#{build_number}"
     )
-    upload_to_app_store(
+    # Upload the binary to TestFlight. Submitting it to the App Store is left
+    # to App Store Connect, since this sample has no store metadata.
+    upload_to_testflight(
       app_identifier: bundle_id,
-      # Upload the binary only: this sample has no store metadata or
-      # screenshots, and CI can't confirm the HTML preview.
-      skip_metadata: true,
-      skip_screenshots: true,
-      force: true,
-      submit_for_review: false
+      skip_waiting_for_build_processing: true
     )
   end
 
-  desc "patch with shorebird"
-  lane :patch_shorebird do
+  desc "patch with shorebird (release_version: defaults to the latest release)"
+  lane :patch_shorebird do |options|
+    # Pass release_version:1.0.0+11 to patch a specific release, for example
+    # the one in the App Store rather than the newest one created.
+    release_version = options[:release_version] || "latest"
     setup_ci
     sync_appstore_signing
     # shorebird_patch doesn't generate export options the way
@@ -83,12 +84,17 @@ platform :ios do
       # release.
       manageAppVersionAndBuildNumber: false
     }
-    export_options_plist = File.join(Dir.mktmpdir("shorebird"), "ExportOptions.plist")
-    File.write(export_options_plist, export_options.to_plist)
-    shorebird_patch(
-      platform: "ios",
-      args: "--release-version=latest --export-options-plist=#{Shellwords.escape(export_options_plist)}"
-    )
+    Dir.mktmpdir("shorebird") do |dir|
+      export_options_plist = File.join(dir, "ExportOptions.plist")
+      File.write(export_options_plist, export_options.to_plist)
+      shorebird_patch(
+        platform: "ios",
+        args: [
+          "--release-version=#{Shellwords.escape(release_version)}",
+          "--export-options-plist=#{Shellwords.escape(export_options_plist)}"
+        ].join(" ")
+      )
+    end
   end
 
   private_lane :sync_appstore_signing do

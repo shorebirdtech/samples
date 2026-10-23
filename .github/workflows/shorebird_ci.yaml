@@ -54,6 +54,9 @@ jobs:
               - fastlane_demo/**
             fastlane_demo_ios:
               - fastlane_demo/ios/**
+              # The release lane reads the version from pubspec.yaml.
+              - fastlane_demo/pubspec.yaml
+              - .github/scripts/check_fastfile.rb
 
   flavors:
     needs: changes
@@ -178,27 +181,10 @@ jobs:
       - name: Load the Fastfile
         run: bundle exec fastlane lanes
 
-      # `fastlane lanes` doesn't run lane bodies, so check that every action
-      # the lanes call still exists (keep this list in sync with the Fastfile).
-      - name: Check the Fastfile's actions exist
-        run: |
-          bundle exec ruby -e '
-            require "fastlane"
-            Fastlane.load_actions
-            Fastlane.plugin_manager.load_plugins
-            actions = %w[
-              setup_ci
-              sync_code_signing
-              app_store_connect_api_key
-              latest_testflight_build_number
-              upload_to_app_store
-              shorebird_release
-              shorebird_patch
-            ]
-            missing = actions.reject { |a| Fastlane::Actions.action_class_ref(a) }
-            abort("Missing fastlane actions: #{missing.join(", ")}") unless missing.empty?
-            puts "All #{actions.size} actions found"
-          '
+      # `fastlane lanes` doesn't run lane bodies, so also check that every
+      # action the lanes call exists and accepts the options it's given.
+      - name: Check the Fastfile's actions and options
+        run: bundle exec ruby ../../.github/scripts/check_fastfile.rb fastlane/Fastfile
 
   required:
     name: required

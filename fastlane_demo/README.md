@@ -31,8 +31,11 @@ replace Shorebird's values with your own in:
   `PROVISIONING_PROFILE_SPECIFIER[sdk=iphoneos*]` in each build configuration,
   and the RunnerTests target's `PRODUCT_BUNDLE_IDENTIFIER`.
 
-`release_shorebird` sets the build number to the latest TestFlight build plus
-one, so each run can be uploaded. `patch_shorebird` patches the latest release.
+`release_shorebird` sets the build number to the latest TestFlight build of the
+pubspec version plus one, then uploads the build to TestFlight; submit it for
+review from App Store Connect. `patch_shorebird` patches the latest release, or
+a specific one with `bundle exec fastlane ios patch_shorebird
+release_version:1.0.0+11`.
 
 A step-by-step log of me (bryanoltman) creating this demo is viewable in
 [setup_log.md](./setup_log.md).
