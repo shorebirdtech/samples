@@ -6,10 +6,6 @@ on:
       - main
 
 jobs:
-  semantic_pull_request:
-    name: ✅ Semantic Pull Request
-    uses: VeryGoodOpenSource/very_good_workflows/.github/workflows/semantic_pull_request.yml@v2
-
   changes:
     runs-on: ubuntu-latest
 
@@ -59,7 +55,7 @@ jobs:
           working_directory: ${{ matrix.package }}
 
   ci:
-    needs: [semantic_pull_request, build_flutter_apps]
+    needs: [build_flutter_apps]
     if: ${{ always() }}
 
     runs-on: ubuntu-latest
