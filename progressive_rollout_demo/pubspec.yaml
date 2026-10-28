@@ -17,7 +17,7 @@ dependencies:
   shared_preferences: ^2.5.6
   shorebird_code_push: ^2.0.7
 
-  material_ui: any
+  material_ui: 1.8.0
 dev_dependencies:
   flutter_test:
     sdk: flutter
