@@ -12,7 +12,7 @@ dependencies:
   flutter:
     sdk: flutter
 
-  material_ui: any
+  material_ui: 1.8.0
 dev_dependencies:
   flutter_test:
     sdk: flutter
