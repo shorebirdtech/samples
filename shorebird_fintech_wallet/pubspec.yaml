@@ -45,7 +45,7 @@ dependencies:
   intl: ^0.20.3
   json_annotation: ^4.11.0
 
-  material_ui: any
+  material_ui: 1.8.0
 dev_dependencies:
   flutter_test:
     sdk: flutter
