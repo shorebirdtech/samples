@@ -37,20 +37,36 @@ jobs:
         with:
           filters: |
             flavors:
+              - .github/workflows/shorebird_ci.yaml
+              - .github/workflows/_shorebird_ci_flutter.yaml
               - flavors/**
             multi_dimensioanl_flavors:
+              - .github/workflows/shorebird_ci.yaml
+              - .github/workflows/_shorebird_ci_flutter.yaml
               - multi_dimensional_flavors/**
             my_flutter_module:
+              - .github/workflows/shorebird_ci.yaml
+              - .github/workflows/_shorebird_ci_flutter.yaml
               - add_to_app/my_flutter_module/**
             progressive_rollout_demo:
+              - .github/workflows/shorebird_ci.yaml
+              - .github/workflows/_shorebird_ci_flutter.yaml
               - progressive_rollout_demo/**
             shorebird_fintech_wallet:
+              - .github/workflows/shorebird_ci.yaml
+              - .github/workflows/_shorebird_ci_flutter.yaml
               - shorebird_fintech_wallet/**
             clear_skies:
+              - .github/workflows/shorebird_ci.yaml
+              - .github/workflows/_shorebird_ci_flutter.yaml
               - clear_skies/**
             shorebird_runner:
+              - .github/workflows/shorebird_ci.yaml
+              - .github/workflows/_shorebird_ci_flutter.yaml
               - shorebird_runner/**
             fastlane_demo:
+              - .github/workflows/shorebird_ci.yaml
+              - .github/workflows/_shorebird_ci_flutter.yaml
               - fastlane_demo/**
             fastlane_demo_ios:
               - fastlane_demo/ios/**
