@@ -33,7 +33,7 @@ dependencies:
 
   cupertino_icons: ^1.0.9
   flutter_bloc: ^8.1.6
-  equatable: ^2.1.0
+  equatable: ^3.0.0
   http: ^1.6.0
   google_fonts: ^9.0.0
   shared_preferences: ^2.5.6
