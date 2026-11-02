@@ -21,7 +21,7 @@ dependencies:
   # Architecture & State Management
   flutter_bloc: ^9.1.1
   bloc: ^9.2.0
-  equatable: ^2.0.7
+  equatable: ^3.0.0
 
 dev_dependencies:
   flutter_test:
