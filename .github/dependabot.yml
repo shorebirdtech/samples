@@ -10,6 +10,10 @@ updates:
     schedule:
       interval: "weekly"
 
+  - package-ecosystem: "pub"
+    directory: "/clear_skies"
+    schedule:
+      interval: "weekly"
 
   - package-ecosystem: "pub"
     directory: "/fastlane_demo"
@@ -38,5 +42,10 @@ updates:
 
   - package-ecosystem: "pub"
     directory: "/shorebird_fintech_wallet"
+    schedule:
+      interval: "weekly"
+
+  - package-ecosystem: "pub"
+    directory: "/shorebird_runner"
     schedule:
       interval: "weekly"
