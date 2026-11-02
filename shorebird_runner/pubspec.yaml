@@ -14,7 +14,7 @@ dependencies:
   flame: ^1.38.2
 
   # High score persistence (localStorage on web)
-  shared_preferences: ^2.3.2
+  shared_preferences: ^2.5.6
   # Networking (Supabase REST API for OSS lead capture)
   http: ^1.2.2
 
