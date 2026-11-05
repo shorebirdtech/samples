@@ -55,7 +55,7 @@ jobs:
           working_directory: ${{ matrix.package }}
 
   ci:
-    needs: [build_flutter_apps]
+    needs: [changes, build_flutter_apps]
     if: ${{ always() }}
 
     runs-on: ubuntu-latest
@@ -64,7 +64,7 @@ jobs:
       # A job that hits its timeout-minutes (or loses its runner) ends
       # 'cancelled', not 'failure', so checking 'failure' alone leaves ci
       # green. Fail on 'cancelled' too, unless the whole run was cancelled
-      # (a newer push), where ci doesn't matter.
+      # (cancelled by hand), where ci doesn't matter.
       - name: ⛔️ exit(1) on failure
         if: >-
           ${{
