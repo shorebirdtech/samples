@@ -61,6 +61,14 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      # A job that hits its timeout-minutes (or loses its runner) ends
+      # 'cancelled', not 'failure', so checking 'failure' alone leaves ci
+      # green. Fail on 'cancelled' too, unless the whole run was cancelled
+      # (a newer push), where ci doesn't matter.
       - name: ⛔️ exit(1) on failure
-        if: ${{ contains(join(needs.*.result, ','), 'failure') }}
+        if: >-
+          ${{
+            contains(join(needs.*.result, ','), 'failure') ||
+            (!cancelled() && contains(join(needs.*.result, ','), 'cancelled'))
+          }}
         run: exit 1
