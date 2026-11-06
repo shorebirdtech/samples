@@ -68,9 +68,6 @@ class _MyHomePageState extends State<MyHomePage> {
 
   /// Fetches the rollout percentage for the current release version
   /// (e.g., 1.0.0+1) from Firestore.
-  ///
-  /// Shorebird employees can view the Firestore data in the console at:
-  /// https://console.firebase.google.com/u/0/project/progressive-rollout-demo/firestore/databases/-default-/data/~2Frollouts~2Frollouts
   Future<int?> _fetchRolloutPercentage() async {
     final collection = await FirebaseFirestore.instance
         .collection(firestoreCollectionName)
