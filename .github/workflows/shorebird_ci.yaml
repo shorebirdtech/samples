@@ -29,7 +29,7 @@ jobs:
           # Full history so dorny/paths-filter can diff on push events.
           fetch-depth: 0
       - uses: dart-lang/setup-dart@6afc89df92d6eb3834022f73cd65adc8cdfcb92d # v1.8.1
-      - run: dart pub global activate shorebird_ci
+      - run: dart pub global activate shorebird_ci 0.2.7
       - name: Verify CI coverage
         run: shorebird_ci verify
       - uses: dorny/paths-filter@ceb8a2b8f2d89434be7ff52d3de7ec3738c5cc9d # v4.0.3
@@ -66,7 +66,6 @@ jobs:
     with:
       package_name: flavors
       package_path: flavors
-      has_bloc_lint: false
       has_unit_tests: true
       subpackages: ""
       flutter_version: ""
@@ -79,7 +78,6 @@ jobs:
     with:
       package_name: multi_dimensioanl_flavors
       package_path: multi_dimensional_flavors
-      has_bloc_lint: false
       has_unit_tests: true
       subpackages: ""
       flutter_version: ""
@@ -92,7 +90,6 @@ jobs:
     with:
       package_name: my_flutter_module
       package_path: add_to_app/my_flutter_module
-      has_bloc_lint: false
       has_unit_tests: true
       subpackages: ""
       flutter_version: ""
@@ -105,7 +102,6 @@ jobs:
     with:
       package_name: progressive_rollout_demo
       package_path: progressive_rollout_demo
-      has_bloc_lint: false
       has_unit_tests: true
       subpackages: ""
       flutter_version: ""
@@ -118,7 +114,6 @@ jobs:
     with:
       package_name: shorebird_fintech_wallet
       package_path: shorebird_fintech_wallet
-      has_bloc_lint: false
       has_unit_tests: true
       subpackages: ""
       flutter_version: ""
@@ -131,7 +126,6 @@ jobs:
     with:
       package_name: clear_skies
       package_path: clear_skies
-      has_bloc_lint: false
       has_unit_tests: true
       subpackages: ""
       flutter_version: ""
@@ -144,7 +138,6 @@ jobs:
     with:
       package_name: shorebird_runner
       package_path: shorebird_runner
-      has_bloc_lint: false
       has_unit_tests: true
       subpackages: ""
       flutter_version: ""
@@ -157,7 +150,6 @@ jobs:
     with:
       package_name: fastlane_demo
       package_path: fastlane_demo
-      has_bloc_lint: false
       has_unit_tests: true
       subpackages: ""
       flutter_version: ""
