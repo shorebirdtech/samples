@@ -31,7 +31,7 @@ dependencies:
   flutter:
     sdk: flutter
 
-  cupertino_icons: ^1.0.9
+  cupertino_icons: ^2.0.0
   flutter_bloc: ^9.1.1
   equatable: ^3.0.0
   http: ^1.6.0
