@@ -53,7 +53,8 @@ runs:
       working-directory: ${{ inputs.working_directory }}
       shell: ${{ inputs.shell }}
       run: |
-        flutter pub global activate very_good_cli
+        # Pinned, so a new very_good_cli release can't change CI without a PR.
+        flutter pub global activate very_good_cli 1.6.0
         very_good packages get --recursive
 
     - name: Format
