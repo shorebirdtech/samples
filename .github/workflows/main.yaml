@@ -27,7 +27,7 @@ jobs:
           filters: |
             flavors:
               - ./.github/workflows/main.yaml
-              - ./.github/actions/dart_package
+              - ./.github/actions/flutter_app/**
               - flavors/**
 
   build_flutter_apps:
