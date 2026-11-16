@@ -1,51 +1,78 @@
 version: 2
+# Each ecosystem waits 5 days after a release before Dependabot opens its PR,
+# so a broken or compromised version has time to be flagged and yanked first.
+# Security updates skip the cooldown. Use `default-days` only: github-actions
+# rejects the semver-*-days keys, and one unsupported key makes Dependabot
+# reject the whole file.
 updates:
   - package-ecosystem: "github-actions"
-    directory: "/"
+    directories:
+      - "/"
+      - "/.github/actions/*"
     schedule:
       interval: "weekly"
+    cooldown:
+      default-days: 5
 
   - package-ecosystem: "pub"
     directory: "/add_to_app/my_flutter_module"
     schedule:
       interval: "weekly"
+    cooldown:
+      default-days: 5
 
   - package-ecosystem: "pub"
     directory: "/clear_skies"
     schedule:
       interval: "weekly"
+    cooldown:
+      default-days: 5
 
   - package-ecosystem: "pub"
     directory: "/fastlane_demo"
     schedule:
       interval: "weekly"
+    cooldown:
+      default-days: 5
 
   - package-ecosystem: "bundler"
     directory: "/fastlane_demo/ios"
     schedule:
       interval: "weekly"
+    cooldown:
+      default-days: 5
 
   - package-ecosystem: "pub"
     directory: "/flavors"
     schedule:
       interval: "weekly"
+    cooldown:
+      default-days: 5
 
   - package-ecosystem: "pub"
     directory: "/multi_dimensional_flavors"
     schedule:
       interval: "weekly"
+    cooldown:
+      default-days: 5
 
   - package-ecosystem: "pub"
     directory: "/progressive_rollout_demo"
     schedule:
       interval: "weekly"
+    cooldown:
+      default-days: 5
 
   - package-ecosystem: "pub"
     directory: "/shorebird_fintech_wallet"
     schedule:
       interval: "weekly"
+    cooldown:
+      default-days: 5
 
   - package-ecosystem: "pub"
     directory: "/shorebird_runner"
     schedule:
       interval: "weekly"
+    cooldown:
+      default-days: 5
