@@ -170,7 +170,7 @@ jobs:
       has_unit_tests: true
       subpackages: ""
       flutter_version: ""
-      has_integration_tests: false
+      has_integration_tests: true
 
   shorebird_runner:
     needs: changes

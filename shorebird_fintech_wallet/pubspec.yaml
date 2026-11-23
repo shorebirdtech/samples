@@ -112,9 +112,3 @@ flutter_launcher_icons:
   #
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/to/font-from-package
-
-shorebird_ci:
-  # transfer_flow_test fails on the Linux desktop with "TransactionLogic is
-  # already registered inside GetIt" (it passes headless). Off until that's
-  # fixed; it never ran in CI before.
-  integration_tests: false
