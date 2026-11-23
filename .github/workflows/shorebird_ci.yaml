@@ -38,20 +38,36 @@ jobs:
           filters: |
             flavors:
               - flavors/**
+              - .github/workflows/_shorebird_ci_flutter.yaml
+              - .github/actions/setup_flutter/**
             multi_dimensioanl_flavors:
               - multi_dimensional_flavors/**
+              - .github/workflows/_shorebird_ci_flutter.yaml
+              - .github/actions/setup_flutter/**
             my_flutter_module:
               - add_to_app/my_flutter_module/**
+              - .github/workflows/_shorebird_ci_flutter.yaml
+              - .github/actions/setup_flutter/**
             progressive_rollout_demo:
               - progressive_rollout_demo/**
+              - .github/workflows/_shorebird_ci_flutter.yaml
+              - .github/actions/setup_flutter/**
             shorebird_fintech_wallet:
               - shorebird_fintech_wallet/**
+              - .github/workflows/_shorebird_ci_flutter.yaml
+              - .github/actions/setup_flutter/**
             clear_skies:
               - clear_skies/**
+              - .github/workflows/_shorebird_ci_flutter.yaml
+              - .github/actions/setup_flutter/**
             shorebird_runner:
               - shorebird_runner/**
+              - .github/workflows/_shorebird_ci_flutter.yaml
+              - .github/actions/setup_flutter/**
             fastlane_demo:
               - fastlane_demo/**
+              - .github/workflows/_shorebird_ci_flutter.yaml
+              - .github/actions/setup_flutter/**
             fastlane_demo_ios:
               - fastlane_demo/ios/**
               # The dry run reads the version from pubspec.yaml.

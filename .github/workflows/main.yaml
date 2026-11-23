@@ -28,6 +28,7 @@ jobs:
             flavors:
               - ./.github/workflows/main.yaml
               - ./.github/actions/flutter_app/**
+              - ./.github/actions/setup_flutter/**
               - flavors/**
 
   build_flutter_apps:

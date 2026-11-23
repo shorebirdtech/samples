@@ -33,10 +33,10 @@ jobs:
           submodules: recursive
 
       - name: Setup Flutter
-        uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2.23.0
+        uses: ./.github/actions/setup_flutter
         with:
-          channel: 'stable'
-          cache: true
+          channel: stable
+          cache: "true"
 
       - name: Configure GitHub Pages
         id: pages
