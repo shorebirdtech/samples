@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// Central palette of colors, gradients, and theme tokens for Shorebird Runner.
 class AppColors {

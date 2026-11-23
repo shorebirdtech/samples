@@ -1,5 +1,5 @@
 import 'dart:math';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:shorebird_runner/core/constants/constants.dart';
 import 'package:shorebird_runner/features/start_menu/widgets/particle_data.dart';
 import 'package:shorebird_runner/features/start_menu/widgets/star_data.dart';

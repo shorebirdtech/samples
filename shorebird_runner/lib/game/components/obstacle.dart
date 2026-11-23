@@ -1,6 +1,6 @@
 import 'dart:math';
 import 'package:flame/components.dart';
-import 'package:flutter/material.dart' show Colors;
+import 'package:material_ui/material_ui.dart' show Colors;
 import 'package:flutter/painting.dart';
 import 'package:shorebird_runner/game/components/obstacle_type.dart';
 import 'package:shorebird_runner/game/components/perspective_helper.dart';

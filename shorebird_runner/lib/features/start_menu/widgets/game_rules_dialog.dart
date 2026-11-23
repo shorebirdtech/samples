@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:shorebird_runner/core/core.dart';
 import 'package:shorebird_runner/features/start_menu/widgets/rule_section_card.dart';
 

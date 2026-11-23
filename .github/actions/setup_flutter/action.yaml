@@ -1,0 +1,125 @@
+name: Setup Flutter
+description: >-
+  Installs a Flutter SDK from the official release archives and puts flutter,
+  dart and pub global executables on PATH.
+
+# Stands in for subosito/flutter-action. That action calls actions/cache by
+# tag, not by commit SHA, and this repo only allows SHA-pinned actions (nested
+# ones included), so every job that used it failed before its first step.
+
+inputs:
+  flutter-version:
+    description: Exact Flutter version, such as 3.50.1. Empty uses the latest release on `channel`.
+    required: false
+    default: ""
+  channel:
+    description: Release channel to take the latest release from when `flutter-version` is empty.
+    required: false
+    default: stable
+  cache:
+    description: Whether to cache the SDK and the pub cache between runs.
+    required: false
+    default: "false"
+
+outputs:
+  version:
+    description: The Flutter version that was installed.
+    value: ${{ steps.resolve.outputs.version }}
+
+runs:
+  using: composite
+  steps:
+    - name: Resolve Flutter release
+      id: resolve
+      shell: bash
+      env:
+        FLUTTER_VERSION: ${{ inputs.flutter-version }}
+        FLUTTER_CHANNEL: ${{ inputs.channel }}
+      run: |
+        set -euo pipefail
+        case "$RUNNER_OS" in
+          Linux) os=linux ;;
+          macOS) os=macos ;;
+          *) echo "::error::setup_flutter does not support $RUNNER_OS runners"; exit 1 ;;
+        esac
+        case "$RUNNER_ARCH" in
+          X64) arch=x64 ;;
+          ARM64) arch=arm64 ;;
+          *) echo "::error::setup_flutter does not support $RUNNER_ARCH runners"; exit 1 ;;
+        esac
+
+        base=https://storage.googleapis.com/flutter_infra_release/releases
+        manifest=$(curl -fsSL --retry 3 "$base/releases_$os.json")
+        # Releases before arm64 builds existed have no dart_sdk_arch: x64.
+        release=$(jq -c \
+          --arg version "$FLUTTER_VERSION" \
+          --arg channel "$FLUTTER_CHANNEL" \
+          --arg arch "$arch" '
+            .current_release[$channel] as $head
+            | [.releases[]
+                | select(if $version == ""
+                    then .hash == $head and .channel == $channel
+                    else .version == $version end)
+                | select((.dart_sdk_arch // "x64") == $arch)
+              ][0] // empty' <<<"$manifest")
+        if [ -z "$release" ]; then
+          echo "::error::No Flutter release matches version '${FLUTTER_VERSION:-latest}' on channel '$FLUTTER_CHANNEL' for $os/$arch"
+          exit 1
+        fi
+
+        version=$(jq -r .version <<<"$release")
+        pub_cache="$HOME/.pub-cache"
+        {
+          echo "version=$version"
+          echo "arch=$arch"
+          echo "url=$base/$(jq -r .archive <<<"$release")"
+          echo "sha256=$(jq -r .sha256 <<<"$release")"
+          echo "sdk-dir=$RUNNER_TOOL_CACHE/flutter/$version-$arch"
+          echo "pub-cache=$pub_cache"
+        } >> "$GITHUB_OUTPUT"
+        echo "PUB_CACHE=$pub_cache" >> "$GITHUB_ENV"
+
+    - name: Cache Flutter SDK
+      if: inputs.cache == 'true'
+      uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+      with:
+        path: ${{ steps.resolve.outputs.sdk-dir }}
+        key: flutter-sdk-${{ runner.os }}-${{ steps.resolve.outputs.arch }}-${{ steps.resolve.outputs.version }}
+
+    - name: Cache pub packages
+      if: inputs.cache == 'true'
+      uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+      with:
+        path: ${{ steps.resolve.outputs.pub-cache }}
+        key: flutter-pub-${{ runner.os }}-${{ steps.resolve.outputs.arch }}-${{ steps.resolve.outputs.version }}-${{ hashFiles('**/pubspec.lock') }}
+        restore-keys: flutter-pub-${{ runner.os }}-${{ steps.resolve.outputs.arch }}-${{ steps.resolve.outputs.version }}-
+
+    - name: Install Flutter ${{ steps.resolve.outputs.version }}
+      shell: bash
+      env:
+        ARCHIVE_URL: ${{ steps.resolve.outputs.url }}
+        ARCHIVE_SHA256: ${{ steps.resolve.outputs.sha256 }}
+        SDK_DIR: ${{ steps.resolve.outputs.sdk-dir }}
+        PUB_CACHE_DIR: ${{ steps.resolve.outputs.pub-cache }}
+      run: |
+        set -euo pipefail
+        if [ -x "$SDK_DIR/bin/flutter" ]; then
+          echo "Using cached Flutter SDK at $SDK_DIR"
+        else
+          work=$(mktemp -d "$RUNNER_TEMP/flutter.XXXXXX")
+          archive="$work/$(basename "$ARCHIVE_URL")"
+          curl -fsSL --retry 3 -o "$archive" "$ARCHIVE_URL"
+          echo "$ARCHIVE_SHA256  $archive" | shasum -a 256 -c -
+          case "$archive" in
+            *.tar.xz) tar -xJf "$archive" -C "$work" ;;
+            *.zip) unzip -q "$archive" -d "$work" ;;
+            *) echo "::error::Unexpected Flutter archive: $archive"; exit 1 ;;
+          esac
+          mkdir -p "$(dirname "$SDK_DIR")"
+          rm -rf "$SDK_DIR"
+          mv "$work/flutter" "$SDK_DIR"
+          rm -rf "$work"
+        fi
+        echo "$SDK_DIR/bin" >> "$GITHUB_PATH"
+        echo "$PUB_CACHE_DIR/bin" >> "$GITHUB_PATH"
+        "$SDK_DIR/bin/flutter" --version

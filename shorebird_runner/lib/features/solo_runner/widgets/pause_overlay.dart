@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:shorebird_runner/core/core.dart';
 import 'package:shorebird_runner/features/leaderboard/leaderboard.dart';
 import 'package:shorebird_runner/features/solo_runner/widgets/stat_tile.dart';
