@@ -77,20 +77,27 @@ runs:
           echo "sdk-dir=$RUNNER_TOOL_CACHE/flutter/$version-$arch"
           echo "pub-cache=$pub_cache"
         } >> "$GITHUB_OUTPUT"
-        echo "PUB_CACHE=$pub_cache" >> "$GITHUB_ENV"
+        # The cache steps read their paths from env, not step outputs: when
+        # this action runs inside another composite action (flutter_app), the
+        # post step that saves the cache can't see steps.resolve.outputs and
+        # gets an empty path.
+        {
+          echo "PUB_CACHE=$pub_cache"
+          echo "SETUP_FLUTTER_SDK_DIR=$RUNNER_TOOL_CACHE/flutter/$version-$arch"
+        } >> "$GITHUB_ENV"
 
     - name: Cache Flutter SDK
       if: inputs.cache == 'true'
       uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
       with:
-        path: ${{ steps.resolve.outputs.sdk-dir }}
+        path: ${{ env.SETUP_FLUTTER_SDK_DIR }}
         key: flutter-sdk-${{ runner.os }}-${{ steps.resolve.outputs.arch }}-${{ steps.resolve.outputs.version }}
 
     - name: Cache pub packages
       if: inputs.cache == 'true'
       uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
       with:
-        path: ${{ steps.resolve.outputs.pub-cache }}
+        path: ${{ env.PUB_CACHE }}
         key: flutter-pub-${{ runner.os }}-${{ steps.resolve.outputs.arch }}-${{ steps.resolve.outputs.version }}-${{ hashFiles('**/pubspec.lock') }}
         restore-keys: flutter-pub-${{ runner.os }}-${{ steps.resolve.outputs.arch }}-${{ steps.resolve.outputs.version }}-
 
