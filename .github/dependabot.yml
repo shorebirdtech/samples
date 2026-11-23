@@ -57,6 +57,13 @@ updates:
       default-days: 5
 
   - package-ecosystem: "pub"
+    directory: "/plume"
+    schedule:
+      interval: "weekly"
+    cooldown:
+      default-days: 5
+
+  - package-ecosystem: "pub"
     directory: "/progressive_rollout_demo"
     schedule:
       interval: "weekly"
