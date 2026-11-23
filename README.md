@@ -17,6 +17,7 @@ Below is a list of the available samples. Each directory contains a specific use
 | [**Shorebird Fintech Wallet**](./shorebird_fintech_wallet) | An enterprise-grade example of a logic-level hotfix using a decoupled Reactive Store + BLoC architecture. |
 | [**Clear Skies**](./clear_skies) | A beautifully designed, premium weather application with dynamic glassmorphic UI. |
 | [**Fastlane Demo**](./fastlane_demo) | Shows how to release and patch an iOS app from [fastlane](https://fastlane.tools/) with the `fastlane-plugin-shorebird` plugin. |
+| [**Plume**](./plume) | 🛍️ A production-grade shopping app for live demos and client calls: ship a release with a real checkout bug, then fix it on stage with a patch. |
 | [**Patch Rush**](./shorebird_runner) | 🎮 A fast-paced 3D endless runner arcade game for booth events. Dodge bugs, collect patches, keep flying! |
 
 ## 🛠 Getting Started

@@ -1,0 +1,1202 @@
+{
+  "categories": [
+    {
+      "id": "audio",
+      "name": "Audio",
+      "icon": "headphones",
+      "color": "#4A4E69"
+    },
+    {
+      "id": "wearables",
+      "name": "Wearables",
+      "icon": "watch",
+      "color": "#3D6B63"
+    },
+    {
+      "id": "bags",
+      "name": "Bags",
+      "icon": "backpack",
+      "color": "#8A5A44"
+    },
+    {
+      "id": "home",
+      "name": "Home",
+      "icon": "lamp",
+      "color": "#9A7B3F"
+    },
+    {
+      "id": "desk",
+      "name": "Desk",
+      "icon": "keyboard",
+      "color": "#3F5A80"
+    }
+  ],
+  "collections": [
+    {
+      "id": "sound",
+      "title": "Sound, reimagined",
+      "subtitle": "Up to 20% off headphones and earbuds",
+      "colors": [
+        "#26262B",
+        "#3A3A42",
+        "#55555F"
+      ],
+      "icon": "headphones",
+      "productIds": [
+        "aero-buds",
+        "halo-headphones",
+        "pulse-speaker"
+      ]
+    },
+    {
+      "id": "desk",
+      "title": "The calm desk",
+      "subtitle": "Tools for deep work, built to last",
+      "colors": [
+        "#1E2A32",
+        "#2F3E48",
+        "#4A5B66"
+      ],
+      "icon": "keyboard",
+      "productIds": [
+        "flux-keyboard",
+        "glide-mouse",
+        "dock-hub",
+        "stand-pro"
+      ]
+    },
+    {
+      "id": "travel",
+      "title": "Ready for the road",
+      "subtitle": "Carry less, travel further",
+      "colors": [
+        "#33291F",
+        "#4A3D30",
+        "#6B5A48"
+      ],
+      "icon": "backpack",
+      "productIds": [
+        "nomad-pack",
+        "transit-sling",
+        "weekender",
+        "power-bank"
+      ]
+    }
+  ],
+  "products": [
+    {
+      "id": "aero-buds",
+      "name": "Aero Buds Pro",
+      "brand": "Plume Audio",
+      "categoryId": "audio",
+      "priceCents": 14900,
+      "compareAtPriceCents": 17900,
+      "icon": "earbuds",
+      "colors": [
+        {
+          "name": "Graphite",
+          "hex": "#2B2F3A"
+        },
+        {
+          "name": "Glacier",
+          "hex": "#CFE3F2"
+        },
+        {
+          "name": "Coral",
+          "hex": "#FF7A6B"
+        }
+      ],
+      "sizes": [],
+      "description": "True wireless earbuds with adaptive noise cancelling, a 30-hour case and a fit you forget about.",
+      "highlights": [
+        "Adaptive ANC",
+        "30 h with case",
+        "IPX5 sweat resistant"
+      ],
+      "rating": 4.7,
+      "reviewCount": 2318,
+      "tags": [
+        "bestseller",
+        "trending"
+      ],
+      "stock": 24
+    },
+    {
+      "id": "halo-headphones",
+      "name": "Halo Over-Ear",
+      "brand": "Plume Audio",
+      "categoryId": "audio",
+      "priceCents": 32900,
+      "compareAtPriceCents": null,
+      "icon": "headphones",
+      "colors": [
+        {
+          "name": "Midnight",
+          "hex": "#1D2233"
+        },
+        {
+          "name": "Sand",
+          "hex": "#D9C7A7"
+        },
+        {
+          "name": "Sage",
+          "hex": "#9DB59A"
+        }
+      ],
+      "sizes": [],
+      "description": "Studio-grade over-ear headphones with memory foam cushions and 40 hours of battery.",
+      "highlights": [
+        "40 h battery",
+        "Lossless over USB-C",
+        "Folds flat"
+      ],
+      "rating": 4.8,
+      "reviewCount": 1204,
+      "tags": [
+        "trending"
+      ],
+      "stock": 24
+    },
+    {
+      "id": "pulse-speaker",
+      "name": "Pulse Mini Speaker",
+      "brand": "Plume Audio",
+      "categoryId": "audio",
+      "priceCents": 8900,
+      "compareAtPriceCents": null,
+      "icon": "speaker",
+      "colors": [
+        {
+          "name": "Ink",
+          "hex": "#232634"
+        },
+        {
+          "name": "Tangerine",
+          "hex": "#FF9F45"
+        },
+        {
+          "name": "Mint",
+          "hex": "#7FD8BE"
+        }
+      ],
+      "sizes": [],
+      "description": "A palm-sized speaker that fills a room, floats in water and survives the beach.",
+      "highlights": [
+        "360° sound",
+        "Floats",
+        "12 h playtime"
+      ],
+      "rating": 4.5,
+      "reviewCount": 866,
+      "tags": [
+        "new"
+      ],
+      "stock": 24
+    },
+    {
+      "id": "orbit-watch",
+      "name": "Orbit Watch S2",
+      "brand": "Plume Wear",
+      "categoryId": "wearables",
+      "priceCents": 27900,
+      "compareAtPriceCents": 29900,
+      "icon": "watch",
+      "colors": [
+        {
+          "name": "Obsidian",
+          "hex": "#16181F"
+        },
+        {
+          "name": "Silver",
+          "hex": "#C9CED6"
+        },
+        {
+          "name": "Rose",
+          "hex": "#E7B6B0"
+        }
+      ],
+      "sizes": [],
+      "description": "A sapphire-glass smartwatch with seven-day battery, ECG and an always-on display.",
+      "highlights": [
+        "7-day battery",
+        "ECG & SpO2",
+        "Sapphire glass"
+      ],
+      "rating": 4.6,
+      "reviewCount": 1530,
+      "tags": [
+        "bestseller"
+      ],
+      "stock": 24
+    },
+    {
+      "id": "loop-band",
+      "name": "Loop Fitness Band",
+      "brand": "Plume Wear",
+      "categoryId": "wearables",
+      "priceCents": 7900,
+      "compareAtPriceCents": null,
+      "icon": "fitness",
+      "colors": [
+        {
+          "name": "Black",
+          "hex": "#1B1D24"
+        },
+        {
+          "name": "Lilac",
+          "hex": "#B9A7F5"
+        },
+        {
+          "name": "Lime",
+          "hex": "#C6F36B"
+        }
+      ],
+      "sizes": [],
+      "description": "A featherweight band that tracks sleep, strain and recovery without a screen.",
+      "highlights": [
+        "Sleep staging",
+        "14-day battery",
+        "Swim-proof"
+      ],
+      "rating": 4.3,
+      "reviewCount": 642,
+      "tags": [
+        "new"
+      ],
+      "stock": 24
+    },
+    {
+      "id": "vista-glasses",
+      "name": "Vista Smart Glasses",
+      "brand": "Plume Wear",
+      "categoryId": "wearables",
+      "priceCents": 24900,
+      "compareAtPriceCents": null,
+      "icon": "glasses",
+      "colors": [
+        {
+          "name": "Tortoise",
+          "hex": "#7A4E2D"
+        },
+        {
+          "name": "Jet",
+          "hex": "#15161B"
+        }
+      ],
+      "sizes": [],
+      "description": "Open-ear audio and a camera in a frame that looks like ordinary glasses.",
+      "highlights": [
+        "Open-ear audio",
+        "12 MP camera",
+        "Prescription ready"
+      ],
+      "rating": 4.2,
+      "reviewCount": 311,
+      "tags": [
+        "new",
+        "trending"
+      ],
+      "stock": 24
+    },
+    {
+      "id": "nomad-pack",
+      "name": "Nomad Daypack 22L",
+      "brand": "Plume Carry",
+      "categoryId": "bags",
+      "priceCents": 12900,
+      "compareAtPriceCents": null,
+      "icon": "backpack",
+      "colors": [
+        {
+          "name": "Charcoal",
+          "hex": "#33363F"
+        },
+        {
+          "name": "Olive",
+          "hex": "#6B7550"
+        },
+        {
+          "name": "Clay",
+          "hex": "#C07A5A"
+        }
+      ],
+      "sizes": [],
+      "description": "A weatherproof daypack with a padded laptop sleeve and a hidden passport pocket.",
+      "highlights": [
+        "Fits 16\\\" laptop",
+        "Recycled nylon",
+        "Lifetime warranty"
+      ],
+      "rating": 4.8,
+      "reviewCount": 2077,
+      "tags": [
+        "bestseller"
+      ],
+      "stock": 24
+    },
+    {
+      "id": "transit-sling",
+      "name": "Transit Sling",
+      "brand": "Plume Carry",
+      "categoryId": "bags",
+      "priceCents": 5900,
+      "compareAtPriceCents": 6900,
+      "icon": "sling",
+      "colors": [
+        {
+          "name": "Black",
+          "hex": "#1A1B20"
+        },
+        {
+          "name": "Sky",
+          "hex": "#8EC5FF"
+        }
+      ],
+      "sizes": [],
+      "description": "A slim sling for phone, keys and wallet, with quick-access magnetic buckles.",
+      "highlights": [
+        "Magnetic buckle",
+        "RFID pocket",
+        "Water resistant"
+      ],
+      "rating": 4.4,
+      "reviewCount": 540,
+      "tags": [],
+      "stock": 24
+    },
+    {
+      "id": "weekender",
+      "name": "Harbour Weekender",
+      "brand": "Plume Carry",
+      "categoryId": "bags",
+      "priceCents": 21900,
+      "compareAtPriceCents": null,
+      "icon": "luggage",
+      "colors": [
+        {
+          "name": "Navy",
+          "hex": "#22314F"
+        },
+        {
+          "name": "Tan",
+          "hex": "#C59A6D"
+        }
+      ],
+      "sizes": [],
+      "description": "Carry-on sized duffel with a shoe compartment and a trolley sleeve.",
+      "highlights": [
+        "Carry-on size",
+        "Shoe compartment",
+        "Trolley sleeve"
+      ],
+      "rating": 4.7,
+      "reviewCount": 388,
+      "tags": [
+        "trending"
+      ],
+      "stock": 24
+    },
+    {
+      "id": "glow-lamp",
+      "name": "Glow Desk Lamp",
+      "brand": "Plume Home",
+      "categoryId": "home",
+      "priceCents": 11900,
+      "compareAtPriceCents": null,
+      "icon": "lamp",
+      "colors": [
+        {
+          "name": "White",
+          "hex": "#ECEDEF"
+        },
+        {
+          "name": "Black",
+          "hex": "#1E2026"
+        },
+        {
+          "name": "Butter",
+          "hex": "#F6D776"
+        }
+      ],
+      "sizes": [],
+      "description": "A dimmable lamp that shifts from cool to warm light and charges your phone.",
+      "highlights": [
+        "Wireless charging",
+        "Warm to cool",
+        "Touch dimmer"
+      ],
+      "rating": 4.6,
+      "reviewCount": 734,
+      "tags": [
+        "new"
+      ],
+      "stock": 24
+    },
+    {
+      "id": "brew-kettle",
+      "name": "Brew Pour-Over Kettle",
+      "brand": "Plume Home",
+      "categoryId": "home",
+      "priceCents": 9900,
+      "compareAtPriceCents": null,
+      "icon": "kettle",
+      "colors": [
+        {
+          "name": "Matte Black",
+          "hex": "#202228"
+        },
+        {
+          "name": "Copper",
+          "hex": "#C27C4F"
+        }
+      ],
+      "sizes": [],
+      "description": "Precision gooseneck kettle that holds temperature to the degree.",
+      "highlights": [
+        "±1° hold",
+        "60-min keep warm",
+        "1 L capacity"
+      ],
+      "rating": 4.7,
+      "reviewCount": 1189,
+      "tags": [
+        "bestseller"
+      ],
+      "stock": 24
+    },
+    {
+      "id": "aura-diffuser",
+      "name": "Aura Diffuser",
+      "brand": "Plume Home",
+      "categoryId": "home",
+      "priceCents": 6900,
+      "compareAtPriceCents": 7900,
+      "icon": "diffuser",
+      "colors": [
+        {
+          "name": "Stone",
+          "hex": "#BDB6AA"
+        },
+        {
+          "name": "Ocean",
+          "hex": "#5FA8D3"
+        }
+      ],
+      "sizes": [],
+      "description": "An ultrasonic diffuser with a sunrise light and a whisper-quiet mist.",
+      "highlights": [
+        "Sunrise light",
+        "Auto shut-off",
+        "8 h runtime"
+      ],
+      "rating": 4.3,
+      "reviewCount": 402,
+      "tags": [],
+      "stock": 24
+    },
+    {
+      "id": "cloud-throw",
+      "name": "Cloud Knit Throw",
+      "brand": "Plume Home",
+      "categoryId": "home",
+      "priceCents": 8900,
+      "compareAtPriceCents": null,
+      "icon": "throw",
+      "colors": [
+        {
+          "name": "Oat",
+          "hex": "#E2D5BF"
+        },
+        {
+          "name": "Dusk",
+          "hex": "#8C7AA8"
+        },
+        {
+          "name": "Moss",
+          "hex": "#7C8F66"
+        }
+      ],
+      "sizes": [],
+      "description": "A chunky knit throw made from recycled cotton, soft enough to steal from the sofa.",
+      "highlights": [
+        "Recycled cotton",
+        "Machine washable",
+        "130 × 170 cm"
+      ],
+      "rating": 4.9,
+      "reviewCount": 958,
+      "tags": [
+        "trending"
+      ],
+      "stock": 24
+    },
+    {
+      "id": "flux-keyboard",
+      "name": "Flux Mechanical Keyboard",
+      "brand": "Plume Desk",
+      "categoryId": "desk",
+      "priceCents": 15900,
+      "compareAtPriceCents": 17900,
+      "icon": "keyboard",
+      "colors": [
+        {
+          "name": "Slate",
+          "hex": "#3A3F4B"
+        },
+        {
+          "name": "Snow",
+          "hex": "#F1F2F4"
+        },
+        {
+          "name": "Matcha",
+          "hex": "#A8C686"
+        }
+      ],
+      "sizes": [],
+      "description": "A low-profile wireless keyboard with hot-swappable switches and per-key light.",
+      "highlights": [
+        "Hot-swappable",
+        "Tri-mode wireless",
+        "Aluminium case"
+      ],
+      "rating": 4.8,
+      "reviewCount": 1712,
+      "tags": [
+        "bestseller",
+        "trending"
+      ],
+      "stock": 24
+    },
+    {
+      "id": "glide-mouse",
+      "name": "Glide Mouse",
+      "brand": "Plume Desk",
+      "categoryId": "desk",
+      "priceCents": 7900,
+      "compareAtPriceCents": null,
+      "icon": "mouse",
+      "colors": [
+        {
+          "name": "Graphite",
+          "hex": "#2C2F36"
+        },
+        {
+          "name": "Pearl",
+          "hex": "#E9E7E1"
+        }
+      ],
+      "sizes": [],
+      "description": "An ergonomic mouse with a silent click and a scroll wheel that spins forever.",
+      "highlights": [
+        "Silent click",
+        "8K DPI",
+        "70-day battery"
+      ],
+      "rating": 4.5,
+      "reviewCount": 826,
+      "tags": [],
+      "stock": 24
+    },
+    {
+      "id": "dock-hub",
+      "name": "Dock 9-in-1 Hub",
+      "brand": "Plume Desk",
+      "categoryId": "desk",
+      "priceCents": 9900,
+      "compareAtPriceCents": null,
+      "icon": "hub",
+      "colors": [
+        {
+          "name": "Space Grey",
+          "hex": "#5A5E66"
+        }
+      ],
+      "sizes": [],
+      "description": "One cable for two 4K displays, Ethernet, SD cards and 100 W pass-through charging.",
+      "highlights": [
+        "Dual 4K",
+        "100 W PD",
+        "Gigabit Ethernet"
+      ],
+      "rating": 4.4,
+      "reviewCount": 507,
+      "tags": [
+        "new"
+      ],
+      "stock": 24
+    },
+    {
+      "id": "stand-pro",
+      "name": "Riser Laptop Stand",
+      "brand": "Plume Desk",
+      "categoryId": "desk",
+      "priceCents": 6900,
+      "compareAtPriceCents": 8900,
+      "icon": "stand",
+      "colors": [
+        {
+          "name": "Silver",
+          "hex": "#CDD1D8"
+        },
+        {
+          "name": "Black",
+          "hex": "#1D1F25"
+        }
+      ],
+      "sizes": [],
+      "description": "A foldable aluminium stand that raises your screen to eye level in one motion.",
+      "highlights": [
+        "6 heights",
+        "Folds to 8 mm",
+        "Holds 10 kg"
+      ],
+      "rating": 4.6,
+      "reviewCount": 1320,
+      "tags": [],
+      "stock": 24
+    },
+    {
+      "id": "power-bank",
+      "name": "Charge 20K Power Bank",
+      "brand": "Plume Desk",
+      "categoryId": "desk",
+      "priceCents": 5900,
+      "compareAtPriceCents": null,
+      "icon": "battery",
+      "colors": [
+        {
+          "name": "Ink",
+          "hex": "#24262E"
+        },
+        {
+          "name": "Signal",
+          "hex": "#FF5C5C"
+        }
+      ],
+      "sizes": [],
+      "description": "Charges a laptop, a phone and earbuds at once, and fits in a jacket pocket.",
+      "highlights": [
+        "20,000 mAh",
+        "65 W output",
+        "Charges 3 devices"
+      ],
+      "rating": 4.5,
+      "reviewCount": 2210,
+      "tags": [
+        "bestseller"
+      ],
+      "stock": 24
+    }
+  ],
+  "reviews": [
+    {
+      "id": "aero-buds-r0",
+      "productId": "aero-buds",
+      "author": "Sam K.",
+      "rating": 5,
+      "title": "Beautiful design",
+      "body": "Looks even better in person. The colour is spot on.",
+      "daysAgo": 85
+    },
+    {
+      "id": "aero-buds-r1",
+      "productId": "aero-buds",
+      "author": "Jordan P.",
+      "rating": 4,
+      "title": "Worth every cent",
+      "body": "Build quality is excellent and it arrived a day early.",
+      "daysAgo": 14
+    },
+    {
+      "id": "aero-buds-r2",
+      "productId": "aero-buds",
+      "author": "Quinn D.",
+      "rating": 5,
+      "title": "Beautiful design",
+      "body": "Looks even better in person. The colour is spot on.",
+      "daysAgo": 118
+    },
+    {
+      "id": "halo-headphones-r0",
+      "productId": "halo-headphones",
+      "author": "Taylor M.",
+      "rating": 5,
+      "title": "Gift that landed",
+      "body": "Bought it as a gift and they haven't stopped talking about it.",
+      "daysAgo": 13
+    },
+    {
+      "id": "halo-headphones-r1",
+      "productId": "halo-headphones",
+      "author": "Casey T.",
+      "rating": 5,
+      "title": "Great, with one nit",
+      "body": "Love it overall, though I wish the cable were longer.",
+      "daysAgo": 32
+    },
+    {
+      "id": "halo-headphones-r2",
+      "productId": "halo-headphones",
+      "author": "Avery N.",
+      "rating": 5,
+      "title": "Worth every cent",
+      "body": "Build quality is excellent and it arrived a day early.",
+      "daysAgo": 9
+    },
+    {
+      "id": "pulse-speaker-r0",
+      "productId": "pulse-speaker",
+      "author": "Jordan P.",
+      "rating": 5,
+      "title": "Gift that landed",
+      "body": "Bought it as a gift and they haven't stopped talking about it.",
+      "daysAgo": 82
+    },
+    {
+      "id": "pulse-speaker-r1",
+      "productId": "pulse-speaker",
+      "author": "Quinn D.",
+      "rating": 5,
+      "title": "Solid",
+      "body": "Does exactly what it says. Setup took two minutes.",
+      "daysAgo": 75
+    },
+    {
+      "id": "pulse-speaker-r2",
+      "productId": "pulse-speaker",
+      "author": "Casey T.",
+      "rating": 5,
+      "title": "Gift that landed",
+      "body": "Bought it as a gift and they haven't stopped talking about it.",
+      "daysAgo": 30
+    },
+    {
+      "id": "orbit-watch-r0",
+      "productId": "orbit-watch",
+      "author": "Avery N.",
+      "rating": 5,
+      "title": "Worth every cent",
+      "body": "Build quality is excellent and it arrived a day early.",
+      "daysAgo": 39
+    },
+    {
+      "id": "orbit-watch-r1",
+      "productId": "orbit-watch",
+      "author": "Sam K.",
+      "rating": 4,
+      "title": "Great, with one nit",
+      "body": "Love it overall, though I wish the cable were longer.",
+      "daysAgo": 17
+    },
+    {
+      "id": "orbit-watch-r2",
+      "productId": "orbit-watch",
+      "author": "Riley S.",
+      "rating": 4,
+      "title": "Gift that landed",
+      "body": "Bought it as a gift and they haven't stopped talking about it.",
+      "daysAgo": 106
+    },
+    {
+      "id": "loop-band-r0",
+      "productId": "loop-band",
+      "author": "Sam K.",
+      "rating": 5,
+      "title": "Solid",
+      "body": "Does exactly what it says. Setup took two minutes.",
+      "daysAgo": 76
+    },
+    {
+      "id": "loop-band-r1",
+      "productId": "loop-band",
+      "author": "Taylor M.",
+      "rating": 4,
+      "title": "Gift that landed",
+      "body": "Bought it as a gift and they haven't stopped talking about it.",
+      "daysAgo": 14
+    },
+    {
+      "id": "loop-band-r2",
+      "productId": "loop-band",
+      "author": "Jordan P.",
+      "rating": 4,
+      "title": "Gift that landed",
+      "body": "Bought it as a gift and they haven't stopped talking about it.",
+      "daysAgo": 9
+    },
+    {
+      "id": "vista-glasses-r0",
+      "productId": "vista-glasses",
+      "author": "Taylor M.",
+      "rating": 5,
+      "title": "Gift that landed",
+      "body": "Bought it as a gift and they haven't stopped talking about it.",
+      "daysAgo": 89
+    },
+    {
+      "id": "vista-glasses-r1",
+      "productId": "vista-glasses",
+      "author": "Casey T.",
+      "rating": 4,
+      "title": "Gift that landed",
+      "body": "Bought it as a gift and they haven't stopped talking about it.",
+      "daysAgo": 61
+    },
+    {
+      "id": "vista-glasses-r2",
+      "productId": "vista-glasses",
+      "author": "Jamie W.",
+      "rating": 4,
+      "title": "Gift that landed",
+      "body": "Bought it as a gift and they haven't stopped talking about it.",
+      "daysAgo": 40
+    },
+    {
+      "id": "nomad-pack-r0",
+      "productId": "nomad-pack",
+      "author": "Sam K.",
+      "rating": 3,
+      "title": "Daily driver",
+      "body": "I use it every day. Battery life is better than advertised.",
+      "daysAgo": 101
+    },
+    {
+      "id": "nomad-pack-r1",
+      "productId": "nomad-pack",
+      "author": "Jordan P.",
+      "rating": 4,
+      "title": "Daily driver",
+      "body": "I use it every day. Battery life is better than advertised.",
+      "daysAgo": 40
+    },
+    {
+      "id": "nomad-pack-r2",
+      "productId": "nomad-pack",
+      "author": "Jamie W.",
+      "rating": 4,
+      "title": "Gift that landed",
+      "body": "Bought it as a gift and they haven't stopped talking about it.",
+      "daysAgo": 95
+    },
+    {
+      "id": "transit-sling-r0",
+      "productId": "transit-sling",
+      "author": "Riley S.",
+      "rating": 4,
+      "title": "Great, with one nit",
+      "body": "Love it overall, though I wish the cable were longer.",
+      "daysAgo": 11
+    },
+    {
+      "id": "transit-sling-r1",
+      "productId": "transit-sling",
+      "author": "Avery N.",
+      "rating": 5,
+      "title": "Worth every cent",
+      "body": "Build quality is excellent and it arrived a day early.",
+      "daysAgo": 23
+    },
+    {
+      "id": "transit-sling-r2",
+      "productId": "transit-sling",
+      "author": "Sam K.",
+      "rating": 5,
+      "title": "Beautiful design",
+      "body": "Looks even better in person. The colour is spot on.",
+      "daysAgo": 55
+    },
+    {
+      "id": "weekender-r0",
+      "productId": "weekender",
+      "author": "Jordan P.",
+      "rating": 4,
+      "title": "Worth every cent",
+      "body": "Build quality is excellent and it arrived a day early.",
+      "daysAgo": 75
+    },
+    {
+      "id": "weekender-r1",
+      "productId": "weekender",
+      "author": "Morgan L.",
+      "rating": 3,
+      "title": "Beautiful design",
+      "body": "Looks even better in person. The colour is spot on.",
+      "daysAgo": 46
+    },
+    {
+      "id": "weekender-r2",
+      "productId": "weekender",
+      "author": "Jamie W.",
+      "rating": 4,
+      "title": "Gift that landed",
+      "body": "Bought it as a gift and they haven't stopped talking about it.",
+      "daysAgo": 104
+    },
+    {
+      "id": "glow-lamp-r0",
+      "productId": "glow-lamp",
+      "author": "Jordan P.",
+      "rating": 5,
+      "title": "Great, with one nit",
+      "body": "Love it overall, though I wish the cable were longer.",
+      "daysAgo": 36
+    },
+    {
+      "id": "glow-lamp-r1",
+      "productId": "glow-lamp",
+      "author": "Jordan P.",
+      "rating": 5,
+      "title": "Great, with one nit",
+      "body": "Love it overall, though I wish the cable were longer.",
+      "daysAgo": 95
+    },
+    {
+      "id": "glow-lamp-r2",
+      "productId": "glow-lamp",
+      "author": "Riley S.",
+      "rating": 3,
+      "title": "Solid",
+      "body": "Does exactly what it says. Setup took two minutes.",
+      "daysAgo": 75
+    },
+    {
+      "id": "brew-kettle-r0",
+      "productId": "brew-kettle",
+      "author": "Jamie W.",
+      "rating": 4,
+      "title": "Solid",
+      "body": "Does exactly what it says. Setup took two minutes.",
+      "daysAgo": 93
+    },
+    {
+      "id": "brew-kettle-r1",
+      "productId": "brew-kettle",
+      "author": "Morgan L.",
+      "rating": 5,
+      "title": "Great, with one nit",
+      "body": "Love it overall, though I wish the cable were longer.",
+      "daysAgo": 61
+    },
+    {
+      "id": "brew-kettle-r2",
+      "productId": "brew-kettle",
+      "author": "Sam K.",
+      "rating": 4,
+      "title": "Beautiful design",
+      "body": "Looks even better in person. The colour is spot on.",
+      "daysAgo": 16
+    },
+    {
+      "id": "aura-diffuser-r0",
+      "productId": "aura-diffuser",
+      "author": "Alex R.",
+      "rating": 5,
+      "title": "Great, with one nit",
+      "body": "Love it overall, though I wish the cable were longer.",
+      "daysAgo": 100
+    },
+    {
+      "id": "aura-diffuser-r1",
+      "productId": "aura-diffuser",
+      "author": "Sam K.",
+      "rating": 3,
+      "title": "Beautiful design",
+      "body": "Looks even better in person. The colour is spot on.",
+      "daysAgo": 33
+    },
+    {
+      "id": "aura-diffuser-r2",
+      "productId": "aura-diffuser",
+      "author": "Casey T.",
+      "rating": 5,
+      "title": "Great, with one nit",
+      "body": "Love it overall, though I wish the cable were longer.",
+      "daysAgo": 12
+    },
+    {
+      "id": "cloud-throw-r0",
+      "productId": "cloud-throw",
+      "author": "Jamie W.",
+      "rating": 5,
+      "title": "Daily driver",
+      "body": "I use it every day. Battery life is better than advertised.",
+      "daysAgo": 72
+    },
+    {
+      "id": "cloud-throw-r1",
+      "productId": "cloud-throw",
+      "author": "Sam K.",
+      "rating": 5,
+      "title": "Beautiful design",
+      "body": "Looks even better in person. The colour is spot on.",
+      "daysAgo": 112
+    },
+    {
+      "id": "cloud-throw-r2",
+      "productId": "cloud-throw",
+      "author": "Riley S.",
+      "rating": 3,
+      "title": "Gift that landed",
+      "body": "Bought it as a gift and they haven't stopped talking about it.",
+      "daysAgo": 55
+    },
+    {
+      "id": "flux-keyboard-r0",
+      "productId": "flux-keyboard",
+      "author": "Casey T.",
+      "rating": 5,
+      "title": "Beautiful design",
+      "body": "Looks even better in person. The colour is spot on.",
+      "daysAgo": 21
+    },
+    {
+      "id": "flux-keyboard-r1",
+      "productId": "flux-keyboard",
+      "author": "Sam K.",
+      "rating": 5,
+      "title": "Worth every cent",
+      "body": "Build quality is excellent and it arrived a day early.",
+      "daysAgo": 31
+    },
+    {
+      "id": "flux-keyboard-r2",
+      "productId": "flux-keyboard",
+      "author": "Taylor M.",
+      "rating": 5,
+      "title": "Solid",
+      "body": "Does exactly what it says. Setup took two minutes.",
+      "daysAgo": 64
+    },
+    {
+      "id": "glide-mouse-r0",
+      "productId": "glide-mouse",
+      "author": "Sam K.",
+      "rating": 4,
+      "title": "Gift that landed",
+      "body": "Bought it as a gift and they haven't stopped talking about it.",
+      "daysAgo": 38
+    },
+    {
+      "id": "glide-mouse-r1",
+      "productId": "glide-mouse",
+      "author": "Sam K.",
+      "rating": 5,
+      "title": "Worth every cent",
+      "body": "Build quality is excellent and it arrived a day early.",
+      "daysAgo": 70
+    },
+    {
+      "id": "glide-mouse-r2",
+      "productId": "glide-mouse",
+      "author": "Quinn D.",
+      "rating": 4,
+      "title": "Beautiful design",
+      "body": "Looks even better in person. The colour is spot on.",
+      "daysAgo": 42
+    },
+    {
+      "id": "dock-hub-r0",
+      "productId": "dock-hub",
+      "author": "Avery N.",
+      "rating": 4,
+      "title": "Daily driver",
+      "body": "I use it every day. Battery life is better than advertised.",
+      "daysAgo": 85
+    },
+    {
+      "id": "dock-hub-r1",
+      "productId": "dock-hub",
+      "author": "Alex R.",
+      "rating": 5,
+      "title": "Solid",
+      "body": "Does exactly what it says. Setup took two minutes.",
+      "daysAgo": 117
+    },
+    {
+      "id": "dock-hub-r2",
+      "productId": "dock-hub",
+      "author": "Avery N.",
+      "rating": 5,
+      "title": "Solid",
+      "body": "Does exactly what it says. Setup took two minutes.",
+      "daysAgo": 52
+    },
+    {
+      "id": "stand-pro-r0",
+      "productId": "stand-pro",
+      "author": "Casey T.",
+      "rating": 5,
+      "title": "Great, with one nit",
+      "body": "Love it overall, though I wish the cable were longer.",
+      "daysAgo": 63
+    },
+    {
+      "id": "stand-pro-r1",
+      "productId": "stand-pro",
+      "author": "Casey T.",
+      "rating": 5,
+      "title": "Solid",
+      "body": "Does exactly what it says. Setup took two minutes.",
+      "daysAgo": 26
+    },
+    {
+      "id": "stand-pro-r2",
+      "productId": "stand-pro",
+      "author": "Taylor M.",
+      "rating": 5,
+      "title": "Worth every cent",
+      "body": "Build quality is excellent and it arrived a day early.",
+      "daysAgo": 22
+    },
+    {
+      "id": "power-bank-r0",
+      "productId": "power-bank",
+      "author": "Morgan L.",
+      "rating": 4,
+      "title": "Worth every cent",
+      "body": "Build quality is excellent and it arrived a day early.",
+      "daysAgo": 8
+    },
+    {
+      "id": "power-bank-r1",
+      "productId": "power-bank",
+      "author": "Alex R.",
+      "rating": 4,
+      "title": "Worth every cent",
+      "body": "Build quality is excellent and it arrived a day early.",
+      "daysAgo": 21
+    },
+    {
+      "id": "power-bank-r2",
+      "productId": "power-bank",
+      "author": "Jordan P.",
+      "rating": 4,
+      "title": "Gift that landed",
+      "body": "Bought it as a gift and they haven't stopped talking about it.",
+      "daysAgo": 80
+    }
+  ],
+  "promotions": [
+    {
+      "code": "SAVE10",
+      "kind": "fixed",
+      "amount": 10,
+      "minSubtotal": 50,
+      "description": "$10 off orders over $50"
+    },
+    {
+      "code": "WELCOME15",
+      "kind": "percent",
+      "amount": 15,
+      "minSubtotal": 0,
+      "description": "15% off your first order"
+    },
+    {
+      "code": "FREESHIP",
+      "kind": "shipping",
+      "amount": 0,
+      "minSubtotal": 0,
+      "description": "Free standard shipping"
+    }
+  ]
+}

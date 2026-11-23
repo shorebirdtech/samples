@@ -1,0 +1,410 @@
+{
+  "@@locale": "en",
+  "appName": "Plume",
+  "tabDiscover": "Discover",
+  "tabSearch": "Search",
+  "tabWishlist": "Wishlist",
+  "tabCart": "Bag",
+  "tabProfile": "Profile",
+  "errorTitle": "Something went wrong",
+  "errorMessage": "We couldn't reach the store. Check your connection and try again.",
+  "retry": "Try again",
+  "skip": "Skip",
+  "next": "Next",
+  "getStarted": "Get started",
+  "onboardingTitle1": "Gear you'll love",
+  "onboardingBody1": "Audio, wearables and everyday carry, picked by people who use them.",
+  "onboardingTitle2": "Checkout in seconds",
+  "onboardingBody2": "Saved addresses, smart promo codes and one-tap payment.",
+  "onboardingTitle3": "Track every step",
+  "onboardingBody3": "Live order tracking from our warehouse to your door.",
+  "greetingMorning": "Good morning, {name}",
+  "@greetingMorning": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "greetingAfternoon": "Good afternoon, {name}",
+  "@greetingAfternoon": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "greetingEvening": "Good evening, {name}",
+  "@greetingEvening": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "discoverHeadline": "Find your next favourite",
+  "searchHint": "Search products, brands…",
+  "collectionLabel": "COLLECTION",
+  "shopNow": "Shop now",
+  "promoSave10": "$10 off orders over $50",
+  "promoUseCode": "Use code {code} at checkout",
+  "@promoUseCode": {
+    "placeholders": {
+      "code": {
+        "type": "String"
+      }
+    }
+  },
+  "promoCopied": "{code} copied to clipboard",
+  "@promoCopied": {
+    "placeholders": {
+      "code": {
+        "type": "String"
+      }
+    }
+  },
+  "copyCode": "Copy code",
+  "shopByCategory": "Shop by category",
+  "trendingNow": "Trending now",
+  "seeAll": "See all",
+  "dealsTitle": "Deals",
+  "newArrivals": "New & bestselling",
+  "itemCount": "{count, plural, =1{1 item} other{{count} items}}",
+  "@itemCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "addToWishlist": "Save to wishlist",
+  "removeFromWishlist": "Remove from wishlist",
+  "percentOff": "{percent}% OFF",
+  "@percentOff": {
+    "placeholders": {
+      "percent": {
+        "type": "int"
+      }
+    }
+  },
+  "badgeNew": "NEW",
+  "decreaseQuantity": "Decrease quantity",
+  "increaseQuantity": "Increase quantity",
+  "productNotFoundTitle": "Product unavailable",
+  "productNotFoundMessage": "This product is no longer in our catalog.",
+  "backToShop": "Back to shop",
+  "dragToTilt": "Drag to tilt",
+  "colorLabel": "Colour: {name}",
+  "@colorLabel": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "readMore": "Read more",
+  "readLess": "Show less",
+  "reviewsTitle": "Reviews",
+  "reviewCount": "{count, plural, =1{1 review} other{{count} reviews}}",
+  "@reviewCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "daysAgo": "{days, plural, =1{yesterday} other{{days} days ago}}",
+  "@daysAgo": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "youMayAlsoLike": "You may also like",
+  "freeShippingOver75": "Free standard shipping on orders over $75",
+  "freeReturns": "Free 30-day returns",
+  "inStock": "In stock, ships today",
+  "lowStock": "Only {count} left",
+  "@lowStock": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "addedToCart": "{name} added to your bag",
+  "@addedToCart": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "viewCart": "View bag",
+  "addToCartWithPrice": "Add to bag · {price}",
+  "@addToCartWithPrice": {
+    "placeholders": {
+      "price": {
+        "type": "String"
+      }
+    }
+  },
+  "clear": "Clear",
+  "filters": "Filters",
+  "allCategories": "All",
+  "resultCount": "{count, plural, =0{No results} =1{1 result} other{{count} results}}",
+  "@resultCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "noResultsTitle": "Nothing matches",
+  "noResultsMessage": "Try a different search or loosen your filters.",
+  "clearFilters": "Clear filters",
+  "maxPrice": "Max price",
+  "anyPrice": "Any",
+  "onSaleOnly": "On sale only",
+  "sortBy": "Sort by",
+  "sortFeatured": "Featured",
+  "sortPriceLow": "Price: low to high",
+  "sortPriceHigh": "Price: high to low",
+  "sortRating": "Top rated",
+  "reset": "Reset",
+  "applyFilters": "Show results",
+  "wishlistEmptyTitle": "Nothing saved yet",
+  "wishlistEmptyMessage": "Tap the heart on anything you like and it'll wait for you here.",
+  "startShopping": "Start shopping",
+  "cartTitle": "Your bag",
+  "cartEmptyTitle": "Your bag is empty",
+  "cartEmptyMessage": "Good things are waiting. Let's find something you'll love.",
+  "freeShippingUnlocked": "You've unlocked free shipping",
+  "freeShippingRemaining": "Add {amount} more for free shipping",
+  "@freeShippingRemaining": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "removedFromCart": "{name} removed",
+  "@removedFromCart": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "undo": "Undo",
+  "remove": "Remove",
+  "promoTitle": "Promo code",
+  "promoHint": "Enter a code, e.g. SAVE10",
+  "apply": "Apply",
+  "promoInvalid": "That code isn't valid",
+  "promoShortfall": "Add {amount} more to use this code",
+  "@promoShortfall": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "removePromo": "Remove code",
+  "subtotal": "Subtotal",
+  "discount": "Discount",
+  "discountWithCode": "Discount ({code})",
+  "@discountWithCode": {
+    "placeholders": {
+      "code": {
+        "type": "String"
+      }
+    }
+  },
+  "shipping": "Shipping",
+  "free": "Free",
+  "estimatedTax": "Estimated tax ({rate}%)",
+  "@estimatedTax": {
+    "placeholders": {
+      "rate": {
+        "type": "int"
+      }
+    }
+  },
+  "total": "Total",
+  "checkout": "Checkout",
+  "stepAddress": "Address",
+  "stepDelivery": "Delivery",
+  "stepPayment": "Payment",
+  "stepReview": "Review",
+  "continueLabel": "Continue",
+  "placeOrder": "Place order · {total}",
+  "@placeOrder": {
+    "placeholders": {
+      "total": {
+        "type": "String"
+      }
+    }
+  },
+  "fieldRequired": "Required",
+  "fullName": "Full name",
+  "addressLine1": "Street address",
+  "addressLine2": "Apartment, suite (optional)",
+  "city": "City",
+  "postalCode": "Postal code",
+  "country": "Country",
+  "shippingStandard": "Standard",
+  "shippingExpress": "Express",
+  "arrivesBy": "Arrives by {date}",
+  "@arrivesBy": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "standardShippingPrice": "{price}\nFree over $75",
+  "@standardShippingPrice": {
+    "placeholders": {
+      "price": {
+        "type": "String"
+      }
+    }
+  },
+  "businessDays": "{days, plural, =1{1 business day} other{{days} business days}}",
+  "@businessDays": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "cardNumber": "Card number",
+  "cardNumberInvalid": "Check the card number",
+  "cardHolder": "Name on card",
+  "expiry": "Expiry (MM/YY)",
+  "expiryInvalid": "Enter a future date",
+  "cvv": "CVV",
+  "cvvInvalid": "3 or 4 digits",
+  "testCardHint": "Test mode. Use 4242 4242 4242 4242. Cards ending in 0002 are declined.",
+  "edit": "Edit",
+  "processingPayment": "Processing payment…",
+  "paymentDeclined": "Your card was declined. Try another card.",
+  "orderConfirmedTitle": "Order confirmed!",
+  "orderConfirmedMessage": "Order {id} is on its way. It should arrive by {date}.",
+  "@orderConfirmedMessage": {
+    "placeholders": {
+      "id": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "trackOrder": "Track order",
+  "continueShopping": "Continue shopping",
+  "ordersTitle": "Orders",
+  "ordersEmptyTitle": "No orders yet",
+  "ordersEmptyMessage": "When you place an order, you can track it here.",
+  "orderNotFound": "Order not found",
+  "statusPlaced": "Order placed",
+  "statusPacked": "Packed",
+  "statusShipped": "Shipped",
+  "statusOutForDelivery": "Out for delivery",
+  "statusDelivered": "Delivered",
+  "estimatedDelivery": "Estimated delivery {date}",
+  "@estimatedDelivery": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "deliveringTo": "Delivering to",
+  "receipt": "Receipt",
+  "paidWith": "Paid with card ending {last4}",
+  "@paidWith": {
+    "placeholders": {
+      "last4": {
+        "type": "String"
+      }
+    }
+  },
+  "statOrders": "Orders",
+  "statSaved": "Saved",
+  "statSpent": "Spent",
+  "recentOrder": "Recent order",
+  "updatesTitle": "App updates",
+  "settingsTitle": "Settings",
+  "cancel": "Cancel",
+  "badgeNewUpdate": "New",
+  "noPatch": "No patch",
+  "patchNumber": "Patch #{number}",
+  "@patchNumber": {
+    "placeholders": {
+      "number": {
+        "type": "int"
+      }
+    }
+  },
+  "appearance": "Appearance",
+  "themeSystem": "System",
+  "themeLight": "Light",
+  "themeDark": "Dark",
+  "language": "Language",
+  "languageSystem": "System",
+  "notifications": "Notifications",
+  "orderUpdates": "Order updates",
+  "orderUpdatesBody": "Shipping and delivery alerts",
+  "offers": "Offers",
+  "offersBody": "Promo codes and new arrivals",
+  "developer": "Developer",
+  "simulateOffline": "Simulate a network error",
+  "simulateOfflineBody": "The next request to the store fails, so you can see error states.",
+  "simulateOfflineArmed": "The next request will fail. Pull to refresh on Discover to see it.",
+  "madeWithShorebird": "Plume · Updated over the air with Shorebird",
+  "dismiss": "Dismiss",
+  "install": "Install",
+  "restart": "Restart",
+  "updateAvailableTitle": "Update available",
+  "updateAvailableBody": "A new version of Plume is ready to download.",
+  "updateDownloading": "Downloading update…",
+  "updateDownloadingBody": "This only takes a few seconds.",
+  "updateReadyTitle": "Restart to update",
+  "updateReadyBody": "The update is installed. Close and reopen Plume to use it.",
+  "updateChecking": "Checking for updates…",
+  "updateCheckingBody": "Asking Shorebird for the latest patch.",
+  "upToDateTitle": "You're up to date",
+  "upToDateBody": "You're running the latest version.",
+  "lastChecked": "Last checked at {time}",
+  "@lastChecked": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "updateFailedTitle": "Update failed",
+  "updateFailedBody": "We couldn't download the update. Check your connection and try again.",
+  "updaterUnavailableTitle": "Updates unavailable in this build",
+  "updaterUnavailableBody": "Build with `shorebird release` or `shorebird preview` to enable over-the-air updates. Debug builds and `flutter run` don't include the Shorebird updater.",
+  "checkForUpdates": "Check for updates",
+  "releaseVersion": "Release",
+  "runningPatch": "Running patch",
+  "nextLaunchPatch": "On next launch",
+  "howItWorks": "How over-the-air updates work",
+  "howStep1Title": "Release",
+  "howStep1Body": "`shorebird release` builds the app that goes to the stores.",
+  "howStep2Title": "Patch",
+  "howStep2Body": "Fix a bug in Dart, then run `shorebird patch`. No store review.",
+  "howStep3Title": "Update",
+  "howStep3Body": "The app downloads the patch and runs it on the next launch.",
+  "restartTitle": "Restart Plume",
+  "restartBody": "The update runs the next time Plume starts.",
+  "restartStep1": "Open the app switcher",
+  "restartStep2": "Swipe Plume away to close it",
+  "restartStep3": "Tap Plume to open it again",
+  "gotIt": "Got it"
+}
