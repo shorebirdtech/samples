@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:shorebird_runner/core/audio/audio_service.dart';
 import 'package:shorebird_runner/core/constants/app_colors.dart';
 import 'package:shorebird_runner/core/constants/app_strings.dart';

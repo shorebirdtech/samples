@@ -1,5 +1,5 @@
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shorebird_runner/core/core.dart';
 import 'package:shorebird_runner/features/app_shell/bloc/app_shell_bloc.dart';

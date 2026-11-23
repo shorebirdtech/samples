@@ -2,7 +2,7 @@ import 'dart:math';
 import 'package:flame/components.dart';
 import 'package:flame/events.dart';
 import 'package:flame/game.dart';
-import 'package:flutter/material.dart' show KeyEventResult;
+import 'package:material_ui/material_ui.dart' show KeyEventResult;
 import 'package:flutter/painting.dart';
 import 'package:flutter/services.dart';
 import 'package:shorebird_runner/game/components/components.dart';

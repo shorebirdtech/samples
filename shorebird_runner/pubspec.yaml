@@ -22,6 +22,7 @@ dependencies:
   flutter_bloc: ^9.1.1
   bloc: ^9.2.0
   equatable: ^3.0.0
+  material_ui: ^1.11.1
 
 dev_dependencies:
   flutter_test:
