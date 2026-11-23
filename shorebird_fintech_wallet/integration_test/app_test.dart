@@ -1,9 +1,15 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
+import 'package:shorebird_fintech_wallet/core/di/injection.dart';
 import 'package:shorebird_fintech_wallet/main.dart' as app;
 
 void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
+
+  // app.main() registers the dependencies; reset so it can register again.
+  setUp(() async {
+    await getIt.reset();
+  });
 
   testWidgets('app launches successfully', (WidgetTester tester) async {
     app.main();

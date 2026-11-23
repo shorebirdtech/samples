@@ -1,0 +1,6 @@
+# Not a package: holds the repository-wide settings that
+# `shorebird_ci generate` and `shorebird_ci verify` read from the
+# repository root. With no `name:`, shorebird_ci doesn't treat it as a
+# package to test.
+shorebird_ci:
+  required: true

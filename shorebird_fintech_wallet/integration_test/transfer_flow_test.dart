@@ -9,9 +9,9 @@ import 'package:shorebird_fintech_wallet/store/wallet_store/wallet_store.dart';
 void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
 
+  // app.main() registers the dependencies; reset so it can register again.
   setUp(() async {
     await getIt.reset();
-    configureDependencies();
   });
 
   testWidgets(
